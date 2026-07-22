@@ -3079,8 +3079,7 @@ if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(17
 
     local Inner = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
-        BorderColor3 = Library.AccentColor;
-        BorderMode = Enum.BorderMode.Inset;
+        BorderSizePixel = 0;
         Position = UDim2.new(0, 1, 0, 1);
         Size = UDim2.new(1, -2, 1, -2);
         ZIndex = 1;
@@ -3089,7 +3088,6 @@ if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(17
 
     Library:AddToRegistry(Inner, {
         BackgroundColor3 = 'MainColor';
-        BorderColor3 = 'AccentColor';
     });
 
  local HasSubtitle = type(Config.Subtitle) == 'string' and #Config.Subtitle > 0;
@@ -3208,12 +3206,12 @@ local TabContainer = Library:Create('Frame', {
 
         local TabButton = Library:Create('Frame', {
             BackgroundTransparency = 1;
-            Size = UDim2.new(0, TabButtonWidth, 1, 0);
+            Size = UDim2.new(0, TabButtonWidth + 12, 1, 0);
             ZIndex = 1;
             Parent = TabArea;
         });
 
-local TabButtonLabel = Library:CreateLabel({
+        local TabButtonLabel = Library:CreateLabel({
             Position = UDim2.new(0, 0, 0, 4);
             Size = UDim2.new(1, 0, 1, -4);
             Text = Name;
@@ -3227,7 +3225,7 @@ local TabButtonLabel = Library:CreateLabel({
         local Blocker = Library:Create('Frame', {
             BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
-            Position = UDim2.new(0, 0, 0, 0);
+            Position = UDim2.new(0, 0, 1, -4);
             Size = UDim2.new(1, 0, 0, 2);
             BackgroundTransparency = 1;
             ZIndex = 3;
