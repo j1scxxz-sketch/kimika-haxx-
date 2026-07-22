@@ -3099,8 +3099,8 @@ local TitleWidth = select(1, Library:GetTextBounds(Config.Title or '', Library.F
         BackgroundTransparency = 1;
         Image = 'rbxthumb://type=Asset&id=136707890626722&w=420&h=420';
         ImageColor3 = Library.AccentColor;
-        Position = UDim2.new(0, 8, 0, HasSubtitle and 4 or 5);
-        Size = UDim2.new(0, 20, 0, 20);
+        Position = UDim2.new(0, 6, 0, HasSubtitle and 2 or 3);
+        Size = UDim2.new(0, 24, 0, 24);
         ZIndex = 1;
         Parent = Inner;
     });
