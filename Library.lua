@@ -2060,8 +2060,26 @@ local HideBorderRight = Library:Create('Frame', {
             Parent = Fill;
         });
 
-        Library:AddToRegistry(HideBorderRight, {
+Library:AddToRegistry(HideBorderRight, {
             BackgroundColor3 = 'AccentColor';
+        });
+
+        local FillShade = Library:Create('Frame', {
+            BackgroundColor3 = Color3.new(0, 0, 0);
+            BorderSizePixel = 0;
+            Size = UDim2.new(1, 0, 1, 0);
+            ZIndex = 7;
+            Parent = Fill;
+        });
+
+        Library:Create('UIGradient', {
+            Color = ColorSequence.new(Color3.new(0, 0, 0));
+            Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 1);
+                NumberSequenceKeypoint.new(1, 0.65);
+            });
+            Rotation = 90;
+            Parent = FillShade;
         });
 
         local FillHighlight = Library:Create('Frame', {
@@ -2153,29 +2171,38 @@ function Slider:Display()
             Library:SafeCallback(Slider.Changed, Slider.Value);
         end;
 
-SliderInner.InputBegan:Connect(function(Input)
+local SliderDragging = false;
+
+        SliderInner.InputBegan:Connect(function(Input)
             if Input.UserInputType == Enum.UserInputType.MouseButton1 and not Library:MouseIsOverOpenedFrame() then
-                while InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
-                    local MinX = SliderInner.AbsolutePosition.X;
-                    local nX = math.clamp(Mouse.X - MinX, 0, Slider.MaxSize);
-
-                    local nValue = Slider:GetValueFromXOffset(nX);
-                    local OldValue = Slider.Value;
-                    Slider.Value = nValue;
-
-                    Slider:Display();
-
-                    if nValue ~= OldValue then
-                        Library:SafeCallback(Slider.Callback, Slider.Value);
-                        Library:SafeCallback(Slider.Changed, Slider.Value);
-                    end;
-
-                    RenderStepped:Wait();
-                end;
-
-                Library:AttemptSave();
+                SliderDragging = true;
             end;
         end);
+
+        Library:GiveSignal(InputService.InputChanged:Connect(function(Input)
+            if SliderDragging and Input.UserInputType == Enum.UserInputType.MouseMovement then
+                local MinX = SliderInner.AbsolutePosition.X;
+                local nX = math.clamp(Mouse.X - MinX, 0, Slider.MaxSize);
+
+                local nValue = Slider:GetValueFromXOffset(nX);
+                local OldValue = Slider.Value;
+                Slider.Value = nValue;
+
+                Slider:Display();
+
+                if nValue ~= OldValue then
+                    Library:SafeCallback(Slider.Callback, Slider.Value);
+                    Library:SafeCallback(Slider.Changed, Slider.Value);
+                end;
+            end;
+        end));
+
+        Library:GiveSignal(InputService.InputEnded:Connect(function(Input)
+            if Input.UserInputType == Enum.UserInputType.MouseButton1 and SliderDragging then
+                SliderDragging = false;
+                Library:AttemptSave();
+            end;
+        end));
 
         Slider:Display();
         Groupbox:AddBlank(Info.BlankSize or 6);
@@ -2236,12 +2263,19 @@ SliderInner.InputBegan:Connect(function(Input)
             end;
         end;
 
+local DropdownRow = Library:Create('Frame', {
+            BackgroundTransparency = 1;
+            Size = UDim2.new(1, -4, 0, 16);
+            ZIndex = 5;
+            Parent = Container;
+        });
+
         local DropdownOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(1, -4, 0, 20);
+            Size = UDim2.new(1, -20, 1, 0);
             ZIndex = 5;
-            Parent = Container;
+            Parent = DropdownRow;
         });
 
         Library:AddToRegistry(DropdownOuter, {
@@ -2271,14 +2305,47 @@ SliderInner.InputBegan:Connect(function(Input)
             Parent = DropdownInner;
         });
 
-        local DropdownArrow = Library:Create('ImageLabel', {
-            AnchorPoint = Vector2.new(0, 0.5);
+        local DropdownArrow = Library:Create('Frame', {
             BackgroundTransparency = 1;
-            Position = UDim2.new(1, -16, 0.5, 0);
-            Size = UDim2.new(0, 12, 0, 12);
-            Image = 'http://www.roblox.com/asset/?id=6282522798';
-            ZIndex = 8;
+            Rotation = 0;
+            Size = UDim2.new(0, 0, 0, 0);
+            Visible = false;
             Parent = DropdownInner;
+        });
+
+        local PlusOuter = Library:Create('Frame', {
+            BackgroundColor3 = Color3.new(0, 0, 0);
+            BorderColor3 = Color3.new(0, 0, 0);
+            Position = UDim2.new(1, -16, 0, 0);
+            Size = UDim2.new(0, 16, 1, 0);
+            ZIndex = 5;
+            Parent = DropdownRow;
+        });
+
+        Library:AddToRegistry(PlusOuter, {
+            BorderColor3 = 'Black';
+        });
+
+        local PlusInner = Library:Create('Frame', {
+            BackgroundColor3 = Library.MainColor;
+            BorderColor3 = Library.OutlineColor;
+            BorderMode = Enum.BorderMode.Inset;
+            Size = UDim2.new(1, 0, 1, 0);
+            ZIndex = 6;
+            Parent = PlusOuter;
+        });
+
+        Library:AddToRegistry(PlusInner, {
+            BackgroundColor3 = 'MainColor';
+            BorderColor3 = 'OutlineColor';
+        });
+
+        Library:CreateLabel({
+            Size = UDim2.new(1, 0, 1, 0);
+            TextSize = 13;
+            Text = '+';
+            ZIndex = 7;
+            Parent = PlusInner;
         });
 
         local ItemList = Library:CreateLabel({
@@ -3097,10 +3164,10 @@ local TitleWidth = select(1, Library:GetTextBounds(Config.Title or '', Library.F
         BackgroundColor3 = 'BackgroundColor';
     });
 
-    local TabArea = Library:Create('Frame', {
+local TabArea = Library:Create('Frame', {
         BackgroundTransparency = 1;
         Position = UDim2.new(0, 8, 0, 4);
-        Size = UDim2.new(1, -16, 0, 28);
+        Size = UDim2.new(1, -16, 0, 22);
         ZIndex = 1;
         Parent = MainSectionInner;
     });
@@ -3112,24 +3179,11 @@ local TitleWidth = select(1, Library:GetTextBounds(Config.Title or '', Library.F
         Parent = TabArea;
     });
 
-local TabAreaDivider = Library:Create('Frame', {
-        BackgroundColor3 = Library.OutlineColor;
-        BorderSizePixel = 0;
-        Position = UDim2.new(0, 8, 0, 0);
-        Size = UDim2.new(1, -16, 0, 1);
-        ZIndex = 1;
-        Parent = MainSectionInner;
-    });
-
-    Library:AddToRegistry(TabAreaDivider, {
-        BackgroundColor3 = 'OutlineColor';
-    });
-
-    local TabContainer = Library:Create('Frame', {
+local TabContainer = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
         BorderColor3 = Library.OutlineColor;
-        Position = UDim2.new(0, 8, 0, 37);
-        Size = UDim2.new(1, -16, 1, -45);
+        Position = UDim2.new(0, 8, 0, 34);
+        Size = UDim2.new(1, -16, 1, -42);
         ZIndex = 2;
         Parent = MainSectionInner;
     });
@@ -3165,6 +3219,7 @@ local TabButtonLabel = Library:CreateLabel({
             Text = Name;
             TextSize = 15;
             TextXAlignment = Enum.TextXAlignment.Center;
+            TextYAlignment = Enum.TextYAlignment.Center;
             ZIndex = 1;
             Parent = TabButton;
         });
