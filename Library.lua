@@ -433,11 +433,11 @@ do
 
         ColorPicker:SetHSVFromRGB(ColorPicker.Value);
 
-        local DisplayFrame = Library:Create('Frame', {
+local DisplayFrame = Library:Create('Frame', {
             BackgroundColor3 = ColorPicker.Value;
             BorderColor3 = Library:GetDarkerColor(ColorPicker.Value);
             BorderMode = Enum.BorderMode.Inset;
-            Size = UDim2.new(0, 28, 0, 14);
+            Size = UDim2.new(0, 20, 0, 10);
             ZIndex = 6;
             Parent = ToggleLabel;
         });
@@ -445,11 +445,29 @@ do
         -- Transparency image taken from https://github.com/matas3535/SplixPrivateDrawingLibrary/blob/main/Library.lua cus i'm lazy
         local CheckerFrame = Library:Create('ImageLabel', {
             BorderSizePixel = 0;
-            Size = UDim2.new(0, 27, 0, 13);
+            Size = UDim2.new(0, 19, 0, 9);
             ZIndex = 5;
             Image = 'http://www.roblox.com/asset/?id=12977615774';
             Visible = not not Info.Transparency;
             Parent = DisplayFrame;
+        });
+
+        local DisplayFrameShade = Library:Create('Frame', {
+            BackgroundColor3 = Color3.new(0, 0, 0);
+            BorderSizePixel = 0;
+            Size = UDim2.new(1, 0, 1, 0);
+            ZIndex = 6;
+            Parent = DisplayFrame;
+        });
+
+        Library:Create('UIGradient', {
+            Color = ColorSequence.new(Color3.new(0, 0, 0));
+            Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 1);
+                NumberSequenceKeypoint.new(1, 0.6);
+            });
+            Rotation = 90;
+            Parent = DisplayFrameShade;
         });
 
         -- 1/16/23
@@ -2135,15 +2153,11 @@ function Slider:Display()
             Library:SafeCallback(Slider.Changed, Slider.Value);
         end;
 
-        SliderInner.InputBegan:Connect(function(Input)
+SliderInner.InputBegan:Connect(function(Input)
             if Input.UserInputType == Enum.UserInputType.MouseButton1 and not Library:MouseIsOverOpenedFrame() then
-                local mPos = Mouse.X;
-                local gPos = Fill.Size.X.Offset;
-                local Diff = mPos - (Fill.AbsolutePosition.X + gPos);
-
                 while InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
-                    local nMPos = Mouse.X;
-                    local nX = math.clamp(gPos + (nMPos - mPos) + Diff, 0, Slider.MaxSize);
+                    local MinX = SliderInner.AbsolutePosition.X;
+                    local nX = math.clamp(Mouse.X - MinX, 0, Slider.MaxSize);
 
                     local nValue = Slider:GetValueFromXOffset(nX);
                     local OldValue = Slider.Value;
@@ -3014,15 +3028,34 @@ if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(17
  local HasSubtitle = type(Config.Subtitle) == 'string' and #Config.Subtitle > 0;
     local HeaderHeight = HasSubtitle and 44 or 28;
 
+local TitleWidth = select(1, Library:GetTextBounds(Config.Title or '', Library.Font, 15));
+
     local WindowLabel = Library:CreateLabel({
         Position = UDim2.new(0, 34, 0, HasSubtitle and 6 or 7);
-        Size = UDim2.new(0, 0, 0, 16);
+        Size = UDim2.new(0, TitleWidth, 0, 16);
         Text = Config.Title or '';
         TextSize = 15;
         TextXAlignment = Enum.TextXAlignment.Left;
         ZIndex = 1;
         Parent = Inner;
     });
+
+    local WindowLabelSuffix = Library:Create('TextLabel', {
+        BackgroundTransparency = 1;
+        Font = Library.Font;
+        TextColor3 = Library.AccentColor;
+        TextSize = 15;
+        TextStrokeTransparency = 0;
+        Position = UDim2.new(0, 34 + TitleWidth, 0, HasSubtitle and 6 or 7);
+        Size = UDim2.new(0, 0, 0, 16);
+        Text = '.haxx';
+        TextXAlignment = Enum.TextXAlignment.Left;
+        ZIndex = 1;
+        Parent = Inner;
+    });
+
+    Library:ApplyTextStroke(WindowLabelSuffix);
+    Library:AddToRegistry(WindowLabelSuffix, { TextColor3 = 'AccentColor' });
 
     local WindowSubLabel = Library:CreateLabel({
         Position = UDim2.new(0, 34, 0, 22);
@@ -3126,9 +3159,9 @@ local TabAreaDivider = Library:Create('Frame', {
             Parent = TabArea;
         });
 
-        local TabButtonLabel = Library:CreateLabel({
-            Position = UDim2.new(0, 0, 0, 0);
-            Size = UDim2.new(1, 0, 1, -6);
+local TabButtonLabel = Library:CreateLabel({
+            Position = UDim2.new(0, 0, 0, 4);
+            Size = UDim2.new(1, 0, 1, -4);
             Text = Name;
             TextSize = 15;
             TextXAlignment = Enum.TextXAlignment.Center;
@@ -3139,7 +3172,7 @@ local TabAreaDivider = Library:Create('Frame', {
         local Blocker = Library:Create('Frame', {
             BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
-            Position = UDim2.new(0, 0, 1, -2);
+            Position = UDim2.new(0, 0, 0, 0);
             Size = UDim2.new(1, 0, 0, 2);
             BackgroundTransparency = 1;
             ZIndex = 3;
@@ -3160,11 +3193,11 @@ local TabAreaDivider = Library:Create('Frame', {
             Parent = TabContainer;
         });
 
-        local LeftSide = Library:Create('ScrollingFrame', {
+local LeftSide = Library:Create('ScrollingFrame', {
             BackgroundTransparency = 1;
             BorderSizePixel = 0;
             Position = UDim2.new(0, 8 - 1, 0, 8 - 1);
-            Size = UDim2.new(0.5, -12 + 2, 0, 507 + 2);
+            Size = UDim2.new(0.5, -12 + 2, 1, -16);
             CanvasSize = UDim2.new(0, 0, 0, 0);
             BottomImage = '';
             TopImage = '';
@@ -3177,7 +3210,7 @@ local TabAreaDivider = Library:Create('Frame', {
             BackgroundTransparency = 1;
             BorderSizePixel = 0;
             Position = UDim2.new(0.5, 4 + 1, 0, 8 - 1);
-            Size = UDim2.new(0.5, -12 + 2, 0, 507 + 2);
+            Size = UDim2.new(0.5, -12 + 2, 1, -16);
             CanvasSize = UDim2.new(0, 0, 0, 0);
             BottomImage = '';
             TopImage = '';
@@ -3242,11 +3275,11 @@ function Tab:ShowTab()
         function Tab:AddGroupbox(Info)
             local Groupbox = {};
 
-            local BoxOuter = Library:Create('Frame', {
+local BoxOuter = Library:Create('Frame', {
                 BackgroundColor3 = Library.BackgroundColor;
                 BorderColor3 = Library.OutlineColor;
                 BorderMode = Enum.BorderMode.Inset;
-                Size = UDim2.new(1, 0, 0, 507 + 2);
+                Size = UDim2.new(1, 0, 0, 0);
                 ZIndex = 2;
                 Parent = Info.Side == 1 and LeftSide or RightSide;
             });
