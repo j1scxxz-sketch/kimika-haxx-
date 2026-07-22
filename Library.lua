@@ -3095,6 +3095,20 @@ if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(17
 
 local TitleWidth = select(1, Library:GetTextBounds(Config.Title or '', Library.Font, 15));
 
+    local TitleImage = Library:Create('ImageLabel', {
+        BackgroundTransparency = 1;
+        Image = 'rbxassetid://136707890626722';
+        ImageColor3 = Library.AccentColor;
+        Position = UDim2.new(0, 8, 0, HasSubtitle and 4 or 5);
+        Size = UDim2.new(0, 20, 0, 20);
+        ZIndex = 1;
+        Parent = Inner;
+    });
+
+    Library:AddToRegistry(TitleImage, {
+        ImageColor3 = 'AccentColor';
+    });
+
     local WindowLabel = Library:CreateLabel({
         Position = UDim2.new(0, 34, 0, HasSubtitle and 6 or 7);
         Size = UDim2.new(0, TitleWidth, 0, 16);
@@ -3225,7 +3239,7 @@ local TabContainer = Library:Create('Frame', {
         local Blocker = Library:Create('Frame', {
             BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
-            Position = UDim2.new(0, 0, 1, -4);
+            Position = UDim2.new(0, 0, 0, 2);
             Size = UDim2.new(1, 0, 0, 2);
             BackgroundTransparency = 1;
             ZIndex = 3;
