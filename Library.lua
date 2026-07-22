@@ -3097,7 +3097,7 @@ local TitleWidth = select(1, Library:GetTextBounds(Config.Title or '', Library.F
 
     local TitleImage = Library:Create('ImageLabel', {
         BackgroundTransparency = 1;
-        Image = 'rbxassetid://136707890626722';
+        Image = 'rbxassetid://106429108349684';
         ImageColor3 = Library.AccentColor;
         Position = UDim2.new(0, 8, 0, HasSubtitle and 4 or 5);
         Size = UDim2.new(0, 20, 0, 20);
