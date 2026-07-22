@@ -1998,7 +1998,7 @@ do
             BorderColor3 = 'Black';
         });
 
-        local SliderInner = Library:Create('Frame', {
+local SliderInner = Library:Create('Frame', {
             BackgroundColor3 = Library.MainColor;
             BorderColor3 = Library.OutlineColor;
             BorderMode = Enum.BorderMode.Inset;
@@ -2011,6 +2011,14 @@ do
             BackgroundColor3 = 'MainColor';
             BorderColor3 = 'OutlineColor';
         });
+
+        local function UpdateSliderMaxSize()
+            Slider.MaxSize = SliderInner.AbsoluteSize.X;
+            Slider:Display();
+        end;
+
+        SliderInner:GetPropertyChangedSignal('AbsoluteSize'):Connect(UpdateSliderMaxSize);
+        task.defer(UpdateSliderMaxSize);
 
         local Fill = Library:Create('Frame', {
             BackgroundColor3 = Library.AccentColor;
@@ -2025,7 +2033,7 @@ do
             BorderColor3 = 'AccentColorDark';
         });
 
-        local HideBorderRight = Library:Create('Frame', {
+local HideBorderRight = Library:Create('Frame', {
             BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
             Position = UDim2.new(1, 0, 0, 0);
@@ -2038,10 +2046,22 @@ do
             BackgroundColor3 = 'AccentColor';
         });
 
+        local FillHighlight = Library:Create('Frame', {
+            BackgroundColor3 = Color3.new(1, 1, 1);
+            BackgroundTransparency = 0.5;
+            BorderSizePixel = 0;
+            Size = UDim2.new(1, 0, 0, 1);
+            ZIndex = 8;
+            Parent = Fill;
+        });
+
         local DisplayLabel = Library:CreateLabel({
-            Size = UDim2.new(1, 0, 1, 0);
+            AnchorPoint = Vector2.new(0, 0.5);
+            Position = UDim2.new(0, 4, 0.5, 0);
+            Size = UDim2.new(0, 0, 1, 0);
             TextSize = 14;
             Text = 'Infinite';
+            TextXAlignment = Enum.TextXAlignment.Left;
             ZIndex = 9;
             Parent = SliderInner;
         });
@@ -2060,7 +2080,7 @@ do
             Fill.BorderColor3 = Library.AccentColorDark;
         end;
 
-        function Slider:Display()
+function Slider:Display()
             local Suffix = Info.Suffix or '';
 
             if Info.Compact then
@@ -2075,6 +2095,10 @@ do
             Fill.Size = UDim2.new(0, X, 1, 0);
 
             HideBorderRight.Visible = not (X == Slider.MaxSize or X == 0);
+
+            local LabelWidth = select(1, Library:GetTextBounds(DisplayLabel.Text, Library.Font, 14));
+            local LabelX = math.clamp(X + 4, 4, math.max(Slider.MaxSize - LabelWidth - 2, 4));
+            DisplayLabel.Position = UDim2.new(0, LabelX, 0.5, 0);
         end;
 
         function Slider:OnChanged(Func)
@@ -2987,8 +3011,11 @@ if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(17
         BorderColor3 = 'AccentColor';
     });
 
+ local HasSubtitle = type(Config.Subtitle) == 'string' and #Config.Subtitle > 0;
+    local HeaderHeight = HasSubtitle and 44 or 28;
+
     local WindowLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 34, 0, 6);
+        Position = UDim2.new(0, 34, 0, HasSubtitle and 6 or 7);
         Size = UDim2.new(0, 0, 0, 16);
         Text = Config.Title or '';
         TextSize = 15;
@@ -3003,6 +3030,7 @@ if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(17
         Text = Config.Subtitle or '';
         TextSize = 12;
         TextTransparency = 0.4;
+        Visible = HasSubtitle;
         TextXAlignment = Enum.TextXAlignment.Left;
         ZIndex = 1;
         Parent = Inner;
@@ -3011,8 +3039,8 @@ if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(17
     local MainSectionOuter = Library:Create('Frame', {
         BackgroundColor3 = Library.BackgroundColor;
         BorderColor3 = Library.OutlineColor;
-        Position = UDim2.new(0, 8, 0, 44);
-        Size = UDim2.new(1, -16, 1, -52);
+        Position = UDim2.new(0, 8, 0, HeaderHeight);
+        Size = UDim2.new(1, -16, 1, -(HeaderHeight + 8));
         ZIndex = 1;
         Parent = Inner;
     });
@@ -3051,10 +3079,10 @@ if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(17
         Parent = TabArea;
     });
 
-    local TabAreaDivider = Library:Create('Frame', {
+local TabAreaDivider = Library:Create('Frame', {
         BackgroundColor3 = Library.OutlineColor;
         BorderSizePixel = 0;
-        Position = UDim2.new(0, 8, 0, 32);
+        Position = UDim2.new(0, 8, 0, 0);
         Size = UDim2.new(1, -16, 0, 1);
         ZIndex = 1;
         Parent = MainSectionInner;
@@ -3180,7 +3208,7 @@ if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(17
             end);
         end;
 
-        function Tab:ShowTab()
+function Tab:ShowTab()
             for _, Tab in next, Window.Tabs do
                 Tab:HideTab();
             end;
@@ -3191,6 +3219,10 @@ if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(17
             Library.RegistryMap[TabButtonLabel].Properties.TextColor3 = 'AccentColor';
 
             TabFrame.Visible = true;
+
+            for _, Groupbox in next, Tab.Groupboxes do
+                Groupbox:Resize();
+            end;
         end;
 
         function Tab:HideTab()
