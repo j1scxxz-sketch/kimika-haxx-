@@ -3036,7 +3036,7 @@ if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(17
         BackgroundColor3 = 'BackgroundColor';
     });
 
-    llocal TabArea = Library:Create('Frame', {
+    local TabArea = Library:Create('Frame', {
         BackgroundTransparency = 1;
         Position = UDim2.new(0, 8, 0, 4);
         Size = UDim2.new(1, -16, 0, 28);
@@ -3089,7 +3089,7 @@ if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(17
             Tabboxes = {};
         };
 
-        llocal TabButtonWidth = Library:GetTextBounds(Name, Library.Font, 15);
+        local TabButtonWidth = Library:GetTextBounds(Name, Library.Font, 15);
 
         local TabButton = Library:Create('Frame', {
             BackgroundTransparency = 1;
