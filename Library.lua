@@ -3054,10 +3054,10 @@ if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(17
     local TabAreaDivider = Library:Create('Frame', {
         BackgroundColor3 = Library.OutlineColor;
         BorderSizePixel = 0;
-        Position = UDim2.new(0, 0, 1, 0);
-        Size = UDim2.new(1, 0, 0, 1);
+        Position = UDim2.new(0, 8, 0, 32);
+        Size = UDim2.new(1, -16, 0, 1);
         ZIndex = 1;
-        Parent = TabArea;
+        Parent = MainSectionInner;
     });
 
     Library:AddToRegistry(TabAreaDivider, {
