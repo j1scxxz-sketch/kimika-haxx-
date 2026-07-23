@@ -1444,11 +1444,11 @@ do
         local Groupbox = self;
         local Container = Groupbox.Container;
 
-        local function CreateBaseButton(Button)
+local function CreateBaseButton(Button)
             local Outer = Library:Create('Frame', {
                 BackgroundColor3 = Color3.new(0, 0, 0);
                 BorderColor3 = Color3.new(0, 0, 0);
-                Size = UDim2.new(1, -4, 0, 20);
+                Size = UDim2.new(1, -4, 0, 16);
                 ZIndex = 5;
             });
 
@@ -1672,10 +1672,10 @@ do
 
         Groupbox:AddBlank(1);
 
-        local TextBoxOuter = Library:Create('Frame', {
+local TextBoxOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(1, -4, 0, 20);
+            Size = UDim2.new(1, -4, 0, 16);
             ZIndex = 5;
             Parent = Container;
         });
