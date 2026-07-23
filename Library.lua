@@ -1173,7 +1173,7 @@ local KeyIcon = Library:Create('ImageLabel', {
             BackgroundTransparency = 1;
             AnchorPoint = Vector2.new(1, 0.5);
             Position = UDim2.new(0, -3, 0.5, 0);
-            Size = UDim2.new(0, 30, 0, 30);
+            Size = UDim2.new(0, 42, 0, 42);
             Image = 'rbxthumb://type=Asset&id=111580508510087&w=420&h=420';
             ImageColor3 = Library.FontColor;
             ZIndex = 6;
@@ -1222,10 +1222,10 @@ local KeyIcon = Library:Create('ImageLabel', {
 
         KeyPicker:UpdateDisplay();
 
-        local ModeSelectOuter = Library:Create('Frame', {
+local ModeSelectOuter = Library:Create('Frame', {
             BorderColor3 = Color3.new(0, 0, 0);
             Position = UDim2.fromOffset(ToggleLabel.AbsolutePosition.X + ToggleLabel.AbsoluteSize.X + 4, ToggleLabel.AbsolutePosition.Y + 1);
-            Size = UDim2.new(0, 60, 0, 45 + 2);
+            Size = UDim2.new(0, 90, 0, 45 + 15 + 2);
             Visible = false;
             ZIndex = 14;
             Parent = ScreenGui;
@@ -1310,8 +1310,39 @@ local KeyIcon = Library:Create('ImageLabel', {
                 ModeButton:Select();
             end;
 
-            ModeButtons[Mode] = ModeButton;
+ModeButtons[Mode] = ModeButton;
         end;
+
+        local RemoveLabel = Library:CreateLabel({
+            Active = false;
+            Size = UDim2.new(1, 0, 0, 15);
+            TextSize = 13;
+            Text = 'Remove keybind';
+            ZIndex = 16;
+            Parent = ModeSelectInner;
+        });
+
+        Library:OnHighlight(RemoveLabel, RemoveLabel,
+            { TextColor3 = 'RiskColor' },
+            { TextColor3 = 'FontColor' }
+        );
+
+        RemoveLabel.InputBegan:Connect(function(Input)
+            if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+                DisplayLabel.Text = 'None';
+                KeyPicker.Value = 'None';
+                KeyPicker.Toggled = false;
+                KeyPicker:UpdateDisplay();
+                KeyPicker:Update();
+
+                Library:SafeCallback(KeyPicker.ChangedCallback, nil)
+                Library:SafeCallback(KeyPicker.Changed, nil)
+
+                ModeSelectOuter.Visible = false;
+
+                Library:AttemptSave();
+            end;
+        end);
 
         function KeyPicker:Update()
             if Info.NoUI then
