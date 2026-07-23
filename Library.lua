@@ -2323,6 +2323,24 @@ local DropdownRow = Library:Create('Frame', {
             Parent = DropdownRow;
         });
 
+        local PlusButton = Library:Create('TextButton', {
+            BackgroundTransparency = 1;
+            Size = UDim2.new(1, 0, 1, 0);
+            Text = '';
+            ZIndex = 10;
+            Parent = PlusOuter;
+        });
+
+        PlusButton.MouseButton1Click:Connect(function()
+            if not Library:MouseIsOverOpenedFrame() then
+                if ListOuter.Visible then
+                    Dropdown:CloseDropdown();
+                else
+                    Dropdown:OpenDropdown();
+                end;
+            end;
+        end);
+
         Library:AddToRegistry(PlusOuter, {
             BorderColor3 = 'Black';
         });
@@ -2392,7 +2410,7 @@ local DropdownRow = Library:Create('Frame', {
         RecalculateListPosition();
         RecalculateListSize();
 
-        DropdownOuter:GetPropertyChangedSignal('AbsolutePosition'):Connect(RecalculateListPosition);
+                PlusOuter:GetPropertyChangedSignal('AbsolutePosition'):Connect(RecalculateListPosition);
 
         local ListInner = Library:Create('Frame', {
             BackgroundColor3 = Library.MainColor;
