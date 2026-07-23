@@ -475,10 +475,28 @@ local DisplayFrame = Library:Create('Frame', {
         -- There was some issue which caused RelativeOffset to be way off
         -- Thus the color picker would never show
 
+-- Shadow frame sits behind and offset to simulate depth
+        local PickerShadow = Library:Create('Frame', {
+            Name = 'ColorShadow';
+            BackgroundColor3 = Color3.new(0, 0, 0);
+            BackgroundTransparency = 0.5;
+            BorderSizePixel = 0;
+            Position = UDim2.fromOffset(DisplayFrame.AbsolutePosition.X + 4, DisplayFrame.AbsolutePosition.Y + 22),
+            Size = UDim2.fromOffset(230, Info.Transparency and 271 or 253);
+            Visible = false;
+            ZIndex = 14;
+            Parent = ScreenGui,
+        });
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 6);
+            Parent = PickerShadow;
+        });
+
         local PickerFrameOuter = Library:Create('Frame', {
             Name = 'Color';
-            BackgroundColor3 = Color3.new(1, 1, 1);
-            BorderColor3 = Color3.new(0, 0, 0);
+            BackgroundColor3 = Color3.new(0, 0, 0);
+            BorderSizePixel = 0;
             Position = UDim2.fromOffset(DisplayFrame.AbsolutePosition.X, DisplayFrame.AbsolutePosition.Y + 18),
             Size = UDim2.fromOffset(230, Info.Transparency and 271 or 253);
             Visible = false;
@@ -486,25 +504,50 @@ local DisplayFrame = Library:Create('Frame', {
             Parent = ScreenGui,
         });
 
-        DisplayFrame:GetPropertyChangedSignal('AbsolutePosition'):Connect(function()
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 6);
+            Parent = PickerFrameOuter;
+        });
+
+DisplayFrame:GetPropertyChangedSignal('AbsolutePosition'):Connect(function()
             PickerFrameOuter.Position = UDim2.fromOffset(DisplayFrame.AbsolutePosition.X, DisplayFrame.AbsolutePosition.Y + 18);
+            PickerShadow.Position = UDim2.fromOffset(DisplayFrame.AbsolutePosition.X + 4, DisplayFrame.AbsolutePosition.Y + 22);
         end)
 
-        local PickerFrameInner = Library:Create('Frame', {
+local PickerFrameInner = Library:Create('Frame', {
             BackgroundColor3 = Library.BackgroundColor;
-            BorderColor3 = Library.OutlineColor;
-            BorderMode = Enum.BorderMode.Inset;
+            BorderSizePixel = 0;
             Size = UDim2.new(1, 0, 1, 0);
             ZIndex = 16;
             Parent = PickerFrameOuter;
         });
 
-        local Highlight = Library:Create('Frame', {
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 6);
+            Parent = PickerFrameInner;
+        });
+
+local Highlight = Library:Create('Frame', {
             BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
-            Size = UDim2.new(1, 0, 0, 2);
+            Size = UDim2.new(1, 0, 0, 3);
             ZIndex = 17;
             Parent = PickerFrameInner;
+        });
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 6);
+            Parent = Highlight;
+        });
+
+        -- Cut the bottom corners of the highlight so only the top is rounded
+        Library:Create('Frame', {
+            BackgroundColor3 = Library.AccentColor;
+            BorderSizePixel = 0;
+            Position = UDim2.new(0, 0, 0.5, 0);
+            Size = UDim2.new(1, 0, 0.5, 0);
+            ZIndex = 17;
+            Parent = Highlight;
         });
 
         local SatVibMapOuter = Library:Create('Frame', {
@@ -884,7 +927,7 @@ local DisplayFrame = Library:Create('Frame', {
             Func(ColorPicker.Value)
         end;
 
-        function ColorPicker:Show()
+function ColorPicker:Show()
             for Frame, Val in next, Library.OpenedFrames do
                 if Frame.Name == 'Color' then
                     Frame.Visible = false;
@@ -892,11 +935,13 @@ local DisplayFrame = Library:Create('Frame', {
                 end;
             end;
 
+            PickerShadow.Visible = true;
             PickerFrameOuter.Visible = true;
             Library.OpenedFrames[PickerFrameOuter] = true;
         end;
 
         function ColorPicker:Hide()
+            PickerShadow.Visible = false;
             PickerFrameOuter.Visible = false;
             Library.OpenedFrames[PickerFrameOuter] = nil;
         end;
@@ -3354,10 +3399,9 @@ local TabHighlightBg = Library:Create('Frame', {
             BackgroundColor3 = 'AccentColor';
         });
 
-local TabFrame = Library:Create('CanvasGroup', {
+local TabFrame = Library:Create('Frame', {
             Name = 'TabFrame',
             BackgroundTransparency = 1;
-            GroupTransparency = 0;
             Position = UDim2.new(0, 0, 0, 0);
             Size = UDim2.new(1, 0, 1, 0);
             Visible = false;
@@ -3424,10 +3468,6 @@ function Tab:ShowTab()
             Library.RegistryMap[TabButtonLabel].Properties.TextColor3 = 'AccentColor';
 
             TabFrame.Visible = true;
-            TabFrame.GroupTransparency = 1;
-            TweenService:Create(TabFrame, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                GroupTransparency = 0,
-            }):Play();
 
             for _, Groupbox in next, Tab.Groupboxes do
                 Groupbox:Resize();
@@ -3441,7 +3481,6 @@ function Tab:ShowTab()
             Library.RegistryMap[TabButtonLabel].Properties.TextColor3 = 'FontColor';
 
             TabFrame.Visible = false;
-            TabFrame.GroupTransparency = 0;
         end;
 
         function Tab:SetLayoutOrder(Position)
@@ -3644,9 +3683,8 @@ local BoxOuter = Library:Create('Frame', {
                     BackgroundColor3 = 'BackgroundColor';
                 });
 
-local Container = Library:Create('CanvasGroup', {
+local Container = Library:Create('Frame', {
                     BackgroundTransparency = 1;
-                    GroupTransparency = 0;
                     Position = UDim2.new(0, 4, 0, 20);
                     Size = UDim2.new(1, -4, 1, -20);
                     ZIndex = 1;
@@ -3666,16 +3704,9 @@ function Tab:Show()
                     end;
 
                     Container.Visible = true;
-                    Container.GroupTransparency = 1;
-                    TweenService:Create(Container, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                        GroupTransparency = 0,
-                    }):Play();
-
                     Block.Visible = true;
 
-                    TweenService:Create(Button, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                        BackgroundColor3 = Library.BackgroundColor,
-                    }):Play();
+                    Button.BackgroundColor3 = Library.BackgroundColor;
                     Library.RegistryMap[Button].Properties.BackgroundColor3 = 'BackgroundColor';
 
                     Tab:Resize();
@@ -3683,7 +3714,6 @@ function Tab:Show()
 
                 function Tab:Hide()
                     Container.Visible = false;
-                    Container.GroupTransparency = 0;
                     Block.Visible = false;
 
                     Button.BackgroundColor3 = Library.MainColor;
