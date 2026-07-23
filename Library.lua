@@ -1172,9 +1172,9 @@ local PickOuter = Library:Create('Frame', {
 local KeyIcon = Library:Create('ImageLabel', {
             BackgroundTransparency = 1;
             AnchorPoint = Vector2.new(1, 0.5);
-            Position = UDim2.new(0, -5, 0.5, 0);
-            Size = UDim2.new(0, 28, 0, 28);
-            Image = 'rbxthumb://type=Asset&id=131084880237298&w=420&h=420';
+            Position = UDim2.new(0, -3, 0.5, 0);
+            Size = UDim2.new(0, 30, 0, 30);
+            Image = 'rbxthumb://type=Asset&id=111580508510087&w=420&h=420';
             ImageColor3 = Library.FontColor;
             ZIndex = 6;
             Parent = PickOuter;
