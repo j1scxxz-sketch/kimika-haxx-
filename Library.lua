@@ -2318,6 +2318,7 @@ local DropdownRow = Library:Create('Frame', {
             BorderColor3 = Color3.new(0, 0, 0);
             Position = UDim2.new(1, -20, 0, 0);
             Size = UDim2.new(0, 20, 1, 0);
+            Active = true;
             ZIndex = 5;
             Parent = DropdownRow;
         });
@@ -2331,6 +2332,7 @@ local DropdownRow = Library:Create('Frame', {
             BorderColor3 = Library.OutlineColor;
             BorderMode = Enum.BorderMode.Inset;
             Size = UDim2.new(1, 0, 1, 0);
+            Active = true;
             ZIndex = 6;
             Parent = PlusOuter;
         });
@@ -2342,9 +2344,10 @@ local DropdownRow = Library:Create('Frame', {
 
         Library:CreateLabel({
             Size = UDim2.new(1, 0, 1, 0);
-            TextSize = 16;
+            TextSize = 18;
             Text = '+';
-            ZIndex = 7;
+            TextColor3 = Library.FontColor;
+            ZIndex = 8;
             Parent = PlusInner;
         });
 
@@ -2633,7 +2636,15 @@ local DropdownRow = Library:Create('Frame', {
             Library:SafeCallback(Dropdown.Changed, Dropdown.Value);
         end;
 
-        PlusInner.InputBegan:Connect(function(Input)
+        local PlusClickDetector = Library:Create('TextButton', {
+            BackgroundTransparency = 1;
+            Size = UDim2.new(1, 0, 1, 0);
+            Text = '';
+            ZIndex = 10;
+            Parent = PlusOuter;
+        });
+
+        PlusClickDetector.InputBegan:Connect(function(Input)
             if Input.UserInputType == Enum.UserInputType.MouseButton1 and not Library:MouseIsOverOpenedFrame() then
                 if ListOuter.Visible then
                     Dropdown:CloseDropdown();
