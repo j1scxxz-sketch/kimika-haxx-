@@ -550,18 +550,24 @@ local Highlight = Library:Create('Frame', {
             Parent = Highlight;
         });
 
-        local SatVibMapOuter = Library:Create('Frame', {
-            BorderColor3 = Color3.new(0, 0, 0);
-            Position = UDim2.new(0, 4, 0, 25);
-            Size = UDim2.new(0, 200, 0, 200);
+local SatVibMapOuter = Library:Create('Frame', {
+            BackgroundColor3 = Color3.new(0, 0, 0);
+            BorderSizePixel = 0;
+            Position = UDim2.new(0, 6, 0, 28);
+            Size = UDim2.new(0, 196, 0, 196);
             ZIndex = 17;
+            ClipsDescendants = true;
             Parent = PickerFrameInner;
+        });
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 5);
+            Parent = SatVibMapOuter;
         });
 
         local SatVibMapInner = Library:Create('Frame', {
             BackgroundColor3 = Library.BackgroundColor;
-            BorderColor3 = Library.OutlineColor;
-            BorderMode = Enum.BorderMode.Inset;
+            BorderSizePixel = 0;
             Size = UDim2.new(1, 0, 1, 0);
             ZIndex = 18;
             Parent = SatVibMapOuter;
@@ -594,12 +600,19 @@ local Highlight = Library:Create('Frame', {
             Parent = CursorOuter;
         })
 
-        local HueSelectorOuter = Library:Create('Frame', {
-            BorderColor3 = Color3.new(0, 0, 0);
-            Position = UDim2.new(0, 208, 0, 25);
-            Size = UDim2.new(0, 15, 0, 200);
+local HueSelectorOuter = Library:Create('Frame', {
+            BackgroundColor3 = Color3.new(0, 0, 0);
+            BorderSizePixel = 0;
+            Position = UDim2.new(0, 206, 0, 28);
+            Size = UDim2.new(0, 14, 0, 196);
             ZIndex = 17;
+            ClipsDescendants = true;
             Parent = PickerFrameInner;
+        });
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 5);
+            Parent = HueSelectorOuter;
         });
 
         local HueSelectorInner = Library:Create('Frame', {
@@ -619,18 +632,24 @@ local Highlight = Library:Create('Frame', {
             Parent = HueSelectorInner;
         });
 
-        local HueBoxOuter = Library:Create('Frame', {
-            BorderColor3 = Color3.new(0, 0, 0);
-            Position = UDim2.fromOffset(4, 228),
-            Size = UDim2.new(0.5, -6, 0, 20),
+local HueBoxOuter = Library:Create('Frame', {
+            BackgroundColor3 = Color3.new(0, 0, 0);
+            BorderSizePixel = 0;
+            Position = UDim2.fromOffset(6, 232),
+            Size = UDim2.new(0.5, -8, 0, 18),
             ZIndex = 18,
+            ClipsDescendants = true;
             Parent = PickerFrameInner;
+        });
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 4);
+            Parent = HueBoxOuter;
         });
 
         local HueBoxInner = Library:Create('Frame', {
             BackgroundColor3 = Library.MainColor;
-            BorderColor3 = Library.OutlineColor;
-            BorderMode = Enum.BorderMode.Inset;
+            BorderSizePixel = 0;
             Size = UDim2.new(1, 0, 1, 0);
             ZIndex = 18,
             Parent = HueBoxOuter;
@@ -663,9 +682,9 @@ local Highlight = Library:Create('Frame', {
 
         Library:ApplyTextStroke(HueBox);
 
-        local RgbBoxBase = Library:Create(HueBoxOuter:Clone(), {
-            Position = UDim2.new(0.5, 2, 0, 228),
-            Size = UDim2.new(0.5, -6, 0, 20),
+local RgbBoxBase = Library:Create(HueBoxOuter:Clone(), {
+            Position = UDim2.new(0.5, 2, 0, 232),
+            Size = UDim2.new(0.5, -8, 0, 18),
             Parent = PickerFrameInner
         });
 
@@ -678,18 +697,24 @@ local Highlight = Library:Create('Frame', {
         local TransparencyBoxOuter, TransparencyBoxInner, TransparencyCursor;
         
         if Info.Transparency then 
-            TransparencyBoxOuter = Library:Create('Frame', {
-                BorderColor3 = Color3.new(0, 0, 0);
-                Position = UDim2.fromOffset(4, 251);
-                Size = UDim2.new(1, -8, 0, 15);
+TransparencyBoxOuter = Library:Create('Frame', {
+                BackgroundColor3 = Color3.new(0, 0, 0);
+                BorderSizePixel = 0;
+                Position = UDim2.fromOffset(6, 254);
+                Size = UDim2.new(1, -12, 0, 13);
                 ZIndex = 19;
+                ClipsDescendants = true;
                 Parent = PickerFrameInner;
+            });
+
+            Library:Create('UICorner', {
+                CornerRadius = UDim.new(0, 4);
+                Parent = TransparencyBoxOuter;
             });
 
             TransparencyBoxInner = Library:Create('Frame', {
                 BackgroundColor3 = ColorPicker.Value;
-                BorderColor3 = Library.OutlineColor;
-                BorderMode = Enum.BorderMode.Inset;
+                BorderSizePixel = 0;
                 Size = UDim2.new(1, 0, 1, 0);
                 ZIndex = 19;
                 Parent = TransparencyBoxOuter;
