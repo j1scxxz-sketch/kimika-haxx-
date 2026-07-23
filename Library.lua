@@ -3336,26 +3336,12 @@ local Inner = Library:Create('Frame', {
 local TitleWidth = select(1, Library:GetTextBounds(Config.Title or '', Library.Font, 15));
     local SuffixWidth = select(1, Library:GetTextBounds('.haxx', Library.Font, 15));
 
-    local IconSize, IconGap = 32, 8;
-    local GroupWidth = IconSize + IconGap + TitleWidth + SuffixWidth;
-    local GroupStartX = math.floor((Config.Size.X.Offset - GroupWidth) / 2);
-
-    local TitleImage = Library:Create('ImageLabel', {
-        BackgroundTransparency = 1;
-        Image = 'rbxthumb://type=Asset&id=101069633565053&w=420&h=420';
-        ImageColor3 = Library.AccentColor;
-        Position = UDim2.new(0, GroupStartX, 0, HasSubtitle and 0 or 1);
-        Size = UDim2.new(0, IconSize, 0, IconSize);
-        ZIndex = 1;
-        Parent = Inner;
-    });
-
-    Library:AddToRegistry(TitleImage, {
-        ImageColor3 = 'AccentColor';
-    });
+    local IconSize, IconGap = 20, 6;
+    local TextBlockWidth = TitleWidth + SuffixWidth;
+    local TextBlockX = math.floor((Config.Size.X.Offset - TextBlockWidth) / 2);
 
     local WindowLabel = Library:CreateLabel({
-        Position = UDim2.new(0, GroupStartX + IconSize + IconGap, 0, HasSubtitle and 6 or 7);
+        Position = UDim2.new(0, TextBlockX, 0, HasSubtitle and 6 or 7);
         Size = UDim2.new(0, TitleWidth, 0, 16);
         Text = Config.Title or '';
         TextSize = 15;
@@ -3370,12 +3356,27 @@ local TitleWidth = select(1, Library:GetTextBounds(Config.Title or '', Library.F
         TextColor3 = Library.AccentColor;
         TextSize = 15;
         TextStrokeTransparency = 0;
-        Position = UDim2.new(0, GroupStartX + IconSize + IconGap + TitleWidth, 0, HasSubtitle and 6 or 7);
+        Position = UDim2.new(0, TextBlockX + TitleWidth, 0, HasSubtitle and 6 or 7);
         Size = UDim2.new(0, SuffixWidth, 0, 16);
         Text = '.haxx';
         TextXAlignment = Enum.TextXAlignment.Left;
         ZIndex = 1;
         Parent = Inner;
+    });
+
+    local TitleImage = Library:Create('ImageLabel', {
+        BackgroundTransparency = 1;
+        AnchorPoint = Vector2.new(1, 0.5);
+        Image = 'rbxthumb://type=Asset&id=101069633565053&w=420&h=420';
+        ImageColor3 = Library.AccentColor;
+        Position = UDim2.new(0, TextBlockX - IconGap, 0.5, HasSubtitle and -6 or 0);
+        Size = UDim2.new(0, IconSize, 0, IconSize);
+        ZIndex = 1;
+        Parent = Inner;
+    });
+
+    Library:AddToRegistry(TitleImage, {
+        ImageColor3 = 'AccentColor';
     });
 
     Library:ApplyTextStroke(WindowLabelSuffix);
