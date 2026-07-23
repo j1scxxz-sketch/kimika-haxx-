@@ -2273,7 +2273,7 @@ local DropdownRow = Library:Create('Frame', {
         local DropdownOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(1, -20, 1, 0);
+            Size = UDim2.new(1, -24, 1, 0);
             ZIndex = 5;
             Parent = DropdownRow;
         });
@@ -2316,8 +2316,8 @@ local DropdownRow = Library:Create('Frame', {
         local PlusOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
-            Position = UDim2.new(1, -16, 0, 0);
-            Size = UDim2.new(0, 16, 1, 0);
+            Position = UDim2.new(1, -20, 0, 0);
+            Size = UDim2.new(0, 20, 1, 0);
             ZIndex = 5;
             Parent = DropdownRow;
         });
@@ -2342,7 +2342,7 @@ local DropdownRow = Library:Create('Frame', {
 
         Library:CreateLabel({
             Size = UDim2.new(1, 0, 1, 0);
-            TextSize = 13;
+            TextSize = 16;
             Text = '+';
             ZIndex = 7;
             Parent = PlusInner;
@@ -2359,13 +2359,13 @@ local DropdownRow = Library:Create('Frame', {
             Parent = DropdownInner;
         });
 
-        Library:OnHighlight(DropdownOuter, DropdownOuter,
+        Library:OnHighlight(PlusOuter, PlusOuter,
             { BorderColor3 = 'AccentColor' },
             { BorderColor3 = 'Black' }
         );
 
         if type(Info.Tooltip) == 'string' then
-            Library:AddToolTip(Info.Tooltip, DropdownOuter)
+            Library:AddToolTip(Info.Tooltip, PlusOuter)
         end
 
         local MAX_DROPDOWN_ITEMS = 8;
@@ -2633,7 +2633,7 @@ local DropdownRow = Library:Create('Frame', {
             Library:SafeCallback(Dropdown.Changed, Dropdown.Value);
         end;
 
-        DropdownOuter.InputBegan:Connect(function(Input)
+        PlusInner.InputBegan:Connect(function(Input)
             if Input.UserInputType == Enum.UserInputType.MouseButton1 and not Library:MouseIsOverOpenedFrame() then
                 if ListOuter.Visible then
                     Dropdown:CloseDropdown();
@@ -3110,7 +3110,7 @@ local TitleWidth = select(1, Library:GetTextBounds(Config.Title or '', Library.F
     });
 
     local WindowLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 42, 0, HasSubtitle and 6 or 7);
+        Position = UDim2.new(0, 40, 0, HasSubtitle and 6 or 7);
         Size = UDim2.new(0, TitleWidth, 0, 16);
         Text = Config.Title or '';
         TextSize = 15;
@@ -3125,7 +3125,7 @@ local TitleWidth = select(1, Library:GetTextBounds(Config.Title or '', Library.F
         TextColor3 = Library.AccentColor;
         TextSize = 15;
         TextStrokeTransparency = 0;
-        Position = UDim2.new(0, 34 + TitleWidth, 0, HasSubtitle and 6 or 7);
+        Position = UDim2.new(0, 40 + TitleWidth, 0, HasSubtitle and 6 or 7);
         Size = UDim2.new(0, 0, 0, 16);
         Text = '.haxx';
         TextXAlignment = Enum.TextXAlignment.Left;
