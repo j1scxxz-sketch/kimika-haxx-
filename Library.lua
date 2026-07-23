@@ -1849,7 +1849,7 @@ do
 
 local ToggleOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
-            BorderColor3 = Color3.new(0, 0, 0);
+            BorderSizePixel = 0;
             Size = UDim2.new(0, 14, 0, 14);
             ZIndex = 5;
             Parent = Container;
@@ -1860,8 +1860,14 @@ local ToggleOuter = Library:Create('Frame', {
             Parent = ToggleOuter;
         });
 
-        Library:AddToRegistry(ToggleOuter, {
-            BorderColor3 = 'Black';
+        local ToggleStroke = Library:Create('UIStroke', {
+            Color = Library.Black;
+            Thickness = 1;
+            Parent = ToggleOuter;
+        });
+
+        Library:AddToRegistry(ToggleStroke, {
+            Color = 'Black';
         });
 
         local ToggleInner = Library:Create('Frame', {
@@ -1909,9 +1915,9 @@ local ToggleOuter = Library:Create('Frame', {
             Parent = ToggleOuter;
         });
 
-        Library:OnHighlight(ToggleRegion, ToggleOuter,
-            { BorderColor3 = 'AccentColor' },
-            { BorderColor3 = 'Black' }
+Library:OnHighlight(ToggleRegion, ToggleStroke,
+            { Color = 'AccentColor' },
+            { Color = 'Black' }
         );
 
         function Toggle:UpdateColors()
@@ -2190,10 +2196,10 @@ local SliderDragging = false;
             end;
         end);
 
-        Library:GiveSignal(InputService.InputChanged:Connect(function(Input)
+Library:GiveSignal(InputService.InputChanged:Connect(function(Input)
             if SliderDragging and Input.UserInputType == Enum.UserInputType.MouseMovement then
                 local MinX = SliderInner.AbsolutePosition.X;
-                local nX = math.clamp(Mouse.X - MinX, 0, Slider.MaxSize);
+                local nX = math.clamp(Input.Position.X - MinX, 0, Slider.MaxSize);
 
                 local nValue = Slider:GetValueFromXOffset(nX);
                 local OldValue = Slider.Value;
@@ -2373,7 +2379,7 @@ local DropdownRow = Library:Create('Frame', {
             Parent = DropdownInner;
         });
 
-        Library:OnHighlight(DropdownOuter, DropdownOuter,
+Library:OnHighlight(PlusOuter, PlusOuter,
             { BorderColor3 = 'AccentColor' },
             { BorderColor3 = 'Black' }
         );
@@ -2392,17 +2398,7 @@ local DropdownRow = Library:Create('Frame', {
             Parent = ScreenGui;
         });
 
-        DropdownOuter.InputBegan:Connect(function(Input)
-            if Input.UserInputType == Enum.UserInputType.MouseButton1 and not Library:MouseIsOverOpenedFrame() then
-                if ListOuter.Visible then
-                    Dropdown:CloseDropdown();
-                else
-                    Dropdown:OpenDropdown();
-                end;
-            end;
-        end);
-
-        local function RecalculateListPosition()
+local function RecalculateListPosition()
             ListOuter.Position = UDim2.fromOffset(DropdownOuter.AbsolutePosition.X, DropdownOuter.AbsolutePosition.Y + DropdownOuter.Size.Y.Offset + 1);
         end;
 
