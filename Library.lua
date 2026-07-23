@@ -3356,9 +3356,10 @@ local TabHighlightBg = Library:Create('Frame', {
             BackgroundColor3 = 'AccentColor';
         });
 
-        local TabFrame = Library:Create('Frame', {
+local TabFrame = Library:Create('CanvasGroup', {
             Name = 'TabFrame',
             BackgroundTransparency = 1;
+            GroupTransparency = 0;
             Position = UDim2.new(0, 0, 0, 0);
             Size = UDim2.new(1, 0, 1, 0);
             Visible = false;
@@ -3645,8 +3646,9 @@ local BoxOuter = Library:Create('Frame', {
                     BackgroundColor3 = 'BackgroundColor';
                 });
 
-                local Container = Library:Create('Frame', {
+local Container = Library:Create('CanvasGroup', {
                     BackgroundTransparency = 1;
+                    GroupTransparency = 0;
                     Position = UDim2.new(0, 4, 0, 20);
                     Size = UDim2.new(1, -4, 1, -20);
                     ZIndex = 1;
