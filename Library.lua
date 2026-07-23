@@ -619,19 +619,24 @@ local HueSelectorOuter = Library:Create('Frame', {
             Parent = HueSelectorInner;
         });
 
-        local HueCursor = Library:Create('Frame', { 
-            BackgroundColor3 = Color3.new(1, 1, 1);
+local HueCursorOuter = Library:Create('ImageLabel', {
             AnchorPoint = Vector2.new(0.5, 0.5);
-            BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(1, 4, 0, 3);
-            Position = UDim2.new(0, -2, 0, 0);
+            Position = UDim2.new(0.5, 0, 0, 0);
+            Size = UDim2.new(0, 10, 0, 10);
+            BackgroundTransparency = 1;
+            Image = 'http://www.roblox.com/asset/?id=9619665977';
+            ImageColor3 = Color3.new(0, 0, 0);
             ZIndex = 20;
             Parent = HueSelectorInner;
         });
 
-        Library:Create('UICorner', {
-            CornerRadius = UDim.new(0, 2);
-            Parent = HueCursor;
+        local HueCursor = Library:Create('ImageLabel', {
+            Size = UDim2.new(0, HueCursorOuter.Size.X.Offset - 2, 0, HueCursorOuter.Size.Y.Offset - 2);
+            Position = UDim2.new(0, 1, 0, 1);
+            BackgroundTransparency = 1;
+            Image = 'http://www.roblox.com/asset/?id=9619665977';
+            ZIndex = 21;
+            Parent = HueCursorOuter;
         });
 
 local HueBoxOuter = Library:Create('Frame', {
@@ -979,7 +984,7 @@ Library:AddToRegistry(HueBoxInner, { BackgroundColor3 = 'MainColor'; });
             end;
 
             CursorOuter.Position = UDim2.new(ColorPicker.Sat, 0, 1 - ColorPicker.Vib, 0);
-            HueCursor.Position = UDim2.new(0, 0, ColorPicker.Hue, 0);
+            HueCursorOuter.Position = UDim2.new(0.5, 0, ColorPicker.Hue, 0);
 
             HueBox.Text = '#' .. ColorPicker.Value:ToHex()
             RgbBox.Text = table.concat({ math.floor(ColorPicker.Value.R * 255), math.floor(ColorPicker.Value.G * 255), math.floor(ColorPicker.Value.B * 255) }, ', ')
