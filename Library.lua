@@ -3334,13 +3334,18 @@ local Inner = Library:Create('Frame', {
     local HeaderHeight = HasSubtitle and 44 or 28;
 
 local TitleWidth = select(1, Library:GetTextBounds(Config.Title or '', Library.Font, 15));
+    local SuffixWidth = select(1, Library:GetTextBounds('.haxx', Library.Font, 15));
+
+    local IconSize, IconGap = 32, 8;
+    local TotalWidth = IconSize + IconGap + TitleWidth + SuffixWidth;
+    local StartX = math.floor((Config.Size.X.Offset - TotalWidth) / 2);
 
     local TitleImage = Library:Create('ImageLabel', {
         BackgroundTransparency = 1;
         Image = 'rbxthumb://type=Asset&id=101069633565053&w=420&h=420';
         ImageColor3 = Library.AccentColor;
-        Position = UDim2.new(0, 6, 0, HasSubtitle and 0 or 1);
-        Size = UDim2.new(0, 32, 0, 32);
+        Position = UDim2.new(0, StartX, 0, HasSubtitle and 0 or 1);
+        Size = UDim2.new(0, IconSize, 0, IconSize);
         ZIndex = 1;
         Parent = Inner;
     });
@@ -3350,7 +3355,7 @@ local TitleWidth = select(1, Library:GetTextBounds(Config.Title or '', Library.F
     });
 
     local WindowLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 40, 0, HasSubtitle and 6 or 7);
+        Position = UDim2.new(0, StartX + IconSize + IconGap, 0, HasSubtitle and 6 or 7);
         Size = UDim2.new(0, TitleWidth, 0, 16);
         Text = Config.Title or '';
         TextSize = 15;
@@ -3365,8 +3370,8 @@ local TitleWidth = select(1, Library:GetTextBounds(Config.Title or '', Library.F
         TextColor3 = Library.AccentColor;
         TextSize = 15;
         TextStrokeTransparency = 0;
-        Position = UDim2.new(0, 40 + TitleWidth, 0, HasSubtitle and 6 or 7);
-        Size = UDim2.new(0, 0, 0, 16);
+        Position = UDim2.new(0, StartX + IconSize + IconGap + TitleWidth, 0, HasSubtitle and 6 or 7);
+        Size = UDim2.new(0, SuffixWidth, 0, 16);
         Text = '.haxx';
         TextXAlignment = Enum.TextXAlignment.Left;
         ZIndex = 1;
@@ -3377,13 +3382,13 @@ local TitleWidth = select(1, Library:GetTextBounds(Config.Title or '', Library.F
     Library:AddToRegistry(WindowLabelSuffix, { TextColor3 = 'AccentColor' });
 
     local WindowSubLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 34, 0, 22);
-        Size = UDim2.new(0, 0, 0, 14);
+        Position = UDim2.new(0, 0, 0, 22);
+        Size = UDim2.new(1, 0, 0, 14);
         Text = Config.Subtitle or '';
         TextSize = 12;
         TextTransparency = 0.4;
+        TextXAlignment = Enum.TextXAlignment.Center;
         Visible = HasSubtitle;
-        TextXAlignment = Enum.TextXAlignment.Left;
         ZIndex = 1;
         Parent = Inner;
     });
@@ -3652,12 +3657,12 @@ local BoxOuter = Library:Create('Frame', {
                 BackgroundColor3 = 'AccentColor';
             });
 
-            local GroupboxLabel = Library:CreateLabel({
+local GroupboxLabel = Library:CreateLabel({
                 Size = UDim2.new(1, 0, 0, 16);
-                Position = UDim2.new(0, 4, 0, 1);
+                Position = UDim2.new(0, 0, 0, 1);
                 TextSize = 14;
                 Text = Info.Name;
-                TextXAlignment = Enum.TextXAlignment.Left;
+                TextXAlignment = Enum.TextXAlignment.Center;
                 ZIndex = 5;
                 Parent = BoxInner;
             });
