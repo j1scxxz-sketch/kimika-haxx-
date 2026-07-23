@@ -1461,20 +1461,40 @@ local function CreateBaseButton(Button)
                 Parent = Outer;
             });
 
-            local Label = Library:CreateLabel({
+            -- Subtle top highlight line (mirrors slider's FillHighlight)
+            Library:Create('Frame', {
+                BackgroundColor3 = Color3.new(1, 1, 1);
+                BackgroundTransparency = 0.72;
+                BorderSizePixel = 0;
+                Size = UDim2.new(1, 0, 0, 1);
+                ZIndex = 8;
+                Parent = Inner;
+            });
+
+            -- Bottom shadow layer (mirrors slider's FillShade)
+            local ButtonShade = Library:Create('Frame', {
+                BackgroundColor3 = Color3.new(0, 0, 0);
+                BorderSizePixel = 0;
                 Size = UDim2.new(1, 0, 1, 0);
-                TextSize = 14;
-                Text = Button.Text;
-                ZIndex = 6;
+                ZIndex = 7;
                 Parent = Inner;
             });
 
             Library:Create('UIGradient', {
-                Color = ColorSequence.new({
-                    ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
-                    ColorSequenceKeypoint.new(1, Color3.fromRGB(212, 212, 212))
+                Color = ColorSequence.new(Color3.new(0, 0, 0));
+                Transparency = NumberSequence.new({
+                    NumberSequenceKeypoint.new(0, 1);
+                    NumberSequenceKeypoint.new(1, 0.78);
                 });
                 Rotation = 90;
+                Parent = ButtonShade;
+            });
+
+            local Label = Library:CreateLabel({
+                Size = UDim2.new(1, 0, 1, 0);
+                TextSize = 14;
+                Text = Button.Text;
+                ZIndex = 9;
                 Parent = Inner;
             });
 
@@ -1487,10 +1507,18 @@ local function CreateBaseButton(Button)
                 BorderColor3 = 'OutlineColor';
             });
 
-            Library:OnHighlight(Outer, Outer,
-                { BorderColor3 = 'AccentColor' },
-                { BorderColor3 = 'Black' }
-            );
+            -- Hover: border accent tween instead of instant swap
+            Outer.MouseEnter:Connect(function()
+                TweenService:Create(Outer, TweenInfo.new(0.1, Enum.EasingStyle.Quad), {
+                    BorderColor3 = Library.AccentColor,
+                }):Play();
+            end);
+
+            Outer.MouseLeave:Connect(function()
+                TweenService:Create(Outer, TweenInfo.new(0.1, Enum.EasingStyle.Quad), {
+                    BorderColor3 = Color3.new(0, 0, 0),
+                }):Play();
+            end);
 
             return Outer, Inner, Label
         end
@@ -1928,9 +1956,14 @@ Library:OnHighlight(ToggleRegion, ToggleStroke,
             Library:AddToolTip(Info.Tooltip, ToggleRegion)
         end
 
-        function Toggle:Display()
-            ToggleInner.BackgroundColor3 = Toggle.Value and Library.AccentColor or Library.MainColor;
-            ToggleInner.BorderColor3 = Toggle.Value and Library.AccentColorDark or Library.OutlineColor;
+function Toggle:Display()
+            local TargetColor = Toggle.Value and Library.AccentColor or Library.MainColor;
+            local TargetBorder = Toggle.Value and Library.AccentColorDark or Library.OutlineColor;
+
+            TweenService:Create(ToggleInner, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                BackgroundColor3 = TargetColor,
+                BorderColor3 = TargetBorder,
+            }):Play();
 
             Library.RegistryMap[ToggleInner].Properties.BackgroundColor3 = Toggle.Value and 'AccentColor' or 'MainColor';
             Library.RegistryMap[ToggleInner].Properties.BorderColor3 = Toggle.Value and 'AccentColorDark' or 'OutlineColor';
@@ -3392,6 +3425,10 @@ function Tab:ShowTab()
             Library.RegistryMap[TabButtonLabel].Properties.TextColor3 = 'AccentColor';
 
             TabFrame.Visible = true;
+            TabFrame.GroupTransparency = 1;
+            TweenService:Create(TabFrame, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                GroupTransparency = 0,
+            }):Play();
 
             for _, Groupbox in next, Tab.Groupboxes do
                 Groupbox:Resize();
@@ -3405,6 +3442,7 @@ function Tab:ShowTab()
             Library.RegistryMap[TabButtonLabel].Properties.TextColor3 = 'FontColor';
 
             TabFrame.Visible = false;
+            TabFrame.GroupTransparency = 0;
         end;
 
         function Tab:SetLayoutOrder(Position)
@@ -3622,15 +3660,22 @@ local BoxOuter = Library:Create('Frame', {
                     Parent = Container;
                 });
 
-                function Tab:Show()
+function Tab:Show()
                     for _, Tab in next, Tabbox.Tabs do
                         Tab:Hide();
                     end;
 
                     Container.Visible = true;
+                    Container.GroupTransparency = 1;
+                    TweenService:Create(Container, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        GroupTransparency = 0,
+                    }):Play();
+
                     Block.Visible = true;
 
-                    Button.BackgroundColor3 = Library.BackgroundColor;
+                    TweenService:Create(Button, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        BackgroundColor3 = Library.BackgroundColor,
+                    }):Play();
                     Library.RegistryMap[Button].Properties.BackgroundColor3 = 'BackgroundColor';
 
                     Tab:Resize();
@@ -3638,6 +3683,7 @@ local BoxOuter = Library:Create('Frame', {
 
                 function Tab:Hide()
                     Container.Visible = false;
+                    Container.GroupTransparency = 0;
                     Block.Visible = false;
 
                     Button.BackgroundColor3 = Library.MainColor;
