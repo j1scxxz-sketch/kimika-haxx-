@@ -2079,7 +2079,6 @@ local ToggleInner = Library:Create('Frame', {
             BackgroundColor3 = Library.MainColor;
             BorderColor3 = Library.OutlineColor;
             BorderMode = Enum.BorderMode.Inset;
-            ClipsDescendants = true;
             Size = UDim2.new(1, -2, 1, -2);
             Position = UDim2.new(0, 1, 0, 1);
             ZIndex = 6;
@@ -2096,7 +2095,7 @@ Library:Create('UICorner', {
             BorderColor3 = 'OutlineColor';
         });
 
-        local ToggleShade = Library:Create('Frame', {
+local ToggleShade = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderSizePixel = 0;
             Size = UDim2.new(1, 0, 1, 0);
@@ -2112,15 +2111,6 @@ Library:Create('UICorner', {
             });
             Rotation = 90;
             Parent = ToggleShade;
-        });
-
-        local ToggleHighlight = Library:Create('Frame', {
-            BackgroundColor3 = Color3.new(1, 1, 1);
-            BackgroundTransparency = 0.5;
-            BorderSizePixel = 0;
-            Size = UDim2.new(1, 0, 0, 1);
-            ZIndex = 8;
-            Parent = ToggleInner;
         });
 
 local ToggleLabel = Library:CreateLabel({
@@ -3701,32 +3691,56 @@ local BoxOuter = Library:Create('Frame', {
                 BackgroundColor3 = 'BackgroundColor';
             });
 
-            local Highlight = Library:Create('Frame', {
+local LabelWidth = select(1, Library:GetTextBounds(Info.Name, Library.Font, 14)) + 14;
+
+            local HighlightLeft = Library:Create('Frame', {
                 BackgroundColor3 = Library.AccentColor;
                 BorderSizePixel = 0;
-                Size = UDim2.new(1, 0, 0, 2);
+                Size = UDim2.new(0.5, -(LabelWidth / 2), 0, 2);
                 ZIndex = 5;
                 Parent = BoxInner;
             });
 
-            Library:AddToRegistry(Highlight, {
+            local HighlightRight = Library:Create('Frame', {
+                BackgroundColor3 = Library.AccentColor;
+                BorderSizePixel = 0;
+                Position = UDim2.new(0.5, (LabelWidth / 2), 0, 0);
+                Size = UDim2.new(0.5, -(LabelWidth / 2), 0, 2);
+                ZIndex = 5;
+                Parent = BoxInner;
+            });
+
+            Library:AddToRegistry(HighlightLeft, {
                 BackgroundColor3 = 'AccentColor';
             });
 
-local GroupboxLabel = Library:CreateLabel({
-                Size = UDim2.new(1, 0, 0, 16);
-                Position = UDim2.new(0, 0, 0, 1);
+            Library:AddToRegistry(HighlightRight, {
+                BackgroundColor3 = 'AccentColor';
+            });
+
+            local GroupboxLabel = Library:CreateLabel({
+                AnchorPoint = Vector2.new(0.5, 0.5);
+                Position = UDim2.new(0.5, 0, 0, 1);
+                Size = UDim2.new(0, LabelWidth, 0, 16);
                 TextSize = 14;
                 Text = Info.Name;
                 TextXAlignment = Enum.TextXAlignment.Center;
-                ZIndex = 5;
+                BackgroundColor3 = Library.BackgroundColor;
+                BackgroundTransparency = 0;
+                ZIndex = 6;
                 Parent = BoxInner;
+            });
+
+            Library:RemoveFromRegistry(GroupboxLabel);
+            Library:AddToRegistry(GroupboxLabel, {
+                TextColor3 = 'FontColor';
+                BackgroundColor3 = 'BackgroundColor';
             });
 
             local Container = Library:Create('Frame', {
                 BackgroundTransparency = 1;
-                Position = UDim2.new(0, 3, 0, 18);
-                Size = UDim2.new(1, -6, 1, -20);
+                Position = UDim2.new(0, 3, 0, 16);
+                Size = UDim2.new(1, -6, 1, -18);
                 ZIndex = 1;
                 Parent = BoxInner;
             });
