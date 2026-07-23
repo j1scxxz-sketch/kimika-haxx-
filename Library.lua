@@ -3226,11 +3226,24 @@ local MainSectionOuter = Library:Create('Frame', {
         Parent = MainSectionInner;
     });
 
-    local TabListLayout = Library:Create('UIListLayout', {
+local TabListLayout = Library:Create('UIListLayout', {
         Padding = UDim.new(0, 12);
         FillDirection = Enum.FillDirection.Horizontal;
         SortOrder = Enum.SortOrder.LayoutOrder;
         Parent = TabArea;
+    });
+
+    local TabDivider = Library:Create('Frame', {
+        BackgroundColor3 = Library.OutlineColor;
+        BorderSizePixel = 0;
+        Position = UDim2.new(0, 0, 0, 21);
+        Size = UDim2.new(1, 0, 0, 1);
+        ZIndex = 1;
+        Parent = TabArea;
+    });
+
+    Library:AddToRegistry(TabDivider, {
+        BackgroundColor3 = 'OutlineColor';
     });
 
     local TabContainer = Library:Create('Frame', {
@@ -3267,6 +3280,24 @@ local MainSectionOuter = Library:Create('Frame', {
             Parent = TabArea;
         });
 
+local TabHighlightBg = Library:Create('Frame', {
+            BackgroundColor3 = Library.MainColor;
+            BackgroundTransparency = 1;
+            BorderSizePixel = 0;
+            Size = UDim2.new(1, 0, 1, 0);
+            ZIndex = 1;
+            Parent = TabButton;
+        });
+
+        Library:AddToRegistry(TabHighlightBg, {
+            BackgroundColor3 = 'MainColor';
+        });
+
+        Library:OnHighlight(TabButton, TabHighlightBg,
+            { BackgroundTransparency = 0.5 },
+            { BackgroundTransparency = 1 }
+        );
+
         local TabButtonLabel = Library:CreateLabel({
             Position = UDim2.new(0, 0, 0, 4);
             Size = UDim2.new(1, 0, 1, -4);
@@ -3274,7 +3305,7 @@ local MainSectionOuter = Library:Create('Frame', {
             TextSize = 15;
             TextXAlignment = Enum.TextXAlignment.Center;
             TextYAlignment = Enum.TextYAlignment.Center;
-            ZIndex = 1;
+            ZIndex = 2;
             Parent = TabButton;
         });
 
