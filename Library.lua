@@ -771,7 +771,7 @@ if Info.Transparency then
                 Parent = TransparencyBoxInner;
             });
 
-local TransparencyCursorOuter = Library:Create('ImageLabel', {
+TransparencyCursorOuter = Library:Create('ImageLabel', {
                 AnchorPoint = Vector2.new(0.5, 0.5);
                 Position = UDim2.new(0, 0, 0.5, 0);
                 Size = UDim2.new(0, 10, 0, 10);
