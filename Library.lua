@@ -3691,11 +3691,13 @@ local BoxOuter = Library:Create('Frame', {
                 BackgroundColor3 = 'BackgroundColor';
             });
 
-local LabelWidth = select(1, Library:GetTextBounds(Info.Name, Library.Font, 14)) + 14;
+local LabelWidth = select(1, Library:GetTextBounds(Info.Name, Library.Font, 14)) + 10;
+            local LineY = 8;
 
             local HighlightLeft = Library:Create('Frame', {
                 BackgroundColor3 = Library.AccentColor;
                 BorderSizePixel = 0;
+                Position = UDim2.new(0, 0, 0, LineY);
                 Size = UDim2.new(0.5, -(LabelWidth / 2), 0, 2);
                 ZIndex = 5;
                 Parent = BoxInner;
@@ -3704,7 +3706,7 @@ local LabelWidth = select(1, Library:GetTextBounds(Info.Name, Library.Font, 14))
             local HighlightRight = Library:Create('Frame', {
                 BackgroundColor3 = Library.AccentColor;
                 BorderSizePixel = 0;
-                Position = UDim2.new(0.5, (LabelWidth / 2), 0, 0);
+                Position = UDim2.new(0.5, (LabelWidth / 2), 0, LineY);
                 Size = UDim2.new(0.5, -(LabelWidth / 2), 0, 2);
                 ZIndex = 5;
                 Parent = BoxInner;
@@ -3719,22 +3721,14 @@ local LabelWidth = select(1, Library:GetTextBounds(Info.Name, Library.Font, 14))
             });
 
             local GroupboxLabel = Library:CreateLabel({
-                AnchorPoint = Vector2.new(0.5, 0.5);
-                Position = UDim2.new(0.5, 0, 0, 1);
+                AnchorPoint = Vector2.new(0.5, 0);
+                Position = UDim2.new(0.5, 0, 0, 0);
                 Size = UDim2.new(0, LabelWidth, 0, 16);
                 TextSize = 14;
                 Text = Info.Name;
                 TextXAlignment = Enum.TextXAlignment.Center;
-                BackgroundColor3 = Library.BackgroundColor;
-                BackgroundTransparency = 0;
                 ZIndex = 6;
                 Parent = BoxInner;
-            });
-
-            Library:RemoveFromRegistry(GroupboxLabel);
-            Library:AddToRegistry(GroupboxLabel, {
-                TextColor3 = 'FontColor';
-                BackgroundColor3 = 'BackgroundColor';
             });
 
             local Container = Library:Create('Frame', {
