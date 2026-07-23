@@ -2323,16 +2323,8 @@ local DropdownRow = Library:Create('Frame', {
             Parent = DropdownRow;
         });
 
-        local PlusButton = Library:Create('TextButton', {
-            BackgroundTransparency = 1;
-            Size = UDim2.new(1, 0, 1, 0);
-            Text = '';
-            ZIndex = 10;
-            Parent = PlusOuter;
-        });
-
-        PlusButton.MouseButton1Click:Connect(function()
-            if not Library:MouseIsOverOpenedFrame() then
+        DropdownOuter.InputBegan:Connect(function(Input)
+            if Input.UserInputType == Enum.UserInputType.MouseButton1 and not Library:MouseIsOverOpenedFrame() then
                 if ListOuter.Visible then
                     Dropdown:CloseDropdown();
                 else
@@ -2380,13 +2372,13 @@ local DropdownRow = Library:Create('Frame', {
             Parent = DropdownInner;
         });
 
-        Library:OnHighlight(PlusOuter, PlusOuter,
+        Library:OnHighlight(DropdownOuter, DropdownOuter,
             { BorderColor3 = 'AccentColor' },
             { BorderColor3 = 'Black' }
         );
 
         if type(Info.Tooltip) == 'string' then
-            Library:AddToolTip(Info.Tooltip, PlusOuter)
+            Library:AddToolTip(Info.Tooltip, DropdownOuter)
         end
 
         local MAX_DROPDOWN_ITEMS = 8;
@@ -2410,7 +2402,7 @@ local DropdownRow = Library:Create('Frame', {
         RecalculateListPosition();
         RecalculateListSize();
 
-                PlusOuter:GetPropertyChangedSignal('AbsolutePosition'):Connect(RecalculateListPosition);
+        DropdownOuter:GetPropertyChangedSignal('AbsolutePosition'):Connect(RecalculateListPosition);
 
         local ListInner = Library:Create('Frame', {
             BackgroundColor3 = Library.MainColor;
