@@ -1161,10 +1161,10 @@ Library:AddToRegistry(HueBoxInner, { BackgroundColor3 = 'MainColor'; });
             Info.Mode = 'Toggle'
         end
 
-        local PickOuter = Library:Create('Frame', {
+local PickOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(0, 28, 0, 15);
+            Size = UDim2.new(0, 46, 0, 15);
             ZIndex = 6;
             Parent = ToggleLabel;
         });
@@ -1183,14 +1183,46 @@ Library:AddToRegistry(HueBoxInner, { BackgroundColor3 = 'MainColor'; });
             BorderColor3 = 'OutlineColor';
         });
 
+        local KeyIcon = Library:Create('ImageLabel', {
+            BackgroundTransparency = 1;
+            AnchorPoint = Vector2.new(0, 0.5);
+            Position = UDim2.new(0, 4, 0.5, 0);
+            Size = UDim2.new(0, 10, 0, 10);
+            Image = 'rbxthumb://type=Asset&id=131084880237298&w=420&h=420';
+            ImageColor3 = Library.FontColor;
+            ZIndex = 8;
+            Parent = PickInner;
+        });
+
         local DisplayLabel = Library:CreateLabel({
-            Size = UDim2.new(1, 0, 1, 0);
+            Position = UDim2.new(0, 17, 0, 0);
+            Size = UDim2.new(1, -19, 1, 0);
             TextSize = 13;
             Text = Info.Default;
+            TextXAlignment = Enum.TextXAlignment.Left;
             TextWrapped = true;
             ZIndex = 8;
             Parent = PickInner;
         });
+
+        Library:RemoveFromRegistry(DisplayLabel);
+
+        function KeyPicker:UpdateDisplay()
+            local Color = (KeyPicker.Value ~= 'None') and Library.AccentColor or Library.FontColor;
+
+            KeyIcon.ImageColor3 = Color;
+            DisplayLabel.TextColor3 = Color;
+        end;
+
+        Library:AddToRegistry(KeyIcon, {
+            ImageColor3 = function() return (KeyPicker.Value ~= 'None') and Library.AccentColor or Library.FontColor end;
+        });
+
+        Library:AddToRegistry(DisplayLabel, {
+            TextColor3 = function() return (KeyPicker.Value ~= 'None') and Library.AccentColor or Library.FontColor end;
+        });
+
+        KeyPicker:UpdateDisplay();
 
         local ModeSelectOuter = Library:Create('Frame', {
             BorderColor3 = Color3.new(0, 0, 0);
@@ -1333,10 +1365,11 @@ Library:AddToRegistry(HueBoxInner, { BackgroundColor3 = 'MainColor'; });
             end;
         end;
 
-        function KeyPicker:SetValue(Data)
+function KeyPicker:SetValue(Data)
             local Key, Mode = Data[1], Data[2];
             DisplayLabel.Text = Key;
             KeyPicker.Value = Key;
+            KeyPicker:UpdateDisplay();
             ModeButtons[Mode]:Select();
             KeyPicker:Update();
         end;
@@ -1401,11 +1434,12 @@ Library:AddToRegistry(HueBoxInner, { BackgroundColor3 = 'MainColor'; });
                         Key = 'MB2';
                     end;
 
-                    Break = true;
+Break = true;
                     Picking = false;
 
                     DisplayLabel.Text = Key;
                     KeyPicker.Value = Key;
+                    KeyPicker:UpdateDisplay();
 
                     Library:SafeCallback(KeyPicker.ChangedCallback, Input.KeyCode or Input.UserInputType)
                     Library:SafeCallback(KeyPicker.Changed, Input.KeyCode or Input.UserInputType)
