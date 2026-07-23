@@ -2671,13 +2671,17 @@ local PlusClickDetector = Library:Create('TextButton', {
             end;
         end);
 
-        InputService.InputBegan:Connect(function(Input)
+InputService.InputBegan:Connect(function(Input)
             if Input.UserInputType == Enum.UserInputType.MouseButton1 then
                 local AbsPos, AbsSize = ListOuter.AbsolutePosition, ListOuter.AbsoluteSize;
 
-                if Mouse.X < AbsPos.X or Mouse.X > AbsPos.X + AbsSize.X
-                    or Mouse.Y < (AbsPos.Y - 20 - 1) or Mouse.Y > AbsPos.Y + AbsSize.Y then
+                local OverList = Mouse.X >= AbsPos.X and Mouse.X <= AbsPos.X + AbsSize.X
+                    and Mouse.Y >= (AbsPos.Y - 20 - 1) and Mouse.Y <= AbsPos.Y + AbsSize.Y;
 
+                local OverPlus = Library:IsMouseOverFrame(PlusOuter);
+                local OverDropdown = Library:IsMouseOverFrame(DropdownOuter);
+
+                if (not OverList) and (not OverPlus) and (not OverDropdown) then
                     Dropdown:CloseDropdown();
                 end;
             end;
