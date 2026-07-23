@@ -1847,12 +1847,17 @@ do
         local Groupbox = self;
         local Container = Groupbox.Container;
 
-        local ToggleOuter = Library:Create('Frame', {
+local ToggleOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(0, 13, 0, 13);
+            Size = UDim2.new(0, 14, 0, 14);
             ZIndex = 5;
             Parent = Container;
+        });
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 3);
+            Parent = ToggleOuter;
         });
 
         Library:AddToRegistry(ToggleOuter, {
@@ -1863,9 +1868,15 @@ do
             BackgroundColor3 = Library.MainColor;
             BorderColor3 = Library.OutlineColor;
             BorderMode = Enum.BorderMode.Inset;
-            Size = UDim2.new(1, 0, 1, 0);
+            Size = UDim2.new(1, -2, 1, -2);
+            Position = UDim2.new(0, 1, 0, 1);
             ZIndex = 6;
             Parent = ToggleOuter;
+        });
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 2);
+            Parent = ToggleInner;
         });
 
         Library:AddToRegistry(ToggleInner, {
