@@ -475,53 +475,88 @@ local DisplayFrame = Library:Create('Frame', {
         -- There was some issue which caused RelativeOffset to be way off
         -- Thus the color picker would never show
 
-        local PickerFrameOuter = Library:Create('Frame', {
+local PickerFrameOuter = Library:Create('Frame', {
             Name = 'Color';
-            BackgroundColor3 = Color3.new(1, 1, 1);
-            BorderColor3 = Color3.new(0, 0, 0);
+            BackgroundColor3 = Color3.new(0, 0, 0);
+            BorderSizePixel = 0;
             Position = UDim2.fromOffset(DisplayFrame.AbsolutePosition.X, DisplayFrame.AbsolutePosition.Y + 18),
-            Size = UDim2.fromOffset(230, Info.Transparency and 271 or 253);
+            Size = UDim2.fromOffset(240, Info.Transparency and 282 or 264);
             Visible = false;
             ZIndex = 15;
             Parent = ScreenGui,
+        });
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 8);
+            Parent = PickerFrameOuter;
         });
 
         DisplayFrame:GetPropertyChangedSignal('AbsolutePosition'):Connect(function()
             PickerFrameOuter.Position = UDim2.fromOffset(DisplayFrame.AbsolutePosition.X, DisplayFrame.AbsolutePosition.Y + 18);
         end)
 
-        local PickerFrameInner = Library:Create('Frame', {
+local PickerFrameInner = Library:Create('Frame', {
             BackgroundColor3 = Library.BackgroundColor;
-            BorderColor3 = Library.OutlineColor;
-            BorderMode = Enum.BorderMode.Inset;
-            Size = UDim2.new(1, 0, 1, 0);
+            BorderSizePixel = 0;
+            Size = UDim2.new(1, -2, 1, -2);
+            Position = UDim2.new(0, 1, 0, 1);
             ZIndex = 16;
             Parent = PickerFrameOuter;
         });
 
-        local Highlight = Library:Create('Frame', {
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 7);
+            Parent = PickerFrameInner;
+        });
+
+local Highlight = Library:Create('Frame', {
             BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
-            Size = UDim2.new(1, 0, 0, 2);
+            Size = UDim2.new(1, 0, 0, 3);
             ZIndex = 17;
             Parent = PickerFrameInner;
         });
 
-        local SatVibMapOuter = Library:Create('Frame', {
-            BorderColor3 = Color3.new(0, 0, 0);
-            Position = UDim2.new(0, 4, 0, 25);
-            Size = UDim2.new(0, 200, 0, 200);
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 7);
+            Parent = Highlight;
+        });
+
+        Library:Create('Frame', {
+            BackgroundColor3 = Library.AccentColor;
+            BorderSizePixel = 0;
+            Position = UDim2.new(0, 0, 0.5, 0);
+            Size = UDim2.new(1, 0, 0.5, 0);
+            ZIndex = 17;
+            Parent = Highlight;
+        });
+
+local SatVibMapOuter = Library:Create('Frame', {
+            BackgroundColor3 = Color3.new(0, 0, 0);
+            BorderSizePixel = 0;
+            Position = UDim2.new(0, 6, 0, 28);
+            Size = UDim2.new(0, 196, 0, 196);
             ZIndex = 17;
             Parent = PickerFrameInner;
+        });
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 5);
+            Parent = SatVibMapOuter;
         });
 
         local SatVibMapInner = Library:Create('Frame', {
             BackgroundColor3 = Library.BackgroundColor;
-            BorderColor3 = Library.OutlineColor;
-            BorderMode = Enum.BorderMode.Inset;
-            Size = UDim2.new(1, 0, 1, 0);
+            BorderSizePixel = 0;
+            Size = UDim2.new(1, -2, 1, -2);
+            Position = UDim2.new(0, 1, 0, 1);
             ZIndex = 18;
             Parent = SatVibMapOuter;
+        });
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 4);
+            Parent = SatVibMapInner;
         });
 
         local SatVibMap = Library:Create('ImageLabel', {
@@ -530,6 +565,11 @@ local DisplayFrame = Library:Create('Frame', {
             ZIndex = 18;
             Image = 'rbxassetid://4155801252';
             Parent = SatVibMapInner;
+        });
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 4);
+            Parent = SatVibMap;
         });
 
         local CursorOuter = Library:Create('ImageLabel', {
@@ -551,67 +591,87 @@ local DisplayFrame = Library:Create('Frame', {
             Parent = CursorOuter;
         })
 
-        local HueSelectorOuter = Library:Create('Frame', {
-            BorderColor3 = Color3.new(0, 0, 0);
-            Position = UDim2.new(0, 208, 0, 25);
-            Size = UDim2.new(0, 15, 0, 200);
+local HueSelectorOuter = Library:Create('Frame', {
+            BackgroundColor3 = Color3.new(0, 0, 0);
+            BorderSizePixel = 0;
+            Position = UDim2.new(0, 208, 0, 28);
+            Size = UDim2.new(0, 14, 0, 196);
             ZIndex = 17;
             Parent = PickerFrameInner;
+        });
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 7);
+            Parent = HueSelectorOuter;
         });
 
         local HueSelectorInner = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(1, 1, 1);
             BorderSizePixel = 0;
-            Size = UDim2.new(1, 0, 1, 0);
+            Size = UDim2.new(1, -2, 1, -2);
+            Position = UDim2.new(0, 1, 0, 1);
             ZIndex = 18;
             Parent = HueSelectorOuter;
         });
 
-        local HueCursor = Library:Create('Frame', { 
-            BackgroundColor3 = Color3.new(1, 1, 1);
-            AnchorPoint = Vector2.new(0, 0.5);
-            BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(1, 0, 0, 1);
-            ZIndex = 18;
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 6);
             Parent = HueSelectorInner;
         });
 
-        local HueBoxOuter = Library:Create('Frame', {
+        local HueCursor = Library:Create('Frame', { 
+            BackgroundColor3 = Color3.new(1, 1, 1);
+            AnchorPoint = Vector2.new(0.5, 0.5);
             BorderColor3 = Color3.new(0, 0, 0);
-            Position = UDim2.fromOffset(4, 228),
-            Size = UDim2.new(0.5, -6, 0, 20),
+            Size = UDim2.new(1, 4, 0, 3);
+            Position = UDim2.new(0, -2, 0, 0);
+            ZIndex = 20;
+            Parent = HueSelectorInner;
+        });
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 2);
+            Parent = HueCursor;
+        });
+
+local HueBoxOuter = Library:Create('Frame', {
+            BackgroundColor3 = Color3.new(0, 0, 0);
+            BorderSizePixel = 0;
+            Position = UDim2.fromOffset(6, 232),
+            Size = UDim2.new(0.5, -10, 0, 22),
             ZIndex = 18,
             Parent = PickerFrameInner;
         });
 
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 5);
+            Parent = HueBoxOuter;
+        });
+
         local HueBoxInner = Library:Create('Frame', {
             BackgroundColor3 = Library.MainColor;
-            BorderColor3 = Library.OutlineColor;
-            BorderMode = Enum.BorderMode.Inset;
-            Size = UDim2.new(1, 0, 1, 0);
+            BorderSizePixel = 0;
+            Size = UDim2.new(1, -2, 1, -2);
+            Position = UDim2.new(0, 1, 0, 1);
             ZIndex = 18,
             Parent = HueBoxOuter;
         });
 
-        Library:Create('UIGradient', {
-            Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(212, 212, 212))
-            });
-            Rotation = 90;
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 4);
             Parent = HueBoxInner;
         });
 
         local HueBox = Library:Create('TextBox', {
             BackgroundTransparency = 1;
-            Position = UDim2.new(0, 5, 0, 0);
-            Size = UDim2.new(1, -5, 1, 0);
+            Position = UDim2.new(0, 6, 0, 0);
+            Size = UDim2.new(1, -6, 1, 0);
             Font = Library.Font;
-            PlaceholderColor3 = Color3.fromRGB(190, 190, 190);
-            PlaceholderText = 'Hex color',
+            PlaceholderColor3 = Color3.fromRGB(140, 140, 140);
+            PlaceholderText = 'Hex',
             Text = '#FFFFFF',
             TextColor3 = Library.FontColor;
-            TextSize = 14;
+            TextSize = 13;
             TextStrokeTransparency = 0;
             TextXAlignment = Enum.TextXAlignment.Left;
             ZIndex = 20,
@@ -620,38 +680,82 @@ local DisplayFrame = Library:Create('Frame', {
 
         Library:ApplyTextStroke(HueBox);
 
-        local RgbBoxBase = Library:Create(HueBoxOuter:Clone(), {
-            Position = UDim2.new(0.5, 2, 0, 228),
-            Size = UDim2.new(0.5, -6, 0, 20),
+local RgbBoxBase = Library:Create('Frame', {
+            BackgroundColor3 = Color3.new(0, 0, 0);
+            BorderSizePixel = 0;
+            Position = UDim2.new(0.5, 2, 0, 232),
+            Size = UDim2.new(0.5, -8, 0, 22),
+            ZIndex = 18,
             Parent = PickerFrameInner
         });
 
-        local RgbBox = Library:Create(RgbBoxBase.Frame:FindFirstChild('TextBox'), {
-            Text = '255, 255, 255',
-            PlaceholderText = 'RGB color',
-            TextColor3 = Library.FontColor
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 5);
+            Parent = RgbBoxBase;
         });
+
+        local RgbBoxInner = Library:Create('Frame', {
+            BackgroundColor3 = Library.MainColor;
+            BorderSizePixel = 0;
+            Size = UDim2.new(1, -2, 1, -2);
+            Position = UDim2.new(0, 1, 0, 1);
+            ZIndex = 18,
+            Parent = RgbBoxBase;
+        });
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 4);
+            Parent = RgbBoxInner;
+        });
+
+        local RgbBox = Library:Create('TextBox', {
+            BackgroundTransparency = 1;
+            Position = UDim2.new(0, 6, 0, 0);
+            Size = UDim2.new(1, -6, 1, 0);
+            Font = Library.Font;
+            PlaceholderColor3 = Color3.fromRGB(140, 140, 140);
+            PlaceholderText = 'RGB',
+            Text = '255, 255, 255',
+            TextColor3 = Library.FontColor;
+            TextSize = 13;
+            TextStrokeTransparency = 0;
+            TextXAlignment = Enum.TextXAlignment.Left;
+            ZIndex = 20,
+            Parent = RgbBoxInner;
+        });
+
+        Library:ApplyTextStroke(RgbBox);
 
         local TransparencyBoxOuter, TransparencyBoxInner, TransparencyCursor;
         
-        if Info.Transparency then 
+if Info.Transparency then 
             TransparencyBoxOuter = Library:Create('Frame', {
-                BorderColor3 = Color3.new(0, 0, 0);
-                Position = UDim2.fromOffset(4, 251);
-                Size = UDim2.new(1, -8, 0, 15);
+                BackgroundColor3 = Color3.new(0, 0, 0);
+                BorderSizePixel = 0;
+                Position = UDim2.fromOffset(6, 260);
+                Size = UDim2.new(1, -12, 0, 14);
                 ZIndex = 19;
                 Parent = PickerFrameInner;
             });
 
+            Library:Create('UICorner', {
+                CornerRadius = UDim.new(0, 7);
+                Parent = TransparencyBoxOuter;
+            });
+
             TransparencyBoxInner = Library:Create('Frame', {
                 BackgroundColor3 = ColorPicker.Value;
-                BorderColor3 = Library.OutlineColor;
-                BorderMode = Enum.BorderMode.Inset;
-                Size = UDim2.new(1, 0, 1, 0);
+                BorderSizePixel = 0;
+                Size = UDim2.new(1, -2, 1, -2);
+                Position = UDim2.new(0, 1, 0, 1);
                 ZIndex = 19;
                 Parent = TransparencyBoxOuter;
             });
 
+            Library:Create('UICorner', {
+                CornerRadius = UDim.new(0, 6);
+                Parent = TransparencyBoxInner;
+            });
             Library:AddToRegistry(TransparencyBoxInner, { BorderColor3 = 'OutlineColor' });
 
             Library:Create('ImageLabel', {
@@ -662,22 +766,27 @@ local DisplayFrame = Library:Create('Frame', {
                 Parent = TransparencyBoxInner;
             });
 
-            TransparencyCursor = Library:Create('Frame', { 
+TransparencyCursor = Library:Create('Frame', { 
                 BackgroundColor3 = Color3.new(1, 1, 1);
-                AnchorPoint = Vector2.new(0.5, 0);
+                AnchorPoint = Vector2.new(0.5, 0.5);
                 BorderColor3 = Color3.new(0, 0, 0);
-                Size = UDim2.new(0, 1, 1, 0);
+                Size = UDim2.new(0, 3, 1, 4);
                 ZIndex = 21;
                 Parent = TransparencyBoxInner;
             });
+
+            Library:Create('UICorner', {
+                CornerRadius = UDim.new(0, 2);
+                Parent = TransparencyCursor;
+            });
         end;
 
-        local DisplayLabel = Library:CreateLabel({
-            Size = UDim2.new(1, 0, 0, 14);
-            Position = UDim2.fromOffset(5, 5);
+local DisplayLabel = Library:CreateLabel({
+            Size = UDim2.new(1, -10, 0, 16);
+            Position = UDim2.fromOffset(8, 7);
             TextXAlignment = Enum.TextXAlignment.Left;
-            TextSize = 14;
-            Text = ColorPicker.Title,--Info.Default;
+            TextSize = 13;
+            Text = ColorPicker.Title;
             TextWrapped = false;
             ZIndex = 16;
             Parent = PickerFrameInner;
@@ -811,14 +920,14 @@ local DisplayFrame = Library:Create('Frame', {
 
         end
 
-        Library:AddToRegistry(PickerFrameInner, { BackgroundColor3 = 'BackgroundColor'; BorderColor3 = 'OutlineColor'; });
+        Library:AddToRegistry(PickerFrameInner, { BackgroundColor3 = 'BackgroundColor'; });
         Library:AddToRegistry(Highlight, { BackgroundColor3 = 'AccentColor'; });
-        Library:AddToRegistry(SatVibMapInner, { BackgroundColor3 = 'BackgroundColor'; BorderColor3 = 'OutlineColor'; });
+        Library:AddToRegistry(SatVibMapInner, { BackgroundColor3 = 'BackgroundColor'; });
 
-        Library:AddToRegistry(HueBoxInner, { BackgroundColor3 = 'MainColor'; BorderColor3 = 'OutlineColor'; });
-        Library:AddToRegistry(RgbBoxBase.Frame, { BackgroundColor3 = 'MainColor'; BorderColor3 = 'OutlineColor'; });
-        Library:AddToRegistry(RgbBox, { TextColor3 = 'FontColor', });
-        Library:AddToRegistry(HueBox, { TextColor3 = 'FontColor', });
+Library:AddToRegistry(HueBoxInner, { BackgroundColor3 = 'MainColor'; });
+        Library:AddToRegistry(RgbBoxInner, { BackgroundColor3 = 'MainColor'; });
+        Library:AddToRegistry(RgbBox, { TextColor3 = 'FontColor'; });
+        Library:AddToRegistry(HueBox, { TextColor3 = 'FontColor'; });
 
         local SequenceTable = {};
 
