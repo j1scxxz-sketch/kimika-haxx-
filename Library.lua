@@ -3233,13 +3233,13 @@ local TabListLayout = Library:Create('UIListLayout', {
         Parent = TabArea;
     });
 
-    local TabDivider = Library:Create('Frame', {
+local TabDivider = Library:Create('Frame', {
         BackgroundColor3 = Library.OutlineColor;
         BorderSizePixel = 0;
-        Position = UDim2.new(0, 0, 0, 21);
-        Size = UDim2.new(1, 0, 0, 1);
+        Position = UDim2.new(0, 8, 0, 22);
+        Size = UDim2.new(1, -16, 0, 1);
         ZIndex = 1;
-        Parent = TabArea;
+        Parent = MainSectionInner;
     });
 
     Library:AddToRegistry(TabDivider, {
