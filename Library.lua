@@ -69,12 +69,12 @@ table.insert(Library.Signals, RenderStepped:Connect(function(Delta)
 
 TitleWaveStep = TitleWaveStep + Delta;
 
-    if Library.SuffixLabels then
+if Library.SuffixLabels then
         local Bright = Library:GetBrighterColor(Library.AccentColor);
 
         for i, Label in next, Library.SuffixLabels do
-            local Offset = math.sin((TitleWaveStep * 3) - (i * 1.1));
-            local Brightness = (Offset + 1) / 2;
+            local Offset = math.sin((TitleWaveStep * 5) - (i * 1.4));
+            local Brightness = math.clamp(((Offset + 1) / 2) ^ 0.6, 0, 1);
 
             Label.TextColor3 = Library.AccentColor:Lerp(Bright, Brightness);
         end;
@@ -333,7 +333,7 @@ Library.AccentColorDark = Library:GetDarkerColor(Library.AccentColor);
 
 function Library:GetBrighterColor(Color)
     local H, S, V = Color3.toHSV(Color);
-    return Color3.fromHSV(H, S * 0.6, math.clamp(V * 1.35, 0, 1));
+    return Color3.fromHSV(H, S * 0.35, math.clamp(V * 1.6, 0, 1));
 end;
 
 function Library:AddToRegistry(Instance, Properties, IsHud)
@@ -2075,17 +2075,18 @@ local ToggleOuter = Library:Create('Frame', {
             Color = 'Black';
         });
 
-        local ToggleInner = Library:Create('Frame', {
+local ToggleInner = Library:Create('Frame', {
             BackgroundColor3 = Library.MainColor;
             BorderColor3 = Library.OutlineColor;
             BorderMode = Enum.BorderMode.Inset;
+            ClipsDescendants = true;
             Size = UDim2.new(1, -2, 1, -2);
             Position = UDim2.new(0, 1, 0, 1);
             ZIndex = 6;
             Parent = ToggleOuter;
         });
 
-        Library:Create('UICorner', {
+Library:Create('UICorner', {
             CornerRadius = UDim.new(0, 2);
             Parent = ToggleInner;
         });
@@ -2095,13 +2096,40 @@ local ToggleOuter = Library:Create('Frame', {
             BorderColor3 = 'OutlineColor';
         });
 
-        local ToggleLabel = Library:CreateLabel({
+        local ToggleShade = Library:Create('Frame', {
+            BackgroundColor3 = Color3.new(0, 0, 0);
+            BorderSizePixel = 0;
+            Size = UDim2.new(1, 0, 1, 0);
+            ZIndex = 7;
+            Parent = ToggleInner;
+        });
+
+        Library:Create('UIGradient', {
+            Color = ColorSequence.new(Color3.new(0, 0, 0));
+            Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 1);
+                NumberSequenceKeypoint.new(1, 0.65);
+            });
+            Rotation = 90;
+            Parent = ToggleShade;
+        });
+
+        local ToggleHighlight = Library:Create('Frame', {
+            BackgroundColor3 = Color3.new(1, 1, 1);
+            BackgroundTransparency = 0.5;
+            BorderSizePixel = 0;
+            Size = UDim2.new(1, 0, 0, 1);
+            ZIndex = 8;
+            Parent = ToggleInner;
+        });
+
+local ToggleLabel = Library:CreateLabel({
             Size = UDim2.new(0, 216, 1, 0);
             Position = UDim2.new(1, 6, 0, 0);
             TextSize = 14;
             Text = Info.Text;
             TextXAlignment = Enum.TextXAlignment.Left;
-            ZIndex = 6;
+            ZIndex = 9;
             Parent = ToggleInner;
         });
 
