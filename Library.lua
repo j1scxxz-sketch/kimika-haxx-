@@ -1461,16 +1461,6 @@ local function CreateBaseButton(Button)
                 Parent = Outer;
             });
 
-            -- Subtle top highlight line (mirrors slider's FillHighlight)
-            Library:Create('Frame', {
-                BackgroundColor3 = Color3.new(1, 1, 1);
-                BackgroundTransparency = 0.72;
-                BorderSizePixel = 0;
-                Size = UDim2.new(1, 0, 0, 1);
-                ZIndex = 8;
-                Parent = Inner;
-            });
-
             -- Bottom shadow layer (mirrors slider's FillShade)
             local ButtonShade = Library:Create('Frame', {
                 BackgroundColor3 = Color3.new(0, 0, 0);
@@ -1956,14 +1946,22 @@ Library:OnHighlight(ToggleRegion, ToggleStroke,
             Library:AddToolTip(Info.Tooltip, ToggleRegion)
         end
 
-function Toggle:Display()
+local ToggleInitialized = false;
+
+        function Toggle:Display()
             local TargetColor = Toggle.Value and Library.AccentColor or Library.MainColor;
             local TargetBorder = Toggle.Value and Library.AccentColorDark or Library.OutlineColor;
 
-            TweenService:Create(ToggleInner, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                BackgroundColor3 = TargetColor,
-                BorderColor3 = TargetBorder,
-            }):Play();
+            if ToggleInitialized then
+                TweenService:Create(ToggleInner, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                    BackgroundColor3 = TargetColor,
+                    BorderColor3 = TargetBorder,
+                }):Play();
+            else
+                ToggleInner.BackgroundColor3 = TargetColor;
+                ToggleInner.BorderColor3 = TargetBorder;
+                ToggleInitialized = true;
+            end;
 
             Library.RegistryMap[ToggleInner].Properties.BackgroundColor3 = Toggle.Value and 'AccentColor' or 'MainColor';
             Library.RegistryMap[ToggleInner].Properties.BorderColor3 = Toggle.Value and 'AccentColorDark' or 'OutlineColor';
