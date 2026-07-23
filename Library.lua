@@ -1169,17 +1169,6 @@ local PickOuter = Library:Create('Frame', {
             Parent = ToggleLabel;
         });
 
-local KeyIcon = Library:Create('ImageLabel', {
-            BackgroundTransparency = 1;
-            AnchorPoint = Vector2.new(1, 0.5);
-            Position = UDim2.new(0, -3, 0.5, 0);
-            Size = UDim2.new(0, 42, 0, 42);
-            Image = 'rbxthumb://type=Asset&id=111580508510087&w=420&h=420';
-            ImageColor3 = Library.FontColor;
-            ZIndex = 6;
-            Parent = PickOuter;
-        });
-
         local PickInner = Library:Create('Frame', {
             BackgroundColor3 = Library.BackgroundColor;
             BorderColor3 = Library.OutlineColor;
@@ -1205,16 +1194,11 @@ local KeyIcon = Library:Create('ImageLabel', {
 
         Library:RemoveFromRegistry(DisplayLabel);
 
-        function KeyPicker:UpdateDisplay()
+function KeyPicker:UpdateDisplay()
             local Color = (KeyPicker.Value ~= 'None') and Library.AccentColor or Library.FontColor;
 
-            KeyIcon.ImageColor3 = Color;
             DisplayLabel.TextColor3 = Color;
         end;
-
-        Library:AddToRegistry(KeyIcon, {
-            ImageColor3 = function() return (KeyPicker.Value ~= 'None') and Library.AccentColor or Library.FontColor end;
-        });
 
         Library:AddToRegistry(DisplayLabel, {
             TextColor3 = function() return (KeyPicker.Value ~= 'None') and Library.AccentColor or Library.FontColor end;
@@ -1313,11 +1297,11 @@ local ModeSelectOuter = Library:Create('Frame', {
 ModeButtons[Mode] = ModeButton;
         end;
 
-        local RemoveLabel = Library:CreateLabel({
+local RemoveLabel = Library:CreateLabel({
             Active = false;
             Size = UDim2.new(1, 0, 0, 15);
             TextSize = 13;
-            Text = 'Remove keybind';
+            Text = 'Remove Key';
             ZIndex = 16;
             Parent = ModeSelectInner;
         });
