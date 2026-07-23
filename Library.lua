@@ -1163,7 +1163,9 @@ Library:AddToRegistry(HueBoxInner, { BackgroundColor3 = 'MainColor'; });
 
 local KeyIcon = Library:Create('ImageLabel', {
             BackgroundTransparency = 1;
-            Size = UDim2.new(0, 18, 0, 18);
+            AnchorPoint = Vector2.new(0, 0.5);
+            Position = UDim2.new(0, 0, 0.5, 0);
+            Size = UDim2.new(0, 26, 0, 26);
             Image = 'rbxthumb://type=Asset&id=131084880237298&w=420&h=420';
             ImageColor3 = Library.FontColor;
             ZIndex = 6;
