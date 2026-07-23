@@ -3409,9 +3409,6 @@ SuffixX = SuffixX + LetterWidth;
 
     Library.SuffixLabels = SuffixLabels;
 
-    Library:ApplyTextStroke(WindowLabelSuffix);
-    Library:AddToRegistry(WindowLabelSuffix, { TextColor3 = 'AccentColor' });
-
     local WindowSubLabel = Library:CreateLabel({
         Position = UDim2.new(0, 0, 0, 22);
         Size = UDim2.new(1, 0, 0, 14);
