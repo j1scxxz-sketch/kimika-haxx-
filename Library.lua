@@ -475,28 +475,10 @@ local DisplayFrame = Library:Create('Frame', {
         -- There was some issue which caused RelativeOffset to be way off
         -- Thus the color picker would never show
 
--- Shadow frame sits behind and offset to simulate depth
-        local PickerShadow = Library:Create('Frame', {
-            Name = 'ColorShadow';
-            BackgroundColor3 = Color3.new(0, 0, 0);
-            BackgroundTransparency = 0.5;
-            BorderSizePixel = 0;
-            Position = UDim2.fromOffset(DisplayFrame.AbsolutePosition.X + 4, DisplayFrame.AbsolutePosition.Y + 22),
-            Size = UDim2.fromOffset(230, Info.Transparency and 271 or 253);
-            Visible = false;
-            ZIndex = 14;
-            Parent = ScreenGui,
-        });
-
-        Library:Create('UICorner', {
-            CornerRadius = UDim.new(0, 6);
-            Parent = PickerShadow;
-        });
-
         local PickerFrameOuter = Library:Create('Frame', {
             Name = 'Color';
-            BackgroundColor3 = Color3.new(0, 0, 0);
-            BorderSizePixel = 0;
+            BackgroundColor3 = Color3.new(1, 1, 1);
+            BorderColor3 = Color3.new(0, 0, 0);
             Position = UDim2.fromOffset(DisplayFrame.AbsolutePosition.X, DisplayFrame.AbsolutePosition.Y + 18),
             Size = UDim2.fromOffset(230, Info.Transparency and 271 or 253);
             Visible = false;
@@ -504,50 +486,25 @@ local DisplayFrame = Library:Create('Frame', {
             Parent = ScreenGui,
         });
 
-        Library:Create('UICorner', {
-            CornerRadius = UDim.new(0, 6);
-            Parent = PickerFrameOuter;
-        });
-
-DisplayFrame:GetPropertyChangedSignal('AbsolutePosition'):Connect(function()
+        DisplayFrame:GetPropertyChangedSignal('AbsolutePosition'):Connect(function()
             PickerFrameOuter.Position = UDim2.fromOffset(DisplayFrame.AbsolutePosition.X, DisplayFrame.AbsolutePosition.Y + 18);
-            PickerShadow.Position = UDim2.fromOffset(DisplayFrame.AbsolutePosition.X + 4, DisplayFrame.AbsolutePosition.Y + 22);
         end)
 
-local PickerFrameInner = Library:Create('Frame', {
+        local PickerFrameInner = Library:Create('Frame', {
             BackgroundColor3 = Library.BackgroundColor;
-            BorderSizePixel = 0;
+            BorderColor3 = Library.OutlineColor;
+            BorderMode = Enum.BorderMode.Inset;
             Size = UDim2.new(1, 0, 1, 0);
             ZIndex = 16;
             Parent = PickerFrameOuter;
         });
 
-        Library:Create('UICorner', {
-            CornerRadius = UDim.new(0, 6);
-            Parent = PickerFrameInner;
-        });
-
-local Highlight = Library:Create('Frame', {
+        local Highlight = Library:Create('Frame', {
             BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
-            Size = UDim2.new(1, 0, 0, 3);
+            Size = UDim2.new(1, 0, 0, 2);
             ZIndex = 17;
             Parent = PickerFrameInner;
-        });
-
-        Library:Create('UICorner', {
-            CornerRadius = UDim.new(0, 6);
-            Parent = Highlight;
-        });
-
-        -- Cut the bottom corners of the highlight so only the top is rounded
-        Library:Create('Frame', {
-            BackgroundColor3 = Library.AccentColor;
-            BorderSizePixel = 0;
-            Position = UDim2.new(0, 0, 0.5, 0);
-            Size = UDim2.new(1, 0, 0.5, 0);
-            ZIndex = 17;
-            Parent = Highlight;
         });
 
         local SatVibMapOuter = Library:Create('Frame', {
@@ -927,7 +884,7 @@ local Highlight = Library:Create('Frame', {
             Func(ColorPicker.Value)
         end;
 
-function ColorPicker:Show()
+        function ColorPicker:Show()
             for Frame, Val in next, Library.OpenedFrames do
                 if Frame.Name == 'Color' then
                     Frame.Visible = false;
@@ -935,13 +892,11 @@ function ColorPicker:Show()
                 end;
             end;
 
-            PickerShadow.Visible = true;
             PickerFrameOuter.Visible = true;
             Library.OpenedFrames[PickerFrameOuter] = true;
         end;
 
         function ColorPicker:Hide()
-            PickerShadow.Visible = false;
             PickerFrameOuter.Visible = false;
             Library.OpenedFrames[PickerFrameOuter] = nil;
         end;
