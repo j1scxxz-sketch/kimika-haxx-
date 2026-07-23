@@ -3096,7 +3096,7 @@ if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(17
         Tabs = {};
     };
 
-    local Outer = Library:Create('Frame', {
+local Outer = Library:Create('Frame', {
         AnchorPoint = Config.AnchorPoint,
         BackgroundColor3 = Color3.new(0, 0, 0);
         BorderSizePixel = 0;
@@ -3107,15 +3107,25 @@ if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(17
         Parent = ScreenGui;
     });
 
+    Library:Create('UICorner', {
+        CornerRadius = UDim.new(0, 6);
+        Parent = Outer;
+    });
+
     Library:MakeDraggable(Outer, 25);
 
-    local Inner = Library:Create('Frame', {
+local Inner = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
         BorderSizePixel = 0;
         Position = UDim2.new(0, 1, 0, 1);
         Size = UDim2.new(1, -2, 1, -2);
         ZIndex = 1;
         Parent = Outer;
+    });
+
+    Library:Create('UICorner', {
+        CornerRadius = UDim.new(0, 6);
+        Parent = Inner;
     });
 
     Library:AddToRegistry(Inner, {
@@ -3180,11 +3190,11 @@ local TitleWidth = select(1, Library:GetTextBounds(Config.Title or '', Library.F
         Parent = Inner;
     });
 
-    local MainSectionOuter = Library:Create('Frame', {
+local MainSectionOuter = Library:Create('Frame', {
         BackgroundColor3 = Library.BackgroundColor;
         BorderColor3 = Library.OutlineColor;
-        Position = UDim2.new(0, 8, 0, HeaderHeight - 2);
-        Size = UDim2.new(1, -16, 1, -(HeaderHeight + 6));
+        Position = UDim2.new(0, 12, 0, HeaderHeight + 2);
+        Size = UDim2.new(1, -24, 1, -(HeaderHeight + 16));
         ZIndex = 1;
         Parent = Inner;
     });
