@@ -2653,11 +2653,11 @@ local function RecalculateListPosition()
             Library:SafeCallback(Dropdown.Changed, Dropdown.Value);
         end;
 
-        local PlusClickDetector = Library:Create('TextButton', {
+local PlusClickDetector = Library:Create('TextButton', {
             BackgroundTransparency = 1;
             Size = UDim2.new(1, 0, 1, 0);
             Text = '';
-            ZIndex = 10;
+            ZIndex = 50;
             Parent = PlusOuter;
         });
 
