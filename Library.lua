@@ -731,7 +731,7 @@ local RgbBoxBase = Library:Create('Frame', {
 
         Library:ApplyTextStroke(RgbBox);
 
-        local TransparencyBoxOuter, TransparencyBoxInner, TransparencyCursor;
+        local TransparencyBoxOuter, TransparencyBoxInner, TransparencyCursor, TransparencyCursorOuter;
         
 if Info.Transparency then 
             TransparencyBoxOuter = Library:Create('Frame', {
@@ -771,18 +771,24 @@ if Info.Transparency then
                 Parent = TransparencyBoxInner;
             });
 
-TransparencyCursor = Library:Create('Frame', { 
-                BackgroundColor3 = Color3.new(1, 1, 1);
+local TransparencyCursorOuter = Library:Create('ImageLabel', {
                 AnchorPoint = Vector2.new(0.5, 0.5);
-                BorderColor3 = Color3.new(0, 0, 0);
-                Size = UDim2.new(0, 3, 1, 4);
+                Position = UDim2.new(0, 0, 0.5, 0);
+                Size = UDim2.new(0, 10, 0, 10);
+                BackgroundTransparency = 1;
+                Image = 'http://www.roblox.com/asset/?id=9619665977';
+                ImageColor3 = Color3.new(0, 0, 0);
                 ZIndex = 21;
                 Parent = TransparencyBoxInner;
             });
 
-            Library:Create('UICorner', {
-                CornerRadius = UDim.new(0, 2);
-                Parent = TransparencyCursor;
+            TransparencyCursor = Library:Create('ImageLabel', {
+                Size = UDim2.new(0, TransparencyCursorOuter.Size.X.Offset - 2, 0, TransparencyCursorOuter.Size.Y.Offset - 2);
+                Position = UDim2.new(0, 1, 0, 1);
+                BackgroundTransparency = 1;
+                Image = 'http://www.roblox.com/asset/?id=9619665977';
+                ZIndex = 22;
+                Parent = TransparencyCursorOuter;
             });
         end;
 
@@ -980,7 +986,7 @@ Library:AddToRegistry(HueBoxInner, { BackgroundColor3 = 'MainColor'; });
 
             if TransparencyBoxInner then
                 TransparencyBoxInner.BackgroundColor3 = ColorPicker.Value;
-                TransparencyCursor.Position = UDim2.new(1 - ColorPicker.Transparency, 0, 0, 0);
+                TransparencyCursorOuter.Position = UDim2.new(1 - ColorPicker.Transparency, 0, 0.5, 0);
             end;
 
             CursorOuter.Position = UDim2.new(ColorPicker.Sat, 0, 1 - ColorPicker.Vib, 0);
