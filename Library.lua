@@ -49,6 +49,8 @@ local Library = {
 local RainbowStep = 0
 local Hue = 0
 
+local TitleWaveStep = 0
+
 table.insert(Library.Signals, RenderStepped:Connect(function(Delta)
     RainbowStep = RainbowStep + Delta
 
@@ -64,6 +66,19 @@ table.insert(Library.Signals, RenderStepped:Connect(function(Delta)
         Library.CurrentRainbowHue = Hue;
         Library.CurrentRainbowColor = Color3.fromHSV(Hue, 0.8, 1);
     end
+
+TitleWaveStep = TitleWaveStep + Delta;
+
+    if Library.SuffixLabels then
+        local Bright = Library:GetBrighterColor(Library.AccentColor);
+
+        for i, Label in next, Library.SuffixLabels do
+            local Offset = math.sin((TitleWaveStep * 3) - (i * 1.1));
+            local Brightness = (Offset + 1) / 2;
+
+            Label.TextColor3 = Library.AccentColor:Lerp(Bright, Brightness);
+        end;
+    end;
 end))
 
 local function GetPlayersString()
@@ -315,6 +330,11 @@ function Library:GetDarkerColor(Color)
     return Color3.fromHSV(H, S, V / 1.5);
 end;
 Library.AccentColorDark = Library:GetDarkerColor(Library.AccentColor);
+
+function Library:GetBrighterColor(Color)
+    local H, S, V = Color3.toHSV(Color);
+    return Color3.fromHSV(H, S * 0.6, math.clamp(V * 1.35, 0, 1));
+end;
 
 function Library:AddToRegistry(Instance, Properties, IsHud)
     local Idx = #Library.Registry + 1;
@@ -3334,14 +3354,23 @@ local Inner = Library:Create('Frame', {
     local HeaderHeight = HasSubtitle and 44 or 28;
 
 local TitleWidth = select(1, Library:GetTextBounds(Config.Title or '', Library.Font, 15));
-    local SuffixWidth = select(1, Library:GetTextBounds('.haxx', Library.Font, 15));
 
-    local IconSize, IconGap = 20, 6;
-    local TextBlockWidth = TitleWidth + SuffixWidth;
-    local TextBlockX = math.floor((Config.Size.X.Offset - TextBlockWidth) / 2);
+    local TitleImage = Library:Create('ImageLabel', {
+        BackgroundTransparency = 1;
+        Image = 'rbxthumb://type=Asset&id=101069633565053&w=420&h=420';
+        ImageColor3 = Library.AccentColor;
+        Position = UDim2.new(0, 6, 0, HasSubtitle and 0 or 1);
+        Size = UDim2.new(0, 32, 0, 32);
+        ZIndex = 1;
+        Parent = Inner;
+    });
+
+    Library:AddToRegistry(TitleImage, {
+        ImageColor3 = 'AccentColor';
+    });
 
     local WindowLabel = Library:CreateLabel({
-        Position = UDim2.new(0, TextBlockX, 0, HasSubtitle and 6 or 7);
+        Position = UDim2.new(0, 40, 0, HasSubtitle and 6 or 7);
         Size = UDim2.new(0, TitleWidth, 0, 16);
         Text = Config.Title or '';
         TextSize = 15;
@@ -3350,34 +3379,35 @@ local TitleWidth = select(1, Library:GetTextBounds(Config.Title or '', Library.F
         Parent = Inner;
     });
 
-    local WindowLabelSuffix = Library:Create('TextLabel', {
-        BackgroundTransparency = 1;
-        Font = Library.Font;
-        TextColor3 = Library.AccentColor;
-        TextSize = 15;
-        TextStrokeTransparency = 0;
-        Position = UDim2.new(0, TextBlockX + TitleWidth, 0, HasSubtitle and 6 or 7);
-        Size = UDim2.new(0, SuffixWidth, 0, 16);
-        Text = '.haxx';
-        TextXAlignment = Enum.TextXAlignment.Left;
-        ZIndex = 1;
-        Parent = Inner;
-    });
+    local SuffixLetters = { '.', 'h', 'a', 'x', 'x' };
+    local SuffixLabels = {};
+    local SuffixX = 40 + TitleWidth;
 
-    local TitleImage = Library:Create('ImageLabel', {
-        BackgroundTransparency = 1;
-        AnchorPoint = Vector2.new(1, 0.5);
-        Image = 'rbxthumb://type=Asset&id=101069633565053&w=420&h=420';
-        ImageColor3 = Library.AccentColor;
-        Position = UDim2.new(0, TextBlockX - IconGap, 0.5, HasSubtitle and -6 or 0);
-        Size = UDim2.new(0, IconSize, 0, IconSize);
-        ZIndex = 1;
-        Parent = Inner;
-    });
+    for i, Letter in next, SuffixLetters do
+        local LetterWidth = select(1, Library:GetTextBounds(Letter, Library.Font, 15));
 
-    Library:AddToRegistry(TitleImage, {
-        ImageColor3 = 'AccentColor';
-    });
+        local LetterLabel = Library:Create('TextLabel', {
+            BackgroundTransparency = 1;
+            Font = Library.Font;
+            TextColor3 = Library.AccentColor;
+            TextSize = 15;
+            TextStrokeTransparency = 0;
+            Position = UDim2.new(0, SuffixX, 0, HasSubtitle and 6 or 7);
+            Size = UDim2.new(0, LetterWidth, 0, 16);
+            Text = Letter;
+            TextXAlignment = Enum.TextXAlignment.Left;
+            ZIndex = 1;
+            Parent = Inner;
+        });
+
+        Library:ApplyTextStroke(LetterLabel);
+
+SuffixX = SuffixX + LetterWidth;
+
+        table.insert(SuffixLabels, LetterLabel);
+    end;
+
+    Library.SuffixLabels = SuffixLabels;
 
     Library:ApplyTextStroke(WindowLabelSuffix);
     Library:AddToRegistry(WindowLabelSuffix, { TextColor3 = 'AccentColor' });
