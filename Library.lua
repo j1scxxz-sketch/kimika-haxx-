@@ -3348,36 +3348,43 @@ local KeybindLabelWidth = select(1, Library:GetTextBounds('Keybinds', Library.Fo
 
 local KeybindTitleLetters = { 'K', 'e', 'y', 'b', 'i', 'n', 'd', 's' };
     local KeybindTitleLabels = {};
-    local KeybindTitleWidths = {};
-    local KeybindTitleTotalWidth = 0;
+
+    local KeybindTitleHolder = Library:Create('Frame', {
+        BackgroundTransparency = 1;
+        AnchorPoint = Vector2.new(0.5, 0);
+        AutomaticSize = Enum.AutomaticSize.X;
+        Position = UDim2.new(0.5, 0, 0, 0);
+        Size = UDim2.new(0, 0, 0, 16);
+        ZIndex = 104;
+        Parent = KeybindInner;
+    });
+
+    Library:Create('UIListLayout', {
+        Padding = UDim.new(0, 0);
+        FillDirection = Enum.FillDirection.Horizontal;
+        SortOrder = Enum.SortOrder.LayoutOrder;
+        VerticalAlignment = Enum.VerticalAlignment.Center;
+        Parent = KeybindTitleHolder;
+    });
 
     for i, Letter in next, KeybindTitleLetters do
         local LetterWidth = select(1, Library:GetTextBounds(Letter, Library.Font, 14));
-        KeybindTitleWidths[i] = LetterWidth;
-        KeybindTitleTotalWidth = KeybindTitleTotalWidth + LetterWidth;
-    end;
 
-    local KeybindTitleOffset = -(KeybindTitleTotalWidth / 2);
-
-    for i, Letter in next, KeybindTitleLetters do
         local LetterLabel = Library:Create('TextLabel', {
             BackgroundTransparency = 1;
             Font = Library.Font;
             TextColor3 = Library.AccentColor;
             TextSize = 14;
             TextStrokeTransparency = 0;
-            AnchorPoint = Vector2.new(0, 0);
-            Position = UDim2.new(0.5, KeybindTitleOffset, 0, 0);
-            Size = UDim2.new(0, KeybindTitleWidths[i], 0, 16);
+            Size = UDim2.new(0, LetterWidth, 1, 0);
             Text = Letter;
-            TextXAlignment = Enum.TextXAlignment.Left;
+            TextXAlignment = Enum.TextXAlignment.Center;
+            LayoutOrder = i;
             ZIndex = 104;
-            Parent = KeybindInner;
+            Parent = KeybindTitleHolder;
         });
 
         Library:ApplyTextStroke(LetterLabel);
-
-        KeybindTitleOffset = KeybindTitleOffset + KeybindTitleWidths[i];
 
         table.insert(KeybindTitleLabels, LetterLabel);
     end;
