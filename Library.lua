@@ -2326,7 +2326,7 @@ local ToggleInitialized = false;
         assert(Info.Max, 'AddSlider: Missing maximum value.');
         assert(Info.Rounding, 'AddSlider: Missing rounding value.');
 
-        local Slider = {
+local Slider = {
             Value = Info.Default;
             Min = Info.Min;
             Max = Info.Max;
@@ -2335,6 +2335,8 @@ local ToggleInitialized = false;
             Type = 'Slider';
             Callback = Info.Callback or function(Value) end;
         };
+
+        local Step = Info.Step or (10 ^ -Info.Rounding);
 
         local Groupbox = self;
         local Container = Groupbox.Container;
@@ -2353,12 +2355,61 @@ local ToggleInitialized = false;
             Groupbox:AddBlank(3);
         end
 
-        local SliderOuter = Library:Create('Frame', {
-            BackgroundColor3 = Color3.new(0, 0, 0);
-            BorderColor3 = Color3.new(0, 0, 0);
+local SliderRow = Library:Create('Frame', {
+            BackgroundTransparency = 1;
             Size = UDim2.new(1, -4, 0, 13);
             ZIndex = 5;
             Parent = Container;
+        });
+
+        local SliderMinusButton = Library:Create('TextButton', {
+            BackgroundTransparency = 1;
+            Position = UDim2.new(0, 0, 0, 0);
+            Size = UDim2.new(0, 14, 1, 0);
+            Font = Library.Font;
+            Text = '-';
+            TextColor3 = Library.FontColor;
+            TextSize = 16;
+            TextStrokeTransparency = 0;
+            ZIndex = 6;
+            Parent = SliderRow;
+        });
+
+        Library:ApplyTextStroke(SliderMinusButton);
+        Library:AddToRegistry(SliderMinusButton, { TextColor3 = 'FontColor' });
+        Library:OnHighlight(SliderMinusButton, SliderMinusButton,
+            { TextColor3 = 'AccentColor' },
+            { TextColor3 = 'FontColor' }
+        );
+
+        local SliderPlusButton = Library:Create('TextButton', {
+            BackgroundTransparency = 1;
+            AnchorPoint = Vector2.new(1, 0);
+            Position = UDim2.new(1, 0, 0, 0);
+            Size = UDim2.new(0, 14, 1, 0);
+            Font = Library.Font;
+            Text = '+';
+            TextColor3 = Library.FontColor;
+            TextSize = 16;
+            TextStrokeTransparency = 0;
+            ZIndex = 6;
+            Parent = SliderRow;
+        });
+
+        Library:ApplyTextStroke(SliderPlusButton);
+        Library:AddToRegistry(SliderPlusButton, { TextColor3 = 'FontColor' });
+        Library:OnHighlight(SliderPlusButton, SliderPlusButton,
+            { TextColor3 = 'AccentColor' },
+            { TextColor3 = 'FontColor' }
+        );
+
+        local SliderOuter = Library:Create('Frame', {
+            BackgroundColor3 = Color3.new(0, 0, 0);
+            BorderColor3 = Color3.new(0, 0, 0);
+            Position = UDim2.new(0, 17, 0, 0);
+            Size = UDim2.new(1, -34, 1, 0);
+            ZIndex = 5;
+            Parent = SliderRow;
         });
 
         Library:AddToRegistry(SliderOuter, {
@@ -2520,7 +2571,21 @@ function Slider:Display()
             Library:SafeCallback(Slider.Changed, Slider.Value);
         end;
 
-local SliderDragging = false;
+SliderMinusButton.InputBegan:Connect(function(Input)
+            if Input.UserInputType == Enum.UserInputType.MouseButton1 and not Library:MouseIsOverOpenedFrame() then
+                Slider:SetValue(Slider.Value - Step);
+                Library:AttemptSave();
+            end;
+        end);
+
+        SliderPlusButton.InputBegan:Connect(function(Input)
+            if Input.UserInputType == Enum.UserInputType.MouseButton1 and not Library:MouseIsOverOpenedFrame() then
+                Slider:SetValue(Slider.Value + Step);
+                Library:AttemptSave();
+            end;
+        end);
+
+        local SliderDragging = false;
 
         SliderInner.InputBegan:Connect(function(Input)
             if Input.UserInputType == Enum.UserInputType.MouseButton1 and not Library:MouseIsOverOpenedFrame() then
