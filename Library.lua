@@ -1434,27 +1434,23 @@ function KeyPicker:IsGatedByToggle()
             return ParentObj.Type == 'Toggle' and not ParentObj.Value;
         end;
 
-        function KeyPicker:Update()
+function KeyPicker:Update()
             if Info.NoUI then
                 return;
             end;
 
-            if KeyPicker:IsGatedByToggle() then
-                ContainerLabel.Visible = false;
-            else
-                local State = KeyPicker:GetState();
+            local State = KeyPicker:GetState();
 
-                ContainerLabel.Text = string.format('[%s] %s (%s)', KeyPicker.Value, Info.Text, KeyPicker.Mode);
-                ContainerLabel.Visible = true;
+            ContainerLabel.Text = string.format('[%s] %s (%s)', KeyPicker.Value, Info.Text, KeyPicker.Mode);
+            ContainerLabel.Visible = true;
 
-                local TargetColor = State and Library.AccentColor or Library.FontColor;
+            local TargetColor = State and Library.AccentColor or Library.FontColor;
 
-                TweenService:Create(ContainerLabel, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                    TextColor3 = TargetColor;
-                }):Play();
+            TweenService:Create(ContainerLabel, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                TextColor3 = TargetColor;
+            }):Play();
 
-                Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and 'AccentColor' or 'FontColor';
-            end;
+            Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and 'AccentColor' or 'FontColor';
 
             local YSize = 0
             local XSize = 0
