@@ -3140,25 +3140,36 @@ do
     });
 
     local WatermarkOuter = Library:Create('Frame', {
-        BorderColor3 = Color3.new(0, 0, 0);
+        BackgroundColor3 = Color3.new(0, 0, 0);
+        BorderSizePixel = 0;
         Position = UDim2.new(0, 100, 0, -25);
-        Size = UDim2.new(0, 213, 0, 20);
+        Size = UDim2.new(0, 213, 0, 24);
         ZIndex = 200;
         Visible = false;
         Parent = ScreenGui;
     });
 
+    Library:Create('UICorner', {
+        CornerRadius = UDim.new(0, 6);
+        Parent = WatermarkOuter;
+    });
+
     local WatermarkInner = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
-        BorderColor3 = Library.AccentColor;
-        BorderMode = Enum.BorderMode.Inset;
-        Size = UDim2.new(1, 0, 1, 0);
+        BorderSizePixel = 0;
+        Size = UDim2.new(1, -2, 1, -2);
+        Position = UDim2.new(0, 1, 0, 1);
         ZIndex = 201;
         Parent = WatermarkOuter;
     });
 
+    Library:Create('UICorner', {
+        CornerRadius = UDim.new(0, 5);
+        Parent = WatermarkInner;
+    });
+
     Library:AddToRegistry(WatermarkInner, {
-        BorderColor3 = 'AccentColor';
+        BackgroundColor3 = 'MainColor';
     });
 
     local InnerFrame = Library:Create('Frame', {
@@ -3193,8 +3204,8 @@ do
         BackgroundTransparency = 1;
         Image = 'rbxthumb://type=Asset&id=101069633565053&w=420&h=420';
         ImageColor3 = Library.AccentColor;
-        Position = UDim2.new(0, 4, 0, 2);
-        Size = UDim2.new(0, 14, 0, 14);
+        Position = UDim2.new(0, 5, 0, 3);
+        Size = UDim2.new(0, 18, 0, 18);
         ZIndex = 203;
         Parent = InnerFrame;
     });
@@ -3205,7 +3216,7 @@ do
 
     -- Title text (dynamic, set via SetWatermark)
     local WatermarkLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 21, 0, 0);
+        Position = UDim2.new(0, 26, 0, 0);
         Size = UDim2.new(0, 0, 1, 0);
         TextSize = 13;
         TextXAlignment = Enum.TextXAlignment.Left;
@@ -3213,10 +3224,9 @@ do
         Parent = InnerFrame;
     });
 
-    -- .haxx suffix with wave animation
+    -- .haxx suffix with wave animation (positioned AFTER the name text)
     local WatermarkSuffixLetters = { '.', 'h', 'a', 'x', 'x' };
     local WatermarkSuffixLabels = {};
-    local WatermarkSuffixX = 21; -- will be updated dynamically
 
     for i, Letter in next, WatermarkSuffixLetters do
         local LetterLabel = Library:Create('TextLabel', {
@@ -3323,8 +3333,9 @@ function Library:SetWatermark(Text)
     local X, Y = Library:GetTextBounds(Text, Library.Font, 13);
     local SuffixTotalWidth = 0;
 
-    -- Position and measure suffix letters
-    local SuffixX = 21 + X + 2; -- logo (21) + title width + padding
+    -- Position suffix letters AFTER the name text
+    -- logo (26px) + name width + small gap
+    local SuffixX = 26 + X + 2;
     for i, Letter in next, { '.', 'h', 'a', 'x', 'x' } do
         local LetterWidth = select(1, Library:GetTextBounds(Letter, Library.Font, 13));
         local Label = Library.WatermarkSuffixLabels[i];
@@ -3335,8 +3346,8 @@ function Library:SetWatermark(Text)
     end;
 
     -- Resize watermark to fit logo + text + suffix + padding
-    local TotalWidth = 21 + X + 2 + SuffixTotalWidth + 8;
-    Library.Watermark.Size = UDim2.new(0, TotalWidth, 0, 20);
+    local TotalWidth = 26 + X + 2 + SuffixTotalWidth + 10;
+    Library.Watermark.Size = UDim2.new(0, TotalWidth, 0, 24);
     Library:SetWatermarkVisibility(true)
 
     Library.WatermarkText.Text = Text;
