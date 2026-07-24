@@ -3259,9 +3259,8 @@ local KeybindLabelWidth = select(1, Library:GetTextBounds('Keybinds', Library.Fo
 
     local KeybindOuter = Library:Create('Frame', {
         AnchorPoint = Vector2.new(0, 0.5);
-        BackgroundColor3 = Library.BackgroundColor;
-        BorderColor3 = Library.OutlineColor;
-        BorderMode = Enum.BorderMode.Inset;
+        BackgroundColor3 = Color3.new(0, 0, 0);
+        BorderSizePixel = 0;
         Position = UDim2.new(0, 10, 0.5, 0);
         Size = UDim2.new(0, 210, 0, 20);
         Visible = false;
@@ -3269,10 +3268,10 @@ local KeybindLabelWidth = select(1, Library:GetTextBounds('Keybinds', Library.Fo
         Parent = ScreenGui;
     });
 
-    Library:AddToRegistry(KeybindOuter, {
-        BackgroundColor3 = 'BackgroundColor';
-        BorderColor3 = 'OutlineColor';
-    }, true);
+    Library:Create('UICorner', {
+        CornerRadius = UDim.new(0, 6);
+        Parent = KeybindOuter;
+    });
 
     local KeybindInner = Library:Create('Frame', {
         BackgroundColor3 = Library.BackgroundColor;
@@ -3281,6 +3280,11 @@ local KeybindLabelWidth = select(1, Library:GetTextBounds('Keybinds', Library.Fo
         Position = UDim2.new(0, 1, 0, 1);
         ZIndex = 101;
         Parent = KeybindOuter;
+    });
+
+    Library:Create('UICorner', {
+        CornerRadius = UDim.new(0, 5);
+        Parent = KeybindInner;
     });
 
     Library:AddToRegistry(KeybindInner, {
@@ -3314,9 +3318,8 @@ local KeybindLabelWidth = select(1, Library:GetTextBounds('Keybinds', Library.Fo
     }, true);
 
     local KeybindLabel = Library:CreateLabel({
-        AnchorPoint = Vector2.new(0.5, 0);
-        Position = UDim2.new(0.5, 0, 0, 0);
-        Size = UDim2.new(0, KeybindLabelWidth, 0, 16);
+        Size = UDim2.new(1, 0, 0, 16);
+        Position = UDim2.new(0, 0, 0, 0);
         TextSize = 14;
         Text = 'Keybinds';
         TextXAlignment = Enum.TextXAlignment.Center;
@@ -3326,8 +3329,8 @@ local KeybindLabelWidth = select(1, Library:GetTextBounds('Keybinds', Library.Fo
 
     local KeybindContainer = Library:Create('Frame', {
         BackgroundTransparency = 1;
-        Size = UDim2.new(1, -6, 1, -18);
-        Position = UDim2.new(0, 3, 0, 16);
+        Size = UDim2.new(1, -10, 1, -22);
+        Position = UDim2.new(0, 5, 0, 18);
         ZIndex = 1;
         Parent = KeybindInner;
     });
