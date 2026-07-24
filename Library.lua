@@ -79,6 +79,17 @@ if Library.SuffixLabels then
             Label.TextColor3 = Library.AccentColor:Lerp(Bright, Brightness);
         end;
     end;
+
+    if Library.WatermarkSuffixLabels then
+        local Bright = Library:GetBrighterColor(Library.AccentColor);
+
+        for i, Label in next, Library.WatermarkSuffixLabels do
+            local Offset = math.sin((TitleWaveStep * 5) - (i * 1.4));
+            local Brightness = math.clamp(((Offset + 1) / 2) ^ 0.6, 0, 1);
+
+            Label.TextColor3 = Library.AccentColor:Lerp(Bright, Brightness);
+        end;
+    end;
 end))
 
 local function GetPlayersString()
@@ -3177,17 +3188,59 @@ do
         end
     });
 
+    -- Logo image (same as main UI)
+    local WatermarkLogo = Library:Create('ImageLabel', {
+        BackgroundTransparency = 1;
+        Image = 'rbxthumb://type=Asset&id=101069633565053&w=420&h=420';
+        ImageColor3 = Library.AccentColor;
+        Position = UDim2.new(0, 4, 0, 2);
+        Size = UDim2.new(0, 14, 0, 14);
+        ZIndex = 203;
+        Parent = InnerFrame;
+    });
+
+    Library:AddToRegistry(WatermarkLogo, {
+        ImageColor3 = 'AccentColor';
+    });
+
+    -- Title text (dynamic, set via SetWatermark)
     local WatermarkLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 5, 0, 0);
-        Size = UDim2.new(1, -4, 1, 0);
-        TextSize = 14;
+        Position = UDim2.new(0, 21, 0, 0);
+        Size = UDim2.new(0, 0, 1, 0);
+        TextSize = 13;
         TextXAlignment = Enum.TextXAlignment.Left;
         ZIndex = 203;
         Parent = InnerFrame;
     });
 
+    -- .haxx suffix with wave animation
+    local WatermarkSuffixLetters = { '.', 'h', 'a', 'x', 'x' };
+    local WatermarkSuffixLabels = {};
+    local WatermarkSuffixX = 21; -- will be updated dynamically
+
+    for i, Letter in next, WatermarkSuffixLetters do
+        local LetterLabel = Library:Create('TextLabel', {
+            BackgroundTransparency = 1;
+            Font = Library.Font;
+            TextColor3 = Library.AccentColor;
+            TextSize = 13;
+            TextStrokeTransparency = 0;
+            Size = UDim2.new(0, 0, 1, 0);
+            Text = Letter;
+            TextXAlignment = Enum.TextXAlignment.Left;
+            ZIndex = 203;
+            Parent = InnerFrame;
+        });
+
+        Library:ApplyTextStroke(LetterLabel);
+        table.insert(WatermarkSuffixLabels, LetterLabel);
+    end;
+
+    Library.WatermarkSuffixLabels = WatermarkSuffixLabels;
+
     Library.Watermark = WatermarkOuter;
     Library.WatermarkText = WatermarkLabel;
+    Library.WatermarkLogo = WatermarkLogo;
     Library:MakeDraggable(Library.Watermark);
 
 
@@ -3267,8 +3320,23 @@ function Library:SetWatermarkVisibility(Bool)
 end;
 
 function Library:SetWatermark(Text)
-    local X, Y = Library:GetTextBounds(Text, Library.Font, 14);
-    Library.Watermark.Size = UDim2.new(0, X + 15, 0, (Y * 1.5) + 3);
+    local X, Y = Library:GetTextBounds(Text, Library.Font, 13);
+    local SuffixTotalWidth = 0;
+
+    -- Position and measure suffix letters
+    local SuffixX = 21 + X + 2; -- logo (21) + title width + padding
+    for i, Letter in next, { '.', 'h', 'a', 'x', 'x' } do
+        local LetterWidth = select(1, Library:GetTextBounds(Letter, Library.Font, 13));
+        local Label = Library.WatermarkSuffixLabels[i];
+        Label.Position = UDim2.new(0, SuffixX, 0, 0);
+        Label.Size = UDim2.new(0, LetterWidth, 1, 0);
+        SuffixX = SuffixX + LetterWidth;
+        SuffixTotalWidth = SuffixTotalWidth + LetterWidth;
+    end;
+
+    -- Resize watermark to fit logo + text + suffix + padding
+    local TotalWidth = 21 + X + 2 + SuffixTotalWidth + 8;
+    Library.Watermark.Size = UDim2.new(0, TotalWidth, 0, 20);
     Library:SetWatermarkVisibility(true)
 
     Library.WatermarkText.Text = Text;
