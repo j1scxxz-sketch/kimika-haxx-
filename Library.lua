@@ -3201,13 +3201,31 @@ do
         Parent = InnerFrame;
     });
 
-    Library:AddToRegistry(Gradient, {
+Library:AddToRegistry(Gradient, {
         Color = function()
             return ColorSequence.new({
                 ColorSequenceKeypoint.new(0, Library:GetDarkerColor(Library.MainColor)),
                 ColorSequenceKeypoint.new(1, Library.MainColor),
             });
         end
+    });
+
+    local WatermarkShade = Library:Create('Frame', {
+        BackgroundColor3 = Color3.new(0, 0, 0);
+        BorderSizePixel = 0;
+        Size = UDim2.new(1, 0, 1, 0);
+        ZIndex = 204;
+        Parent = InnerFrame;
+    });
+
+    Library:Create('UIGradient', {
+        Color = ColorSequence.new(Color3.new(0, 0, 0));
+        Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 1);
+            NumberSequenceKeypoint.new(1, 0.65);
+        });
+        Rotation = 90;
+        Parent = WatermarkShade;
     });
 
     -- Logo image (same as main UI)
@@ -3365,6 +3383,26 @@ local KeybindTitleLetters = { 'K', 'e', 'y', 'b', 'i', 'n', 'd', 's' };
     end;
 
     Library.KeybindTitleLabels = KeybindTitleLabels;
+
+    Library.KeybindTitleLabels = KeybindTitleLabels;
+
+    local KeybindShade = Library:Create('Frame', {
+        BackgroundColor3 = Color3.new(0, 0, 0);
+        BorderSizePixel = 0;
+        Size = UDim2.new(1, 0, 1, 0);
+        ZIndex = 111;
+        Parent = KeybindInner;
+    });
+
+    Library:Create('UIGradient', {
+        Color = ColorSequence.new(Color3.new(0, 0, 0));
+        Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 1);
+            NumberSequenceKeypoint.new(1, 0.65);
+        });
+        Rotation = 90;
+        Parent = KeybindShade;
+    });
 
     local KeybindContainer = Library:Create('Frame', {
         BackgroundTransparency = 1;
