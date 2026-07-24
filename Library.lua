@@ -176,6 +176,60 @@ function Library:CreateLabel(Properties, IsHud)
     return Library:Create(_Instance, Properties);
 end;
 
+function Library:CreateDragOutline()
+    local Outline = Library:Create('Frame', {
+        Name = 'DragOutline',
+        BackgroundTransparency = 1;
+        BorderSizePixel = 0;
+        ZIndex = 1000;
+        Visible = false;
+        Parent = ScreenGui;
+    });
+
+    local Top = Library:Create('Frame', {
+        BackgroundColor3 = Library.AccentColor;
+        BorderSizePixel = 0;
+        Size = UDim2.new(1, 0, 0, 1);
+        Position = UDim2.new(0, 0, 0, 0);
+        ZIndex = 1001;
+        Parent = Outline;
+    });
+
+    local Bottom = Library:Create('Frame', {
+        BackgroundColor3 = Library.AccentColor;
+        BorderSizePixel = 0;
+        Size = UDim2.new(1, 0, 0, 1);
+        Position = UDim2.new(0, 0, 1, -1);
+        ZIndex = 1001;
+        Parent = Outline;
+    });
+
+    local Left = Library:Create('Frame', {
+        BackgroundColor3 = Library.AccentColor;
+        BorderSizePixel = 0;
+        Size = UDim2.new(0, 1, 1, 0);
+        Position = UDim2.new(0, 0, 0, 0);
+        ZIndex = 1001;
+        Parent = Outline;
+    });
+
+    local Right = Library:Create('Frame', {
+        BackgroundColor3 = Library.AccentColor;
+        BorderSizePixel = 0;
+        Size = UDim2.new(0, 1, 1, 0);
+        Position = UDim2.new(1, -1, 0, 0);
+        ZIndex = 1001;
+        Parent = Outline;
+    });
+
+    Library:AddToRegistry(Top, { BackgroundColor3 = 'AccentColor' });
+    Library:AddToRegistry(Bottom, { BackgroundColor3 = 'AccentColor' });
+    Library:AddToRegistry(Left, { BackgroundColor3 = 'AccentColor' });
+    Library:AddToRegistry(Right, { BackgroundColor3 = 'AccentColor' });
+
+    return Outline;
+end;
+
 function Library:MakeDraggable(Instance, Cutoff)
     Instance.Active = true;
 
