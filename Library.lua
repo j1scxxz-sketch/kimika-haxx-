@@ -3255,9 +3255,10 @@ do
 
 
 
-    local KeybindOuter = Library:Create('Frame', {
+local KeybindOuter = Library:Create('Frame', {
         AnchorPoint = Vector2.new(0, 0.5);
-        BorderColor3 = Color3.new(0, 0, 0);
+        BackgroundColor3 = Color3.new(0, 0, 0);
+        BorderSizePixel = 0;
         Position = UDim2.new(0, 10, 0.5, 0);
         Size = UDim2.new(0, 210, 0, 20);
         Visible = false;
@@ -3265,26 +3266,67 @@ do
         Parent = ScreenGui;
     });
 
+    Library:Create('UICorner', {
+        CornerRadius = UDim.new(0, 6);
+        Parent = KeybindOuter;
+    });
+
     local KeybindInner = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
-        BorderColor3 = Library.OutlineColor;
-        BorderMode = Enum.BorderMode.Inset;
-        Size = UDim2.new(1, 0, 1, 0);
+        BorderSizePixel = 0;
+        Size = UDim2.new(1, -2, 1, -2);
+        Position = UDim2.new(0, 1, 0, 1);
         ZIndex = 101;
         Parent = KeybindOuter;
     });
 
+    Library:Create('UICorner', {
+        CornerRadius = UDim.new(0, 5);
+        Parent = KeybindInner;
+    });
+
     Library:AddToRegistry(KeybindInner, {
         BackgroundColor3 = 'MainColor';
-        BorderColor3 = 'OutlineColor';
     }, true);
+
+    local KeybindGradientFrame = Library:Create('Frame', {
+        BackgroundColor3 = Color3.new(1, 1, 1);
+        BorderSizePixel = 0;
+        Position = UDim2.new(0, 1, 0, 1);
+        Size = UDim2.new(1, -2, 1, -2);
+        ZIndex = 101;
+        Parent = KeybindInner;
+    });
+
+    Library:Create('UICorner', {
+        CornerRadius = UDim.new(0, 5);
+        Parent = KeybindGradientFrame;
+    });
+
+    local KeybindGradient = Library:Create('UIGradient', {
+        Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Library:GetDarkerColor(Library.MainColor)),
+            ColorSequenceKeypoint.new(1, Library.MainColor),
+        });
+        Rotation = -90;
+        Parent = KeybindGradientFrame;
+    });
+
+    Library:AddToRegistry(KeybindGradient, {
+        Color = function()
+            return ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Library:GetDarkerColor(Library.MainColor)),
+                ColorSequenceKeypoint.new(1, Library.MainColor),
+            });
+        end
+    });
 
     local ColorFrame = Library:Create('Frame', {
         BackgroundColor3 = Library.AccentColor;
         BorderSizePixel = 0;
         Size = UDim2.new(1, 0, 0, 2);
         ZIndex = 102;
-        Parent = KeybindInner;
+        Parent = KeybindGradientFrame;
     });
 
     Library:AddToRegistry(ColorFrame, {
@@ -3298,7 +3340,7 @@ do
 
         Text = 'Keybinds';
         ZIndex = 104;
-        Parent = KeybindInner;
+        Parent = KeybindGradientFrame;
     });
 
     local KeybindContainer = Library:Create('Frame', {
@@ -3306,7 +3348,7 @@ do
         Size = UDim2.new(1, 0, 1, -20);
         Position = UDim2.new(0, 0, 0, 20);
         ZIndex = 1;
-        Parent = KeybindInner;
+        Parent = KeybindGradientFrame;
     });
 
     Library:Create('UIListLayout', {
