@@ -1471,11 +1471,7 @@ function KeyPicker:IsGatedByToggle()
             Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 10, 210), 0, YSize + 23)
         end;
 
-function KeyPicker:GetState()
-            if KeyPicker:IsGatedByToggle() then
-                return false;
-            end;
-
+        function KeyPicker:GetState()
             if KeyPicker.Mode == 'Always' then
                 return true;
             elseif KeyPicker.Mode == 'Hold' then
@@ -1584,9 +1580,9 @@ Break = true;
             end;
         end);
 
-Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
+        Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
             if (not Picking) then
-                if KeyPicker.Mode == 'Toggle' and not KeyPicker:IsGatedByToggle() then
+                if KeyPicker.Mode == 'Toggle' then
                     local Key = KeyPicker.Value;
 
                     if Key == 'MB1' or Key == 'MB2' then
@@ -2281,18 +2277,15 @@ local ToggleInitialized = false;
             Func(Toggle.Value);
         end;
 
-function Toggle:SetValue(Bool)
+        function Toggle:SetValue(Bool)
             Bool = (not not Bool);
 
             Toggle.Value = Bool;
             Toggle:Display();
 
             for _, Addon in next, Toggle.Addons do
-                if Addon.Type == 'KeyPicker' then
-                    if Addon.SyncToggleState then
-                        Addon.Toggled = Bool
-                    end
-
+                if Addon.Type == 'KeyPicker' and Addon.SyncToggleState then
+                    Addon.Toggled = Bool
                     Addon:Update()
                 end
             end
