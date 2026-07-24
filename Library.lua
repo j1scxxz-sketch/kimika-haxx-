@@ -3518,6 +3518,48 @@ function Library:SetWatermarkVisibility(Bool)
     Library.Watermark.Visible = Bool;
 end;
 
+function Library:SetKeybindListVisibility(Bool)
+    Library.KeybindFrame.Visible = Bool;
+end;
+
+Library.WatermarkOptions = {
+    Name = true;
+    FPS = true;
+    Ping = true;
+    Username = false;
+    DisplayName = false;
+};
+
+function Library:SetWatermarkOptions(Options)
+    Library.WatermarkOptions = Options or {};
+end;
+
+function Library:UpdateWatermark(Data)
+    local Parts = {};
+
+    if Library.WatermarkOptions.Name and Data.Name then
+        table.insert(Parts, Data.Name);
+    end;
+
+    if Library.WatermarkOptions.FPS and Data.FPS then
+        table.insert(Parts, Data.FPS .. ' fps');
+    end;
+
+    if Library.WatermarkOptions.Ping and Data.Ping then
+        table.insert(Parts, Data.Ping .. ' ms');
+    end;
+
+    if Library.WatermarkOptions.Username and Data.Username then
+        table.insert(Parts, '@' .. Data.Username);
+    end;
+
+    if Library.WatermarkOptions.DisplayName and Data.DisplayName then
+        table.insert(Parts, Data.DisplayName);
+    end;
+
+    Library:SetWatermark(table.concat(Parts, ' | '));
+end;
+
 function Library:SetWatermark(Text)
     local X, Y = Library:GetTextBounds(Text, Library.Font, 13);
     local SuffixTotalWidth = 0;
