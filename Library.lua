@@ -80,10 +80,21 @@ if Library.SuffixLabels then
         end;
     end;
 
-    if Library.WatermarkSuffixLabels then
+if Library.WatermarkSuffixLabels then
         local Bright = Library:GetBrighterColor(Library.AccentColor);
 
         for i, Label in next, Library.WatermarkSuffixLabels do
+            local Offset = math.sin((TitleWaveStep * 5) - (i * 1.4));
+            local Brightness = math.clamp(((Offset + 1) / 2) ^ 0.6, 0, 1);
+
+            Label.TextColor3 = Library.AccentColor:Lerp(Bright, Brightness);
+        end;
+    end;
+
+    if Library.KeybindTitleLabels then
+        local Bright = Library:GetBrighterColor(Library.AccentColor);
+
+        for i, Label in next, Library.KeybindTitleLabels do
             local Offset = math.sin((TitleWaveStep * 5) - (i * 1.4));
             local Brightness = math.clamp(((Offset + 1) / 2) ^ 0.6, 0, 1);
 
@@ -3317,15 +3328,43 @@ local KeybindLabelWidth = select(1, Library:GetTextBounds('Keybinds', Library.Fo
         BackgroundColor3 = 'AccentColor';
     }, true);
 
-    local KeybindLabel = Library:CreateLabel({
-        Size = UDim2.new(1, 0, 0, 16);
-        Position = UDim2.new(0, 0, 0, 0);
-        TextSize = 14;
-        Text = 'Keybinds';
-        TextXAlignment = Enum.TextXAlignment.Center;
-        ZIndex = 104;
-        Parent = KeybindInner;
-    }, true);
+local KeybindTitleLetters = { 'K', 'e', 'y', 'b', 'i', 'n', 'd', 's' };
+    local KeybindTitleLabels = {};
+    local KeybindTitleWidths = {};
+    local KeybindTitleTotalWidth = 0;
+
+    for i, Letter in next, KeybindTitleLetters do
+        local LetterWidth = select(1, Library:GetTextBounds(Letter, Library.Font, 14));
+        KeybindTitleWidths[i] = LetterWidth;
+        KeybindTitleTotalWidth = KeybindTitleTotalWidth + LetterWidth;
+    end;
+
+    local KeybindTitleOffset = -(KeybindTitleTotalWidth / 2);
+
+    for i, Letter in next, KeybindTitleLetters do
+        local LetterLabel = Library:Create('TextLabel', {
+            BackgroundTransparency = 1;
+            Font = Library.Font;
+            TextColor3 = Library.AccentColor;
+            TextSize = 14;
+            TextStrokeTransparency = 0;
+            AnchorPoint = Vector2.new(0, 0);
+            Position = UDim2.new(0.5, KeybindTitleOffset, 0, 0);
+            Size = UDim2.new(0, KeybindTitleWidths[i], 0, 16);
+            Text = Letter;
+            TextXAlignment = Enum.TextXAlignment.Left;
+            ZIndex = 104;
+            Parent = KeybindInner;
+        });
+
+        Library:ApplyTextStroke(LetterLabel);
+
+        KeybindTitleOffset = KeybindTitleOffset + KeybindTitleWidths[i];
+
+        table.insert(KeybindTitleLabels, LetterLabel);
+    end;
+
+    Library.KeybindTitleLabels = KeybindTitleLabels;
 
     local KeybindContainer = Library:Create('Frame', {
         BackgroundTransparency = 1;
