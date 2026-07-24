@@ -1279,13 +1279,19 @@ local PickOuter = Library:Create('Frame', {
             BorderColor3 = 'OutlineColor';
         });
 
-        local DisplayLabel = Library:CreateLabel({
+local DisplayLabel = Library:CreateLabel({
             Size = UDim2.new(1, 0, 1, 0);
             TextSize = 13;
             Text = Info.Default;
-            TextWrapped = true;
+            TextXAlignment = Enum.TextXAlignment.Center;
+            TextScaled = true;
             ZIndex = 8;
             Parent = PickInner;
+        });
+
+        Library:Create('UITextSizeConstraint', {
+            MaxTextSize = 13;
+            Parent = DisplayLabel;
         });
 
         Library:RemoveFromRegistry(DisplayLabel);
@@ -1424,19 +1430,31 @@ local RemoveLabel = Library:CreateLabel({
             end;
         end);
 
+function KeyPicker:IsGatedByToggle()
+            return ParentObj.Type == 'Toggle' and not ParentObj.Value;
+        end;
+
         function KeyPicker:Update()
             if Info.NoUI then
                 return;
             end;
 
-            local State = KeyPicker:GetState();
+            if KeyPicker:IsGatedByToggle() then
+                ContainerLabel.Visible = false;
+            else
+                local State = KeyPicker:GetState();
 
-            ContainerLabel.Text = string.format('[%s] %s (%s)', KeyPicker.Value, Info.Text, KeyPicker.Mode);
+                ContainerLabel.Text = string.format('[%s] %s (%s)', KeyPicker.Value, Info.Text, KeyPicker.Mode);
+                ContainerLabel.Visible = true;
 
-            ContainerLabel.Visible = true;
-            ContainerLabel.TextColor3 = State and Library.AccentColor or Library.FontColor;
+                local TargetColor = State and Library.AccentColor or Library.FontColor;
 
-            Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and 'AccentColor' or 'FontColor';
+                TweenService:Create(ContainerLabel, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                    TextColor3 = TargetColor;
+                }):Play();
+
+                Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and 'AccentColor' or 'FontColor';
+            end;
 
             local YSize = 0
             local XSize = 0
@@ -1453,7 +1471,11 @@ local RemoveLabel = Library:CreateLabel({
             Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 10, 210), 0, YSize + 23)
         end;
 
-        function KeyPicker:GetState()
+function KeyPicker:GetState()
+            if KeyPicker:IsGatedByToggle() then
+                return false;
+            end;
+
             if KeyPicker.Mode == 'Always' then
                 return true;
             elseif KeyPicker.Mode == 'Hold' then
@@ -1562,9 +1584,9 @@ Break = true;
             end;
         end);
 
-        Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
+Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
             if (not Picking) then
-                if KeyPicker.Mode == 'Toggle' then
+                if KeyPicker.Mode == 'Toggle' and not KeyPicker:IsGatedByToggle() then
                     local Key = KeyPicker.Value;
 
                     if Key == 'MB1' or Key == 'MB2' then
@@ -2259,15 +2281,18 @@ local ToggleInitialized = false;
             Func(Toggle.Value);
         end;
 
-        function Toggle:SetValue(Bool)
+function Toggle:SetValue(Bool)
             Bool = (not not Bool);
 
             Toggle.Value = Bool;
             Toggle:Display();
 
             for _, Addon in next, Toggle.Addons do
-                if Addon.Type == 'KeyPicker' and Addon.SyncToggleState then
-                    Addon.Toggled = Bool
+                if Addon.Type == 'KeyPicker' then
+                    if Addon.SyncToggleState then
+                        Addon.Toggled = Bool
+                    end
+
                     Addon:Update()
                 end
             end
