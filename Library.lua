@@ -4197,8 +4197,9 @@ InputService.InputBegan:Connect(function(Input)
         return CogWheel
     end
 
-    BaseAddons.__index.AddConfigWheel = AddConfigWheel
-    BaseGroupbox.__index.AddConfigWheel = AddConfigWheel
+    -- Properly attach the function to the groupbox/addons
+    BaseAddons.__index.AddConfigWheel = Funcs.AddConfigWheel
+    BaseGroupbox.__index.AddConfigWheel = Funcs.AddConfigWheel
 end
 
 -- < Create other UI elements >
