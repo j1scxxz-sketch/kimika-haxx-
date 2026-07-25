@@ -363,7 +363,8 @@ function Library:OnHighlight(HighlightInstance, Instance, Properties, Properties
         local Reg = Library.RegistryMap[Instance];
 
         for Property, ColorIdx in next, Properties do
-            Instance[Property] = Library[ColorIdx] or ColorIdx;
+            local AssignedColor = (type(ColorIdx) == 'function') and ColorIdx() or (Library[ColorIdx] or ColorIdx)
+            Instance[Property] = AssignedColor;
 
             if Reg and Reg.Properties[Property] then
                 Reg.Properties[Property] = ColorIdx;
@@ -4070,15 +4071,6 @@ InputService.InputBegan:Connect(function(Input)
                                         end
                                     end
                                 end
-                                
-                                -- Fixes alignment by stopping the horizontal UIListLayout from shrinking elements
-                                if Result.TextLabel then
-                                    for _, ch in next, Result.TextLabel:GetChildren() do
-                                        if ch:IsA('UIListLayout') then
-                                            ch:Destroy()
-                                        end
-                                    end
-                                end
                             end
                             return Result
                         end
@@ -4148,20 +4140,16 @@ InputService.InputBegan:Connect(function(Input)
             for _, ch in next, Library.ScreenGui:GetChildren() do
                 if ch.Name == 'ConfigWheelPanel' and ch ~= PanelOuter then
                     ch.Visible = false
-                    Library.OpenedFrames[ch] = nil
                 end
             end
             PositionPanel()
             ResizePanel()
             PanelOuter.Visible = true
-            -- CRITICAL FIX: We must pass the Instance, not a table, so MouseIsOverOpenedFrame works correctly!
-            Library.OpenedFrames[PanelOuter] = true
             IsOpen = true
         end
 
         function CogWheel:Close()
             PanelOuter.Visible = false
-            Library.OpenedFrames[PanelOuter] = nil
             IsOpen = false
         end
 
