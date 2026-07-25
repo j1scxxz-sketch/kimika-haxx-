@@ -2031,7 +2031,7 @@ self.Outer.Size = UDim2.new(0.5, -2, 0, 16)
                     end
                 end
             end
-            
+
             function SubButton:AddTooltip(tooltip)
                 if type(tooltip) == 'string' then
                     Library:AddToolTip(tooltip, self.Outer)
@@ -3968,7 +3968,7 @@ InputService.InputBegan:Connect(function(Input)
             Position = UDim2.fromOffset(0, 0);
             Size = UDim2.fromOffset(PanelW, 20);
             Visible = false;
-            ZIndex = 150; -- High ZIndex so it sits above everything else
+            ZIndex = 150;
             Parent = Library.ScreenGui;
         })
 
@@ -4060,58 +4060,18 @@ InputService.InputBegan:Connect(function(Input)
 
         setmetatable(WheelGroup, BaseGroupbox)
 
-        -- Intercept element creation to bump ZIndex so they appear above the panel
-        local mt = getmetatable(WheelGroup)
-        local idx = mt.__index
-        if type(idx) == "table" then
-            for MethodName, OriginalFunc in next, idx do
-                if type(OriginalFunc) == "function" and MethodName ~= "AddDependencyBox" and MethodName ~= "AddBlank" then
-                    idx[MethodName] = function(self, ...)
-                        local Result = OriginalFunc(self, ...)
-                        if type(Result) == "table" then
-                            local Outer = Result.Outer or Result.Frame or Result.Container or (Result.DisplayFrame and Result.DisplayFrame.Parent)
-                            if Outer then
-                                for _, Desc in next, Outer:GetDescendants() do
-                                    if Desc:IsA('GuiObject') then
-                                        Desc.ZIndex = Desc.ZIndex + 200
-                                    end
-                                end
-                            end
-                        end
-                        return Result
-                    end
+        -- Automatically bump ZIndex of ANY element added to the panel so they are clickable & visible
+        local function BumpZ(Obj)
+            if Obj:IsA('GuiObject') then
+                if not Obj:GetAttribute("CogZBumped") then
+                    Obj.ZIndex = Obj.ZIndex + 200
+                    Obj:SetAttribute("CogZBumped", true)
                 end
             end
         end
 
-        -- Hook into DependencyBox so its elements also get the ZIndex bump
-        local OriginalAddDependencyBox = WheelGroup.AddDependencyBox
-        WheelGroup.AddDependencyBox = function(...)
-            local Depbox = OriginalAddDependencyBox(...)
-            local dep_mt = getmetatable(Depbox)
-            local dep_idx = dep_mt.__index
-            if type(dep_idx) == "table" then
-                for MethodName, OriginalFunc in next, dep_idx do
-                    if type(OriginalFunc) == "function" and MethodName ~= "AddBlank" then
-                        dep_idx[MethodName] = function(self, ...)
-                            local Result = OriginalFunc(self, ...)
-                            if type(Result) == "table" then
-                                local Outer = Result.Outer or Result.Frame or Result.Container or (Result.DisplayFrame and Result.DisplayFrame.Parent)
-                                if Outer then
-                                    for _, Desc in next, Outer:GetDescendants() do
-                                        if Desc:IsA('GuiObject') then
-                                            Desc.ZIndex = Desc.ZIndex + 200
-                                        end
-                                    end
-                                end
-                            end
-                            return Result
-                        end
-                    end
-                end
-            end
-            return Depbox
-        end
+        PanelScroll.ChildAdded:Connect(BumpZ)
+        PanelScroll.DescendantAdded:Connect(BumpZ)
 
         -- Panel positioning logic
         local function PositionPanel()
@@ -4138,7 +4098,6 @@ InputService.InputBegan:Connect(function(Input)
         local IsOpen = false
 
         function CogWheel:Open()
-            -- Close any other open panels
             for _, ch in next, Library.ScreenGui:GetChildren() do
                 if ch.Name == 'ConfigWheelPanel' and ch ~= PanelOuter then
                     ch.Visible = false
@@ -4161,13 +4120,11 @@ InputService.InputBegan:Connect(function(Input)
             end
         end)
 
-        -- Hover highlight for the cog icon
         Library:OnHighlight(CogOuter, CogImage,
             { ImageColor3 = function() return Library:GetBrighterColor(Library.AccentColor) end },
             { ImageColor3 = 'AccentColor' }
         )
 
-        -- Click outside to close
         Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
             if Input.UserInputType == Enum.UserInputType.MouseButton1 and IsOpen then
                 local ap, as = PanelOuter.AbsolutePosition, PanelOuter.AbsoluteSize
@@ -4188,7 +4145,6 @@ InputService.InputBegan:Connect(function(Input)
         return Funcs[Key](...);
     end;
 
-    -- Properly attach the function to addons so Toggles can use it
     BaseAddons.__index.AddConfigWheel = Funcs.AddConfigWheel
 end
 
