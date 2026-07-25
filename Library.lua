@@ -1615,7 +1615,10 @@ Break = true;
             end;
         end);
 
-        Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
+ KeyPicker.Connections = {};
+        KeyPicker.Idx = Idx;
+
+        local InputBeganConn = InputService.InputBegan:Connect(function(Input)
             if (not Picking) then
                 if KeyPicker.Mode == 'Toggle' then
                     local Key = KeyPicker.Value;
@@ -1646,13 +1649,55 @@ Break = true;
                     ModeSelectOuter.Visible = false;
                 end;
             end;
-        end))
+        end);
 
-        Library:GiveSignal(InputService.InputEnded:Connect(function(Input)
+        local InputEndedConn = InputService.InputEnded:Connect(function(Input)
             if (not Picking) then
                 KeyPicker:Update();
             end;
-        end))
+        end);
+
+        Library:GiveSignal(InputBeganConn);
+        Library:GiveSignal(InputEndedConn);
+        table.insert(KeyPicker.Connections, InputBeganConn);
+        table.insert(KeyPicker.Connections, InputEndedConn);
+
+        function KeyPicker:Destroy()
+            for _, Connection in next, KeyPicker.Connections do
+                Connection:Disconnect();
+            end;
+
+            KeyPicker.Connections = {};
+
+            if Options[KeyPicker.Idx] == KeyPicker then
+                Options[KeyPicker.Idx] = nil;
+            end;
+
+            if ParentObj.Addons then
+                for i = #ParentObj.Addons, 1, -1 do
+                    if ParentObj.Addons[i] == KeyPicker then
+                        table.remove(ParentObj.Addons, i);
+                    end;
+                end;
+            end;
+
+            PickOuter:Destroy();
+            ModeSelectOuter:Destroy();
+            ContainerLabel:Destroy();
+
+            local YSize, XSize = 0, 0;
+
+            for _, Label in next, Library.KeybindContainer:GetChildren() do
+                if Label:IsA('TextLabel') and Label.Visible then
+                    YSize = YSize + 18;
+                    if (Label.TextBounds.X > XSize) then
+                        XSize = Label.TextBounds.X
+                    end
+                end;
+            end;
+
+            Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 10, 210), 0, YSize + 23)
+        end;
 
         KeyPicker:Update();
 
@@ -2405,7 +2450,8 @@ ToggleRegion.InputBegan:Connect(function(Input)
             if Input.UserInputType == Enum.UserInputType.MouseButton1 and not Library:MouseIsOverOpenedFrame() then
                 Toggle:SetValue(not Toggle.Value) -- Why was it not like this from the start?
                 Library:AttemptSave();
-            elseif Input.UserInputType == Enum.UserInputType.MouseButton2 and not Library:MouseIsOverOpenedFrame() then
+elseif Input.UserInputType == Enum.UserInputType.MouseButton2 and not Library:MouseIsOverOpenedFrame() then
+                KeybindContextLabel.Text = Toggle.KeybindPicker and 'Remove Keybind' or 'Add Keybind';
                 ToggleContextOuter.Position = UDim2.fromOffset(Mouse.X, Mouse.Y);
                 ToggleContextOuter.Visible = true;
             end;
