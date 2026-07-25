@@ -2465,7 +2465,7 @@ elseif Input.UserInputType == Enum.UserInputType.MouseButton2 and not Library:Mo
         return Toggle;
     end;
 
-    function Funcs:AddSlider(Idx, Info)
+function Funcs:AddSlider(Idx, Info)
         assert(Info.Default, 'AddSlider: Missing default value.');
         assert(Info.Text, 'AddSlider: Missing slider text.');
         assert(Info.Min, 'AddSlider: Missing minimum value.');
@@ -2480,6 +2480,10 @@ local Slider = {
             MaxSize = 232;
             Type = 'Slider';
             Callback = Info.Callback or function(Value) end;
+            -- Randomizer state
+            Randomize = false;
+            RandomMin = Info.Min;
+            RandomMax = Info.Max;
         };
 
         local Step = Info.Step or (10 ^ -Info.Rounding);
@@ -2764,7 +2768,475 @@ Library:GiveSignal(InputService.InputChanged:Connect(function(Input)
             end;
         end));
 
-        Slider:Display();
+Slider:Display();
+
+        -- ============================================================
+        -- RANDOMIZER CONTEXT MENU
+        -- ============================================================
+        do
+            local RandomizerOpen = false
+
+            local function Round(Value)
+                if Slider.Rounding == 0 then
+                    return math.floor(Value)
+                end
+                return tonumber(string.format('%.' .. Slider.Rounding .. 'f', Value))
+            end
+
+            -- Outer black border frame, same pattern as PickerFrameOuter
+            local RandOuter = Library:Create('Frame', {
+                Name = 'SliderRandomizer';
+                BackgroundColor3 = Color3.new(0, 0, 0);
+                BorderSizePixel = 0;
+                Position = UDim2.fromOffset(0, 0);
+                Size = UDim2.fromOffset(220, 148);
+                Visible = false;
+                ZIndex = 15;
+                Parent = ScreenGui;
+            })
+
+            Library:Create('UICorner', {
+                CornerRadius = UDim.new(0, 8);
+                Parent = RandOuter;
+            })
+
+            -- Inner panel matching BackgroundColor
+            local RandInner = Library:Create('Frame', {
+                BackgroundColor3 = Library.BackgroundColor;
+                BorderSizePixel = 0;
+                Size = UDim2.new(1, -2, 1, -2);
+                Position = UDim2.new(0, 1, 0, 1);
+                ZIndex = 16;
+                Parent = RandOuter;
+            })
+
+            Library:Create('UICorner', {
+                CornerRadius = UDim.new(0, 7);
+                Parent = RandInner;
+            })
+
+            Library:AddToRegistry(RandInner, { BackgroundColor3 = 'BackgroundColor' })
+
+            -- Accent top bar (same as ColorPicker highlight bar)
+            local RandHighlight = Library:Create('Frame', {
+                BackgroundColor3 = Library.AccentColor;
+                BorderSizePixel = 0;
+                Size = UDim2.new(1, 0, 0, 3);
+                ZIndex = 17;
+                Parent = RandInner;
+            })
+            Library:Create('UICorner', { CornerRadius = UDim.new(0, 7); Parent = RandHighlight })
+            Library:Create('Frame', {
+                BackgroundColor3 = Library.AccentColor;
+                BorderSizePixel = 0;
+                Position = UDim2.new(0, 0, 0.5, 0);
+                Size = UDim2.new(1, 0, 0.5, 0);
+                ZIndex = 17;
+                Parent = RandHighlight;
+            })
+            Library:AddToRegistry(RandHighlight, { BackgroundColor3 = 'AccentColor' })
+
+            -- Title label
+            local RandTitle = Library:CreateLabel({
+                Position = UDim2.fromOffset(8, 6);
+                Size = UDim2.new(1, -16, 0, 14);
+                TextSize = 13;
+                Text = 'Randomize: ' .. Info.Text;
+                TextXAlignment = Enum.TextXAlignment.Left;
+                ZIndex = 17;
+                Parent = RandInner;
+            })
+
+            -- ── Toggle row ──────────────────────────────────────────
+            -- Mimics AddToggle exactly: black outer, MainColor inner, shade overlay, label
+            local ToggleOuter = Library:Create('Frame', {
+                BackgroundColor3 = Color3.new(0, 0, 0);
+                BorderSizePixel = 0;
+                Position = UDim2.fromOffset(8, 24);
+                Size = UDim2.new(0, 14, 0, 14);
+                ZIndex = 17;
+                Parent = RandInner;
+            })
+            Library:Create('UICorner', { CornerRadius = UDim.new(0, 3); Parent = ToggleOuter })
+
+            local ToggleStroke = Library:Create('UIStroke', {
+                Color = Library.Black;
+                Thickness = 1;
+                Parent = ToggleOuter;
+            })
+            Library:AddToRegistry(ToggleStroke, { Color = 'Black' })
+
+            local ToggleInner = Library:Create('Frame', {
+                BackgroundColor3 = Library.MainColor;
+                BorderColor3 = Library.OutlineColor;
+                BorderMode = Enum.BorderMode.Inset;
+                Size = UDim2.new(1, -2, 1, -2);
+                Position = UDim2.new(0, 1, 0, 1);
+                ZIndex = 18;
+                Parent = ToggleOuter;
+            })
+            Library:Create('UICorner', { CornerRadius = UDim.new(0, 2); Parent = ToggleInner })
+            Library:AddToRegistry(ToggleInner, { BackgroundColor3 = 'MainColor'; BorderColor3 = 'OutlineColor' })
+
+            Library:Create('Frame', {
+                BackgroundColor3 = Color3.new(0, 0, 0);
+                BorderSizePixel = 0;
+                Size = UDim2.new(1, 0, 1, 0);
+                ZIndex = 19;
+                Parent = ToggleInner;
+            })
+            Library:Create('UIGradient', {
+                Color = ColorSequence.new(Color3.new(0, 0, 0));
+                Transparency = NumberSequence.new({
+                    NumberSequenceKeypoint.new(0, 1);
+                    NumberSequenceKeypoint.new(1, 0.65);
+                });
+                Rotation = 90;
+                Parent = ToggleInner:FindFirstChildOfClass('Frame') or ToggleInner;
+            })
+
+            local ToggleLabel = Library:CreateLabel({
+                Position = UDim2.fromOffset(20, 24);
+                Size = UDim2.new(1, -28, 0, 14);
+                TextSize = 14;
+                Text = 'Randomize';
+                TextXAlignment = Enum.TextXAlignment.Left;
+                ZIndex = 18;
+                Parent = RandInner;
+            })
+
+            -- Hover highlight on the toggle stroke
+            local ToggleRegion = Library:Create('Frame', {
+                BackgroundTransparency = 1;
+                Position = UDim2.fromOffset(8, 24);
+                Size = UDim2.new(0, 170, 0, 14);
+                ZIndex = 20;
+                Parent = RandInner;
+            })
+            Library:OnHighlight(ToggleRegion, ToggleStroke,
+                { Color = 'AccentColor' },
+                { Color = 'Black' }
+            )
+
+            local ToggleInitialized = false
+            local function UpdateToggleDisplay()
+                local TargetColor = Slider.Randomize and Library.AccentColor or Library.MainColor
+                local TargetBorder = Slider.Randomize and Library.AccentColorDark or Library.OutlineColor
+                if ToggleInitialized then
+                    TweenService:Create(ToggleInner, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        BackgroundColor3 = TargetColor;
+                        BorderColor3 = TargetBorder;
+                    }):Play()
+                else
+                    ToggleInner.BackgroundColor3 = TargetColor
+                    ToggleInner.BorderColor3 = TargetBorder
+                    ToggleInitialized = true
+                end
+                Library.RegistryMap[ToggleInner].Properties.BackgroundColor3 = Slider.Randomize and 'AccentColor' or 'MainColor'
+                Library.RegistryMap[ToggleInner].Properties.BorderColor3 = Slider.Randomize and 'AccentColorDark' or 'OutlineColor'
+            end
+
+            ToggleRegion.InputBegan:Connect(function(Input)
+                if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    Slider.Randomize = not Slider.Randomize
+                    UpdateToggleDisplay()
+                end
+            end)
+
+            -- ── Separator line ───────────────────────────────────────
+            local Sep = Library:Create('Frame', {
+                BackgroundColor3 = Library.OutlineColor;
+                BorderSizePixel = 0;
+                Position = UDim2.fromOffset(6, 44);
+                Size = UDim2.new(1, -12, 0, 1);
+                ZIndex = 17;
+                Parent = RandInner;
+            })
+            Library:AddToRegistry(Sep, { BackgroundColor3 = 'OutlineColor' })
+
+            -- ── Live value display ───────────────────────────────────
+            -- Shows the current randomized value animating in real time
+            local LiveLabel = Library:CreateLabel({
+                Position = UDim2.fromOffset(8, 50);
+                Size = UDim2.new(1, -16, 0, 14);
+                TextSize = 13;
+                Text = 'Live: —';
+                TextXAlignment = Enum.TextXAlignment.Left;
+                ZIndex = 17;
+                Parent = RandInner;
+            })
+
+            -- ── Min dual-bound slider ────────────────────────────────
+            -- Label row for Min
+            local MinLabel = Library:CreateLabel({
+                Position = UDim2.fromOffset(8, 68);
+                Size = UDim2.new(1, -16, 0, 12);
+                TextSize = 12;
+                Text = 'Min: ' .. tostring(Slider.RandomMin);
+                TextXAlignment = Enum.TextXAlignment.Left;
+                ZIndex = 17;
+                Parent = RandInner;
+            })
+
+            local MinSliderOuter = Library:Create('Frame', {
+                BackgroundColor3 = Color3.new(0, 0, 0);
+                BorderColor3 = Color3.new(0, 0, 0);
+                Position = UDim2.fromOffset(8, 82);
+                Size = UDim2.new(1, -16, 0, 13);
+                ZIndex = 17;
+                Parent = RandInner;
+            })
+            Library:AddToRegistry(MinSliderOuter, { BorderColor3 = 'Black' })
+
+            local MinSliderInner = Library:Create('Frame', {
+                BackgroundColor3 = Library.MainColor;
+                BorderColor3 = Library.OutlineColor;
+                BorderMode = Enum.BorderMode.Inset;
+                Size = UDim2.new(1, 0, 1, 0);
+                ZIndex = 18;
+                Parent = MinSliderOuter;
+            })
+            Library:AddToRegistry(MinSliderInner, { BackgroundColor3 = 'MainColor'; BorderColor3 = 'OutlineColor' })
+
+            local MinFill = Library:Create('Frame', {
+                BackgroundColor3 = Library.AccentColor;
+                BorderColor3 = Library.AccentColorDark;
+                Size = UDim2.new(0, 0, 1, 0);
+                ZIndex = 19;
+                Parent = MinSliderInner;
+            })
+            Library:AddToRegistry(MinFill, { BackgroundColor3 = 'AccentColor'; BorderColor3 = 'AccentColorDark' })
+            Library:Create('Frame', {
+                BackgroundColor3 = Color3.new(0, 0, 0);
+                BorderSizePixel = 0;
+                Size = UDim2.new(1, 0, 1, 0);
+                ZIndex = 19;
+                Parent = MinFill;
+            })
+            Library:Create('UIGradient', {
+                Color = ColorSequence.new(Color3.new(0, 0, 0));
+                Transparency = NumberSequence.new({
+                    NumberSequenceKeypoint.new(0, 1);
+                    NumberSequenceKeypoint.new(1, 0.65);
+                });
+                Rotation = 90;
+                Parent = MinFill:FindFirstChildOfClass('Frame') or MinFill;
+            })
+
+            Library:OnHighlight(MinSliderOuter, MinSliderOuter,
+                { BorderColor3 = 'AccentColor' },
+                { BorderColor3 = 'Black' }
+            )
+
+            -- ── Max dual-bound slider ────────────────────────────────
+            local MaxLabel = Library:CreateLabel({
+                Position = UDim2.fromOffset(8, 99);
+                Size = UDim2.new(1, -16, 0, 12);
+                TextSize = 12;
+                Text = 'Max: ' .. tostring(Slider.RandomMax);
+                TextXAlignment = Enum.TextXAlignment.Left;
+                ZIndex = 17;
+                Parent = RandInner;
+            })
+
+            local MaxSliderOuter = Library:Create('Frame', {
+                BackgroundColor3 = Color3.new(0, 0, 0);
+                BorderColor3 = Color3.new(0, 0, 0);
+                Position = UDim2.fromOffset(8, 113);
+                Size = UDim2.new(1, -16, 0, 13);
+                ZIndex = 17;
+                Parent = RandInner;
+            })
+            Library:AddToRegistry(MaxSliderOuter, { BorderColor3 = 'Black' })
+
+            local MaxSliderInner = Library:Create('Frame', {
+                BackgroundColor3 = Library.MainColor;
+                BorderColor3 = Library.OutlineColor;
+                BorderMode = Enum.BorderMode.Inset;
+                Size = UDim2.new(1, 0, 1, 0);
+                ZIndex = 18;
+                Parent = MaxSliderOuter;
+            })
+            Library:AddToRegistry(MaxSliderInner, { BackgroundColor3 = 'MainColor'; BorderColor3 = 'OutlineColor' })
+
+            local MaxFill = Library:Create('Frame', {
+                BackgroundColor3 = Library.AccentColor;
+                BorderColor3 = Library.AccentColorDark;
+                Size = UDim2.new(0, 0, 1, 0);
+                ZIndex = 19;
+                Parent = MaxSliderInner;
+            })
+            Library:AddToRegistry(MaxFill, { BackgroundColor3 = 'AccentColor'; BorderColor3 = 'AccentColorDark' })
+            Library:Create('Frame', {
+                BackgroundColor3 = Color3.new(0, 0, 0);
+                BorderSizePixel = 0;
+                Size = UDim2.new(1, 0, 1, 0);
+                ZIndex = 19;
+                Parent = MaxFill;
+            })
+            Library:Create('UIGradient', {
+                Color = ColorSequence.new(Color3.new(0, 0, 0));
+                Transparency = NumberSequence.new({
+                    NumberSequenceKeypoint.new(0, 1);
+                    NumberSequenceKeypoint.new(1, 0.65);
+                });
+                Rotation = 90;
+                Parent = MaxFill:FindFirstChildOfClass('Frame') or MaxFill;
+            })
+
+            Library:OnHighlight(MaxSliderOuter, MaxSliderOuter,
+                { BorderColor3 = 'AccentColor' },
+                { BorderColor3 = 'Black' }
+            )
+
+            -- ── Helper: pixel-to-value for these mini sliders ────────
+            local function GetRandValue(AbsoluteX, AbsoluteWidth, RawX)
+                local nX = math.clamp(RawX - AbsoluteX, 0, AbsoluteWidth)
+                local ratio = nX / AbsoluteWidth
+                local raw = Info.Min + ratio * (Info.Max - Info.Min)
+                return Round(raw)
+            end
+
+            local function UpdateMinFill()
+                local ratio = (Slider.RandomMin - Info.Min) / (Info.Max - Info.Min)
+                MinFill.Size = UDim2.new(ratio, 0, 1, 0)
+                MinLabel.Text = 'Min: ' .. tostring(Slider.RandomMin)
+            end
+
+            local function UpdateMaxFill()
+                local ratio = (Slider.RandomMax - Info.Min) / (Info.Max - Info.Min)
+                MaxFill.Size = UDim2.new(ratio, 0, 1, 0)
+                MaxLabel.Text = 'Max: ' .. tostring(Slider.RandomMax)
+            end
+
+            -- Drag logic for Min slider
+            MinSliderInner.InputBegan:Connect(function(Input)
+                if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    while InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
+                        local v = GetRandValue(
+                            MinSliderInner.AbsolutePosition.X,
+                            MinSliderInner.AbsoluteSize.X,
+                            Mouse.X
+                        )
+                        -- clamp so min never exceeds max
+                        Slider.RandomMin = math.min(v, Slider.RandomMax)
+                        UpdateMinFill()
+                        RenderStepped:Wait()
+                    end
+                end
+            end)
+
+            -- Drag logic for Max slider
+            MaxSliderInner.InputBegan:Connect(function(Input)
+                if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    while InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
+                        local v = GetRandValue(
+                            MaxSliderInner.AbsolutePosition.X,
+                            MaxSliderInner.AbsoluteSize.X,
+                            Mouse.X
+                        )
+                        -- clamp so max never goes below min
+                        Slider.RandomMax = math.max(v, Slider.RandomMin)
+                        UpdateMaxFill()
+                        RenderStepped:Wait()
+                    end
+                end
+            end)
+
+            -- ── Open / close helpers ─────────────────────────────────
+            local function OpenRandomizer()
+                -- Close any other open randomizer panels
+                for _, ch in next, ScreenGui:GetChildren() do
+                    if ch.Name == 'SliderRandomizer' and ch ~= RandOuter then
+                        ch.Visible = false
+                        Library.OpenedFrames[ch] = nil
+                    end
+                end
+
+                -- Position just below the slider outer frame
+                RandOuter.Position = UDim2.fromOffset(
+                    SliderOuter.AbsolutePosition.X,
+                    SliderOuter.AbsolutePosition.Y + SliderOuter.AbsoluteSize.Y + 4
+                )
+
+                UpdateToggleDisplay()
+                UpdateMinFill()
+                UpdateMaxFill()
+
+                RandOuter.Visible = true
+                Library.OpenedFrames[RandOuter] = true
+                RandomizerOpen = true
+            end
+
+            local function CloseRandomizer()
+                RandOuter.Visible = false
+                Library.OpenedFrames[RandOuter] = nil
+                RandomizerOpen = false
+            end
+
+            -- Keep panel anchored to slider if the slider moves (e.g. window dragged)
+            SliderOuter:GetPropertyChangedSignal('AbsolutePosition'):Connect(function()
+                if RandOuter.Visible then
+                    RandOuter.Position = UDim2.fromOffset(
+                        SliderOuter.AbsolutePosition.X,
+                        SliderOuter.AbsolutePosition.Y + SliderOuter.AbsoluteSize.Y + 4
+                    )
+                end
+            end)
+
+            -- Right-click on slider opens the panel
+            SliderInner.InputBegan:Connect(function(Input)
+                if Input.UserInputType == Enum.UserInputType.MouseButton2 then
+                    if RandomizerOpen then
+                        CloseRandomizer()
+                    else
+                        OpenRandomizer()
+                    end
+                end
+            end)
+
+            -- Click outside closes it
+            Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
+                if Input.UserInputType == Enum.UserInputType.MouseButton1 and RandomizerOpen then
+                    local ap, as = RandOuter.AbsolutePosition, RandOuter.AbsoluteSize
+                    if Mouse.X < ap.X or Mouse.X > ap.X + as.X
+                        or Mouse.Y < ap.Y or Mouse.Y > ap.Y + as.Y then
+                        CloseRandomizer()
+                    end
+                end
+            end))
+
+            -- ── Background randomizer loop ───────────────────────────
+            -- Fires every 0.05–0.15 s when Randomize is on, picks a
+            -- value in [RandomMin, RandomMax] with full decimal precision,
+            -- calls SetValue so the real slider animates.
+            task.spawn(function()
+                while true do
+                    if Slider.Randomize then
+                        local lo = math.min(Slider.RandomMin, Slider.RandomMax)
+                        local hi = math.max(Slider.RandomMin, Slider.RandomMax)
+
+                        -- Full float in range, then rounded to slider's own precision
+                        local raw = lo + math.random() * (hi - lo)
+                        local val = Round(raw)
+
+                        Slider:SetValue(val)
+
+                        -- Update live label (only visible when panel is open)
+                        if RandOuter.Visible then
+                            LiveLabel.Text = 'Live: ' .. tostring(val)
+                        end
+                    end
+
+                    -- Random interval so motion looks organic, not robotic
+                    task.wait(0.05 + math.random() * 0.10)
+                end
+            end)
+        end
+        -- ============================================================
+        -- END RANDOMIZER
+        -- ============================================================
+
         Groupbox:AddBlank(Info.BlankSize or 4);
         Groupbox:Resize();
 
