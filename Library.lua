@@ -4065,11 +4065,16 @@ InputService.InputBegan:Connect(function(Input)
                         idx[MethodName] = function(self, ...)
                             -- Hijack Library.Create to bump ZIndex of ScreenGui popups (Colorpickers, Dropdowns, etc)
                             local oldCreate = Library.Create
-                            Library.Create = function(c, p)
-                                if p and p.Parent == Library.ScreenGui and type(c) == 'string' then
-                                    p.ZIndex = (p.ZIndex or 1) + 200
+                            Library.Create = function(self, ...)
+                                local args = {...}
+                                local Class = args[1]
+                                local Props = args[2]
+                                
+                                if Props and Props.Parent == Library.ScreenGui and type(Class) == 'string' then
+                                    Props.ZIndex = (Props.ZIndex or 1) + 200
                                 end
-                                return oldCreate(c, p)
+                                
+                                return oldCreate(self, ...)
                             end
                             
                             local Result = OriginalFunc(self, ...)
