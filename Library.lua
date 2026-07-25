@@ -2317,16 +2317,20 @@ Library:OnHighlight(ToggleRegion, ToggleStroke,
 
             ToggleContextOuter.Visible = false;
 
-            if Toggle.KeybindPicker then
+if Toggle.KeybindPicker then
                 Toggle.KeybindPicker:Destroy();
                 Toggle.KeybindPicker = nil;
             else
-                Toggle.KeybindPicker = Library.CreateKeyPicker(Toggle, tostring(Toggle.Idx) .. '_Keybind', {
+                local KeybindIdx = tostring(Toggle.Idx) .. '_Keybind';
+
+                Library.CreateKeyPicker(Toggle, KeybindIdx, {
                     Text = Toggle.Text;
                     Default = 'None';
                     Mode = 'Toggle';
                     SyncToggleState = true;
                 });
+
+                Toggle.KeybindPicker = Options[KeybindIdx];
             end;
 
             Library:AttemptSave();
