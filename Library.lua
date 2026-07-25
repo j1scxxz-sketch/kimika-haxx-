@@ -4159,9 +4159,17 @@ function Funcs:AddConfigWheel(Info)
             end
         end))
 
-        CogWheel.Group = WheelGroup
+CogWheel.Group = WheelGroup
         return CogWheel
     end
+
+    BaseGroupbox.__index = Funcs;
+    BaseGroupbox.__namecall = function(Table, Key, ...)
+        return Funcs[Key](...);
+    end;
+
+    BaseAddons.__index.AddConfigWheel = Funcs.AddConfigWheel
+end
 
 -- < Create other UI elements >
 do
