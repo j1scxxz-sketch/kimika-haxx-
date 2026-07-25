@@ -252,10 +252,12 @@ function Library:CreateDragOutline()
 return Outline;
 end;
 
-Library.DragOutline = Library:CreateDragOutline();
-
 function Library:MakeDraggable(Instance, Cutoff)
     Instance.Active = true;
+
+    if not Library.DragOutline then
+        Library.DragOutline = Library:CreateDragOutline();
+    end;
 
     local Outline = Library.DragOutline;
 
