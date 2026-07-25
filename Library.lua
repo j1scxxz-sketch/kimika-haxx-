@@ -4204,10 +4204,8 @@ InputService.InputBegan:Connect(function(Input)
         return Funcs[Key](...);
     end;
 
-    -- Attach AddConfigWheel to BaseAddons so Toggles can use it
-    BaseAddons.__index.AddConfigWheel = function(self, ...)
-        return BaseGroupbox.__index.AddConfigWheel(self, ...)
-    end
+    -- Attach AddConfigWheel to BaseAddons directly without a wrapper
+    BaseAddons.__index.AddConfigWheel = Funcs.AddConfigWheel
 end
 
 -- < Create other UI elements >
