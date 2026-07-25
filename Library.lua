@@ -1770,11 +1770,6 @@ Library.CreateKeyPicker = Funcs.AddKeyPicker;
 
         return Funcs[Key](...);
     end;
-    
-    -- Properly attach the function to the addons AFTER __index is set
-    BaseAddons.__index.AddConfigWheel = function(self, ...)
-        return Funcs.AddConfigWheel(self, ...);
-    end;
 end;
 
 local BaseGroupbox = {};
@@ -4205,8 +4200,14 @@ InputService.InputBegan:Connect(function(Input)
 
     BaseGroupbox.__index = Funcs;
     BaseGroupbox.__namecall = function(Table, Key, ...)
+
         return Funcs[Key](...);
     end;
+
+    -- Attach AddConfigWheel to BaseAddons so Toggles can use it
+    BaseAddons.__index.AddConfigWheel = function(self, ...)
+        return BaseGroupbox.__index.AddConfigWheel(self, ...)
+    end
 end
 
 -- < Create other UI elements >
