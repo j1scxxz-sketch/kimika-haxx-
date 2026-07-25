@@ -3467,12 +3467,17 @@ Library:OnHighlight(PlusOuter, PlusOuter,
 
         local MAX_DROPDOWN_ITEMS = 8;
 
-        local ListOuter = Library:Create('Frame', {
+local ListOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
             ZIndex = 20;
             Visible = false;
             Parent = ScreenGui;
+        });
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 6);
+            Parent = ListOuter;
         });
 
 local function RecalculateListPosition()
@@ -3488,7 +3493,7 @@ local function RecalculateListPosition()
 
         DropdownOuter:GetPropertyChangedSignal('AbsolutePosition'):Connect(RecalculateListPosition);
 
-        local ListInner = Library:Create('Frame', {
+local ListInner = Library:Create('Frame', {
             BackgroundColor3 = Library.MainColor;
             BorderColor3 = Library.OutlineColor;
             BorderMode = Enum.BorderMode.Inset;
@@ -3498,9 +3503,31 @@ local function RecalculateListPosition()
             Parent = ListOuter;
         });
 
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 5);
+            Parent = ListInner;
+        });
+
         Library:AddToRegistry(ListInner, {
             BackgroundColor3 = 'MainColor';
             BorderColor3 = 'OutlineColor';
+        });
+
+        local ListHighlight = Library:Create('Frame', {
+            BackgroundColor3 = Library.AccentColor;
+            BorderSizePixel = 0;
+            Size = UDim2.new(1, 0, 0, 2);
+            ZIndex = 22;
+            Parent = ListInner;
+        });
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(1, 0);
+            Parent = ListHighlight;
+        });
+
+        Library:AddToRegistry(ListHighlight, {
+            BackgroundColor3 = 'AccentColor';
         });
 
         local Scrolling = Library:Create('ScrollingFrame', {
@@ -4720,44 +4747,10 @@ local TabListLayout = Library:Create('UIListLayout', {
 local TabButtonWidth = Library:GetTextBounds(Name, Library.Font, 13);
 
         local TabButton = Library:Create('Frame', {
-            BackgroundColor3 = Color3.new(0, 0, 0);
-            BorderSizePixel = 0;
-            Size = UDim2.new(0, TabButtonWidth + 18, 0, 18);
+            BackgroundTransparency = 1;
+            Size = UDim2.new(0, TabButtonWidth, 1, 0);
             ZIndex = 1;
             Parent = TabArea;
-        });
-
-        Library:Create('UICorner', {
-            CornerRadius = UDim.new(0, 5);
-            Parent = TabButton;
-        });
-
-        local TabButtonInner = Library:Create('Frame', {
-            BackgroundColor3 = Library.MainColor;
-            BorderSizePixel = 0;
-            Size = UDim2.new(1, -2, 1, -2);
-            Position = UDim2.new(0, 1, 0, 1);
-            ZIndex = 1;
-            Parent = TabButton;
-        });
-
-        Library:Create('UICorner', {
-            CornerRadius = UDim.new(0, 4);
-            Parent = TabButtonInner;
-        });
-
-        Library:AddToRegistry(TabButtonInner, {
-            BackgroundColor3 = 'MainColor';
-        });
-
-        local TabButtonStroke = Library:Create('UIStroke', {
-            Color = Library.OutlineColor;
-            Thickness = 1;
-            Parent = TabButtonInner;
-        });
-
-        Library:AddToRegistry(TabButtonStroke, {
-            Color = 'OutlineColor';
         });
 
         local TabButtonLabel = Library:CreateLabel({
@@ -4767,10 +4760,8 @@ local TabButtonWidth = Library:GetTextBounds(Name, Library.Font, 13);
             TextXAlignment = Enum.TextXAlignment.Center;
             TextYAlignment = Enum.TextYAlignment.Center;
             ZIndex = 2;
-            Parent = TabButtonInner;
+            Parent = TabButton;
         });
-
-        local TabIsActive = false;
 
 local TabFrame = Library:Create('Frame', {
             Name = 'TabFrame',
