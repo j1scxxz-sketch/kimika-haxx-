@@ -8,6 +8,35 @@ local TweenService = game:GetService('TweenService');
 local RenderStepped = RunService.RenderStepped;
 local LocalPlayer = Players.LocalPlayer;
 local Mouse = LocalPlayer:GetMouse();
+local HttpService = game:GetService('HttpService');
+
+local FontFolder = 'font for kimika thing';
+
+if not isfolder(FontFolder) then
+    makefolder(FontFolder);
+end;
+
+if not isfile(FontFolder .. '/Tahoma.ttf') then
+    writefile(FontFolder .. '/Tahoma.ttf', game:HttpGet('https://github.com/LuckyHub1/LuckyHub/raw/main/zekton_rg.ttf'));
+end;
+
+if not isfile(FontFolder .. '/Tahoma.font') then
+    local TahomaFontConfig = {
+        name = 'Tahoma';
+        faces = {
+            {
+                name = 'Regular';
+                weight = 400;
+                style = 'normal';
+                assetId = getcustomasset(FontFolder .. '/Tahoma.ttf');
+            };
+        };
+    };
+
+    writefile(FontFolder .. '/Tahoma.font', HttpService:JSONEncode(TahomaFontConfig));
+end;
+
+local TahomaFont = Font.new(getcustomasset(FontFolder .. '/Tahoma.font'), Enum.FontWeight.Regular);
 
 local ProtectGui = protectgui or (syn and syn.protect_gui) or (function() end);
 
@@ -37,7 +66,7 @@ local Library = {
     RiskColor = Color3.fromRGB(255, 50, 50),
 
     Black = Color3.new(0, 0, 0);
-    Font = Enum.Font.Code,
+    Font = TahomaFont,
 
     OpenedFrames = {};
     DependencyBoxes = {};
