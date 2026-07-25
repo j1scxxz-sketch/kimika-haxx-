@@ -1765,227 +1765,6 @@ PickOuter:Destroy();
 
 Library.CreateKeyPicker = Funcs.AddKeyPicker;
 
-    function Funcs:AddConfigWheel(Info)
-        Info = Info or {}
-
-        local ParentLabel = self.TextLabel
-        if not ParentLabel then return end
-
-        local CogWheel = {
-            Type = 'ConfigWheel',
-        }
-
-        local CogOuter = Library:Create('Frame', {
-            BackgroundColor3 = Color3.new(0, 0, 0);
-            BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(0, 15, 0, 15);
-            ZIndex = 6;
-            Parent = ParentLabel;
-        })
-
-        local CogInner = Library:Create('Frame', {
-            BackgroundColor3 = Library.BackgroundColor;
-            BorderColor3 = Library.OutlineColor;
-            BorderMode = Enum.BorderMode.Inset;
-            Size = UDim2.new(1, 0, 1, 0);
-            ZIndex = 7;
-            Parent = CogOuter;
-        })
-
-        Library:AddToRegistry(CogInner, {
-            BackgroundColor3 = 'BackgroundColor';
-            BorderColor3 = 'OutlineColor';
-        })
-
-        local CogImage = Library:Create('ImageLabel', {
-            BackgroundTransparency = 1;
-            Image = 'rbxthumb://type=Asset&id=6793572216&w=420&h=420';
-            ImageColor3 = Library.AccentColor;
-            Size = UDim2.new(1, 0, 1, 0);
-            ZIndex = 8;
-            Parent = CogInner;
-        })
-
-        Library:AddToRegistry(CogImage, {
-            ImageColor3 = 'AccentColor';
-        })
-
-        local PanelOuter = Library:Create('Frame', {
-            Name = 'ConfigWheelPanel';
-            BackgroundColor3 = Color3.new(0, 0, 0);
-            BorderSizePixel = 0;
-            Position = UDim2.fromOffset(0, 0);
-            Size = UDim2.fromOffset(260, 20);
-            Visible = false;
-            ZIndex = 15;
-            Parent = Library.ScreenGui;
-        })
-
-        Library:Create('UICorner', {
-            CornerRadius = UDim.new(0, 8);
-            Parent = PanelOuter;
-        })
-
-        local PanelInner = Library:Create('Frame', {
-            BackgroundColor3 = Library.BackgroundColor;
-            BorderSizePixel = 0;
-            Size = UDim2.new(1, -2, 1, -2);
-            Position = UDim2.new(0, 1, 0, 1);
-            ZIndex = 16;
-            Parent = PanelOuter;
-        })
-
-        Library:Create('UICorner', {
-            CornerRadius = UDim.new(0, 7);
-            Parent = PanelInner;
-        })
-
-        Library:AddToRegistry(PanelInner, { BackgroundColor3 = 'BackgroundColor' })
-
-        local PanelHighlight = Library:Create('Frame', {
-            BackgroundColor3 = Library.AccentColor;
-            BorderSizePixel = 0;
-            Size = UDim2.new(1, 0, 0, 3);
-            ZIndex = 17;
-            Parent = PanelInner;
-        })
-        Library:Create('UICorner', { CornerRadius = UDim.new(0, 7); Parent = PanelHighlight })
-        Library:Create('Frame', {
-            BackgroundColor3 = Library.AccentColor;
-            BorderSizePixel = 0;
-            Position = UDim2.new(0, 0, 0.5, 0);
-            Size = UDim2.new(1, 0, 0.5, 0);
-            ZIndex = 17;
-            Parent = PanelHighlight;
-        })
-        Library:AddToRegistry(PanelHighlight, { BackgroundColor3 = 'AccentColor' })
-
-        Library:CreateLabel({
-            Position = UDim2.fromOffset(8, 5);
-            Size = UDim2.new(1, -16, 0, 14);
-            TextSize = 13;
-            Text = Info.Title or 'config';
-            TextXAlignment = Enum.TextXAlignment.Left;
-            ZIndex = 17;
-            Parent = PanelInner;
-        })
-
-        local PanelScroll = Library:Create('ScrollingFrame', {
-            BackgroundTransparency = 1;
-            BorderSizePixel = 0;
-            Position = UDim2.fromOffset(4, 22);
-            Size = UDim2.new(1, -8, 1, -26);
-            CanvasSize = UDim2.new(0, 0, 0, 0);
-            BottomImage = '';
-            TopImage = '';
-            ScrollBarThickness = 3;
-            ScrollBarImageColor3 = Library.AccentColor;
-            ZIndex = 17;
-            Parent = PanelInner;
-        })
-
-        Library:AddToRegistry(PanelScroll, { ScrollBarImageColor3 = 'AccentColor' })
-
-        local PanelLayout = Library:Create('UIListLayout', {
-            FillDirection = Enum.FillDirection.Vertical;
-            SortOrder = Enum.SortOrder.LayoutOrder;
-            Padding = UDim.new(0, 0);
-            Parent = PanelScroll;
-        })
-
-        local WheelGroup = {}
-        WheelGroup.Container = PanelScroll
-
-        local function ResizePanel()
-            local contentH = PanelLayout.AbsoluteContentSize.Y
-            local capped = math.clamp(contentH, 20, 300)
-            PanelOuter.Size = UDim2.fromOffset(260, capped + 26)
-            PanelScroll.CanvasSize = UDim2.fromOffset(0, contentH)
-        end
-
-        PanelLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(ResizePanel)
-
-        function WheelGroup:Resize()
-            ResizePanel()
-        end
-
-        setmetatable(WheelGroup, BaseGroupbox)
-
-        local function PositionPanel()
-            local ap = CogOuter.AbsolutePosition
-            local as = CogOuter.AbsoluteSize
-            local screenSize = Library.ScreenGui.AbsoluteSize
-            local panelW = PanelOuter.AbsoluteSize.X
-            local panelH = PanelOuter.AbsoluteSize.Y
-
-            local x = ap.X + as.X + 4
-            local y = ap.Y
-
-            if x + panelW > screenSize.X then
-                x = ap.X - panelW - 4
-            end
-            if y + panelH > screenSize.Y then
-                y = screenSize.Y - panelH - 4
-            end
-
-            PanelOuter.Position = UDim2.fromOffset(x, y)
-        end
-
-        CogOuter:GetPropertyChangedSignal('AbsolutePosition'):Connect(function()
-            if PanelOuter.Visible then
-                PositionPanel()
-            end
-        end)
-
-        local IsOpen = false
-
-        function CogWheel:Open()
-            for _, ch in next, Library.ScreenGui:GetChildren() do
-                if ch.Name == 'ConfigWheelPanel' and ch ~= PanelOuter then
-                    ch.Visible = false
-                    Library.OpenedFrames[ch] = nil
-                end
-            end
-            PositionPanel()
-            ResizePanel()
-            PanelOuter.Visible = true
-            Library.OpenedFrames[PanelOuter] = true
-            IsOpen = true
-        end
-
-        function CogWheel:Close()
-            PanelOuter.Visible = false
-            Library.OpenedFrames[PanelOuter] = nil
-            IsOpen = false
-        end
-
-        CogOuter.InputBegan:Connect(function(Input)
-            if Input.UserInputType == Enum.UserInputType.MouseButton1 and not Library:MouseIsOverOpenedFrame() then
-                if IsOpen then
-                    CogWheel:Close()
-                else
-                    CogWheel:Open()
-                end
-            end
-        end)
-
-        Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
-            if Input.UserInputType == Enum.UserInputType.MouseButton1 and IsOpen then
-                local ap, as = PanelOuter.AbsolutePosition, PanelOuter.AbsoluteSize
-                if Mouse.X < ap.X or Mouse.X > ap.X + as.X
-                    or Mouse.Y < ap.Y or Mouse.Y > ap.Y + as.Y then
-                    if not Library:IsMouseOverFrame(CogOuter) then
-                        CogWheel:Close()
-                    end
-                end
-            end
-        end))
-
-        CogWheel.Group = WheelGroup
-
-        return CogWheel
-    end
-
     BaseAddons.__index = Funcs;
     BaseAddons.__namecall = function(Table, Key, ...)
         return Funcs[Key](...);
@@ -4376,6 +4155,232 @@ function Funcs:AddConfigWheel(Info)
         return Funcs[Key](...);
     end;
 end;
+
+do
+    local function AddConfigWheel(self, Info)
+        Info = Info or {}
+
+        local ParentLabel = self.TextLabel
+        if not ParentLabel then return end
+
+        local CogWheel = {
+            Type = 'ConfigWheel',
+        }
+
+        local CogOuter = Library:Create('Frame', {
+            BackgroundColor3 = Color3.new(0, 0, 0);
+            BorderColor3 = Color3.new(0, 0, 0);
+            Size = UDim2.new(0, 15, 0, 15);
+            ZIndex = 6;
+            Parent = ParentLabel;
+        })
+
+        local CogInner = Library:Create('Frame', {
+            BackgroundColor3 = Library.BackgroundColor;
+            BorderColor3 = Library.OutlineColor;
+            BorderMode = Enum.BorderMode.Inset;
+            Size = UDim2.new(1, 0, 1, 0);
+            ZIndex = 7;
+            Parent = CogOuter;
+        })
+
+        Library:AddToRegistry(CogInner, {
+            BackgroundColor3 = 'BackgroundColor';
+            BorderColor3 = 'OutlineColor';
+        })
+
+        local CogImage = Library:Create('ImageLabel', {
+            BackgroundTransparency = 1;
+            Image = 'rbxthumb://type=Asset&id=6793572216&w=420&h=420';
+            ImageColor3 = Library.AccentColor;
+            Size = UDim2.new(1, 0, 1, 0);
+            ZIndex = 8;
+            Parent = CogInner;
+        })
+
+        Library:AddToRegistry(CogImage, {
+            ImageColor3 = 'AccentColor';
+        })
+
+        local PanelOuter = Library:Create('Frame', {
+            Name = 'ConfigWheelPanel';
+            BackgroundColor3 = Color3.new(0, 0, 0);
+            BorderSizePixel = 0;
+            Position = UDim2.fromOffset(0, 0);
+            Size = UDim2.fromOffset(260, 20);
+            Visible = false;
+            ZIndex = 15;
+            Parent = Library.ScreenGui;
+        })
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 8);
+            Parent = PanelOuter;
+        })
+
+        local PanelInner = Library:Create('Frame', {
+            BackgroundColor3 = Library.BackgroundColor;
+            BorderSizePixel = 0;
+            Size = UDim2.new(1, -2, 1, -2);
+            Position = UDim2.new(0, 1, 0, 1);
+            ZIndex = 16;
+            Parent = PanelOuter;
+        })
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 7);
+            Parent = PanelInner;
+        })
+
+        Library:AddToRegistry(PanelInner, { BackgroundColor3 = 'BackgroundColor' })
+
+        local PanelHighlight = Library:Create('Frame', {
+            BackgroundColor3 = Library.AccentColor;
+            BorderSizePixel = 0;
+            Size = UDim2.new(1, 0, 0, 3);
+            ZIndex = 17;
+            Parent = PanelInner;
+        })
+        Library:Create('UICorner', { CornerRadius = UDim.new(0, 7); Parent = PanelHighlight })
+        Library:Create('Frame', {
+            BackgroundColor3 = Library.AccentColor;
+            BorderSizePixel = 0;
+            Position = UDim2.new(0, 0, 0.5, 0);
+            Size = UDim2.new(1, 0, 0.5, 0);
+            ZIndex = 17;
+            Parent = PanelHighlight;
+        })
+        Library:AddToRegistry(PanelHighlight, { BackgroundColor3 = 'AccentColor' })
+
+        Library:CreateLabel({
+            Position = UDim2.fromOffset(8, 5);
+            Size = UDim2.new(1, -16, 0, 14);
+            TextSize = 13;
+            Text = Info.Title or 'config';
+            TextXAlignment = Enum.TextXAlignment.Left;
+            ZIndex = 17;
+            Parent = PanelInner;
+        })
+
+        local PanelScroll = Library:Create('ScrollingFrame', {
+            BackgroundTransparency = 1;
+            BorderSizePixel = 0;
+            Position = UDim2.fromOffset(4, 22);
+            Size = UDim2.new(1, -8, 1, -26);
+            CanvasSize = UDim2.new(0, 0, 0, 0);
+            BottomImage = '';
+            TopImage = '';
+            ScrollBarThickness = 3;
+            ScrollBarImageColor3 = Library.AccentColor;
+            ZIndex = 17;
+            Parent = PanelInner;
+        })
+
+        Library:AddToRegistry(PanelScroll, { ScrollBarImageColor3 = 'AccentColor' })
+
+        local PanelLayout = Library:Create('UIListLayout', {
+            FillDirection = Enum.FillDirection.Vertical;
+            SortOrder = Enum.SortOrder.LayoutOrder;
+            Padding = UDim.new(0, 0);
+            Parent = PanelScroll;
+        })
+
+        local WheelGroup = {}
+        WheelGroup.Container = PanelScroll
+
+        local function ResizePanel()
+            local contentH = PanelLayout.AbsoluteContentSize.Y
+            local capped = math.clamp(contentH, 20, 300)
+            PanelOuter.Size = UDim2.fromOffset(260, capped + 26)
+            PanelScroll.CanvasSize = UDim2.fromOffset(0, contentH)
+        end
+
+        PanelLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(ResizePanel)
+
+        function WheelGroup:Resize()
+            ResizePanel()
+        end
+
+        setmetatable(WheelGroup, BaseGroupbox)
+
+        local function PositionPanel()
+            local ap = CogOuter.AbsolutePosition
+            local as = CogOuter.AbsoluteSize
+            local screenSize = Library.ScreenGui.AbsoluteSize
+            local panelW = PanelOuter.AbsoluteSize.X
+            local panelH = PanelOuter.AbsoluteSize.Y
+
+            local x = ap.X + as.X + 4
+            local y = ap.Y
+
+            if x + panelW > screenSize.X then
+                x = ap.X - panelW - 4
+            end
+            if y + panelH > screenSize.Y then
+                y = screenSize.Y - panelH - 4
+            end
+
+            PanelOuter.Position = UDim2.fromOffset(x, y)
+        end
+
+        CogOuter:GetPropertyChangedSignal('AbsolutePosition'):Connect(function()
+            if PanelOuter.Visible then
+                PositionPanel()
+            end
+        end)
+
+        local IsOpen = false
+
+        function CogWheel:Open()
+            for _, ch in next, Library.ScreenGui:GetChildren() do
+                if ch.Name == 'ConfigWheelPanel' and ch ~= PanelOuter then
+                    ch.Visible = false
+                    Library.OpenedFrames[ch] = nil
+                end
+            end
+            PositionPanel()
+            ResizePanel()
+            PanelOuter.Visible = true
+            Library.OpenedFrames[PanelOuter] = true
+            IsOpen = true
+        end
+
+        function CogWheel:Close()
+            PanelOuter.Visible = false
+            Library.OpenedFrames[PanelOuter] = nil
+            IsOpen = false
+        end
+
+        CogOuter.InputBegan:Connect(function(Input)
+            if Input.UserInputType == Enum.UserInputType.MouseButton1 and not Library:MouseIsOverOpenedFrame() then
+                if IsOpen then
+                    CogWheel:Close()
+                else
+                    CogWheel:Open()
+                end
+            end
+        end)
+
+        Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
+            if Input.UserInputType == Enum.UserInputType.MouseButton1 and IsOpen then
+                local ap, as = PanelOuter.AbsolutePosition, PanelOuter.AbsoluteSize
+                if Mouse.X < ap.X or Mouse.X > ap.X + as.X
+                    or Mouse.Y < ap.Y or Mouse.Y > ap.Y + as.Y then
+                    if not Library:IsMouseOverFrame(CogOuter) then
+                        CogWheel:Close()
+                    end
+                end
+            end
+        end))
+
+        CogWheel.Group = WheelGroup
+
+        return CogWheel
+    end
+
+    BaseAddons.__index.AddConfigWheel = AddConfigWheel
+    BaseGroupbox.__index.AddConfigWheel = AddConfigWheel
+end
 
 -- < Create other UI elements >
 do
