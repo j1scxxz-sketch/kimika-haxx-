@@ -3,24 +3,72 @@ local httpService = game:GetService('HttpService')
 local SaveManager = {} do
 	SaveManager.Folder = 'LinoriaLibSettings'
 	SaveManager.Ignore = {}
-	SaveManager.Parser = {
+SaveManager.Parser = {
 		Toggle = {
-			Save = function(idx, object) 
-				return { type = 'Toggle', idx = idx, value = object.Value } 
+			Save = function(idx, object)
+				-- Also capture any dynamically added keybind on this toggle
+				local keybindIdx = idx .. '_Keybind'
+				local keybindData = nil
+				if Options[keybindIdx] then
+					local kb = Options[keybindIdx]
+					keybindData = { mode = kb.Mode, key = kb.Value }
+				end
+				return { type = 'Toggle', idx = idx, value = object.Value, keybind = keybindData }
 			end,
 			Load = function(idx, data)
-				if Toggles[idx] then 
+				if Toggles[idx] then
 					Toggles[idx]:SetValue(data.value)
+
+					-- If a keybind was saved, re-create it on the toggle then apply values
+					if data.keybind then
+						local keybindIdx = idx .. '_Keybind'
+						local toggle = Toggles[idx]
+
+						-- Only create if it doesn't already exist
+						if not Options[keybindIdx] then
+							local Library = SaveManager.Library
+							Library.CreateKeyPicker(toggle, keybindIdx, {
+								Text = toggle.Text;
+								Default = data.keybind.key or 'None';
+								Mode = data.keybind.mode or 'Toggle';
+								SyncToggleState = true;
+							})
+							toggle.KeybindPicker = Options[keybindIdx]
+						end
+
+						if Options[keybindIdx] then
+							Options[keybindIdx]:SetValue({ data.keybind.key, data.keybind.mode })
+						end
+					end
 				end
 			end,
 		},
 		Slider = {
 			Save = function(idx, object)
-				return { type = 'Slider', idx = idx, value = tostring(object.Value) }
+				return {
+					type = 'Slider',
+					idx = idx,
+					value = tostring(object.Value),
+					-- Randomizer state
+					randomize = object.Randomize or false,
+					randomMin = object.RandomMin,
+					randomMax = object.RandomMax,
+				}
 			end,
 			Load = function(idx, data)
-				if Options[idx] then 
+				if Options[idx] then
 					Options[idx]:SetValue(data.value)
+
+					-- Restore randomizer state if it was saved
+					if data.randomMin ~= nil then
+						Options[idx].RandomMin = data.randomMin
+					end
+					if data.randomMax ~= nil then
+						Options[idx].RandomMax = data.randomMax
+					end
+					if data.randomize ~= nil then
+						Options[idx].Randomize = data.randomize
+					end
 				end
 			end,
 		},
