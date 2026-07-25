@@ -4720,29 +4720,44 @@ local TabListLayout = Library:Create('UIListLayout', {
 local TabButtonWidth = Library:GetTextBounds(Name, Library.Font, 13);
 
         local TabButton = Library:Create('Frame', {
-            BackgroundTransparency = 1;
-            Size = UDim2.new(0, TabButtonWidth + 16, 1, 0);
+            BackgroundColor3 = Color3.new(0, 0, 0);
+            BorderSizePixel = 0;
+            Size = UDim2.new(0, TabButtonWidth + 18, 0, 18);
             ZIndex = 1;
             Parent = TabArea;
         });
 
-        local TabBackground = Library:Create('Frame', {
-            BackgroundColor3 = Library.AccentColor;
-            BackgroundTransparency = 1;
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 5);
+            Parent = TabButton;
+        });
+
+        local TabButtonInner = Library:Create('Frame', {
+            BackgroundColor3 = Library.MainColor;
             BorderSizePixel = 0;
-            Size = UDim2.new(1, 0, 1, 4);
-            Position = UDim2.new(0, 0, 0, -2);
+            Size = UDim2.new(1, -2, 1, -2);
+            Position = UDim2.new(0, 1, 0, 1);
             ZIndex = 1;
             Parent = TabButton;
         });
 
         Library:Create('UICorner', {
             CornerRadius = UDim.new(0, 4);
-            Parent = TabBackground;
+            Parent = TabButtonInner;
         });
 
-        Library:AddToRegistry(TabBackground, {
-            BackgroundColor3 = 'AccentColor';
+        Library:AddToRegistry(TabButtonInner, {
+            BackgroundColor3 = 'MainColor';
+        });
+
+        local TabButtonStroke = Library:Create('UIStroke', {
+            Color = Library.OutlineColor;
+            Thickness = 1;
+            Parent = TabButtonInner;
+        });
+
+        Library:AddToRegistry(TabButtonStroke, {
+            Color = 'OutlineColor';
         });
 
         local TabButtonLabel = Library:CreateLabel({
@@ -4752,10 +4767,10 @@ local TabButtonWidth = Library:GetTextBounds(Name, Library.Font, 13);
             TextXAlignment = Enum.TextXAlignment.Center;
             TextYAlignment = Enum.TextYAlignment.Center;
             ZIndex = 2;
-            Parent = TabButton;
+            Parent = TabButtonInner;
         });
 
-local TabIsActive = false;
+        local TabIsActive = false;
 
 local TabFrame = Library:Create('Frame', {
             Name = 'TabFrame',
@@ -4825,9 +4840,9 @@ function Tab:ShowTab()
             TabButtonLabel.TextColor3 = Library.AccentColor;
             Library.RegistryMap[TabButtonLabel].Properties.TextColor3 = 'AccentColor';
 
-            TweenService:Create(TabBackground, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                BackgroundTransparency = 0.85;
-            }):Play();
+            TabButtonStroke.Color = Library.AccentColor;
+            Library.RegistryMap[TabButtonStroke].Properties.Color = 'AccentColor';
+            TabButtonStroke.Thickness = 1.5;
 
             TabFrame.Visible = true;
 
@@ -4856,9 +4871,9 @@ function Tab:HideTab()
             TabButtonLabel.TextColor3 = Library.FontColor;
             Library.RegistryMap[TabButtonLabel].Properties.TextColor3 = 'FontColor';
 
-            TweenService:Create(TabBackground, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                BackgroundTransparency = 1;
-            }):Play();
+            TabButtonStroke.Color = Library.OutlineColor;
+            Library.RegistryMap[TabButtonStroke].Properties.Color = 'OutlineColor';
+            TabButtonStroke.Thickness = 1;
 
             TabFrame.Visible = false;
         end;
