@@ -4721,9 +4721,28 @@ local TabButtonWidth = Library:GetTextBounds(Name, Library.Font, 13);
 
         local TabButton = Library:Create('Frame', {
             BackgroundTransparency = 1;
-            Size = UDim2.new(0, TabButtonWidth, 1, 0);
+            Size = UDim2.new(0, TabButtonWidth + 16, 1, 0);
             ZIndex = 1;
             Parent = TabArea;
+        });
+
+        local TabBackground = Library:Create('Frame', {
+            BackgroundColor3 = Library.AccentColor;
+            BackgroundTransparency = 1;
+            BorderSizePixel = 0;
+            Size = UDim2.new(1, 0, 1, 4);
+            Position = UDim2.new(0, 0, 0, -2);
+            ZIndex = 1;
+            Parent = TabButton;
+        });
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 4);
+            Parent = TabBackground;
+        });
+
+        Library:AddToRegistry(TabBackground, {
+            BackgroundColor3 = 'AccentColor';
         });
 
         local TabButtonLabel = Library:CreateLabel({
@@ -4735,6 +4754,22 @@ local TabButtonWidth = Library:GetTextBounds(Name, Library.Font, 13);
             ZIndex = 2;
             Parent = TabButton;
         });
+
+        local TabIsActive = false;
+
+        TabButton.MouseEnter:Connect(function()
+            if TabIsActive then return end;
+            TweenService:Create(TabBackground, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                BackgroundTransparency = 0.85;
+            }):Play();
+        end);
+
+        TabButton.MouseLeave:Connect(function()
+            if TabIsActive then return end;
+            TweenService:Create(TabBackground, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                BackgroundTransparency = 1;
+            }):Play();
+        end);
 
 local TabFrame = Library:Create('Frame', {
             Name = 'TabFrame',
@@ -4799,8 +4834,14 @@ function Tab:ShowTab()
                 Tab:HideTab();
             end;
 
+            TabIsActive = true;
+
             TabButtonLabel.TextColor3 = Library.AccentColor;
             Library.RegistryMap[TabButtonLabel].Properties.TextColor3 = 'AccentColor';
+
+            TweenService:Create(TabBackground, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                BackgroundTransparency = 0.85;
+            }):Play();
 
             TabFrame.Visible = true;
 
@@ -4823,9 +4864,15 @@ function Tab:ShowTab()
             end;
         end;
 
-        function Tab:HideTab()
+function Tab:HideTab()
+            TabIsActive = false;
+
             TabButtonLabel.TextColor3 = Library.FontColor;
             Library.RegistryMap[TabButtonLabel].Properties.TextColor3 = 'FontColor';
+
+            TweenService:Create(TabBackground, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                BackgroundTransparency = 1;
+            }):Play();
 
             TabFrame.Visible = false;
         end;
