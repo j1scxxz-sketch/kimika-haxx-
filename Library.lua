@@ -4314,12 +4314,18 @@ Library:SetWatermarkParts(Parts);
 end;
 
 function Library:SetWatermark(Text)
-    if Library.WatermarkPartInstances then
-        for _, Inst in next, Library.WatermarkPartInstances do
+    if Library.WatermarkPartLabels then
+        for _, Inst in next, Library.WatermarkPartLabels do
             Inst:Destroy();
         end;
-        Library.WatermarkPartInstances = {};
     end;
+    if Library.WatermarkPartBars then
+        for _, Inst in next, Library.WatermarkPartBars do
+            Inst:Destroy();
+        end;
+    end;
+    Library.WatermarkPartLabels = {};
+    Library.WatermarkPartBars = {};
 
     Library.WatermarkText.Visible = true;
     Library.WatermarkText.Text = Text;
@@ -4327,17 +4333,13 @@ function Library:SetWatermark(Text)
 end;
 
 function Library:SetWatermarkParts(Parts)
-    if Library.WatermarkPartInstances then
-        for _, Inst in next, Library.WatermarkPartInstances do
-            Inst:Destroy();
-        end;
-    end;
-    Library.WatermarkPartInstances = {};
+    Library.WatermarkPartLabels = Library.WatermarkPartLabels or {};
+    Library.WatermarkPartBars = Library.WatermarkPartBars or {};
 
     Library.WatermarkText.Visible = false;
 
     for i, Part in next, Parts do
-        if i > 1 then
+        if i > 1 and (not Library.WatermarkPartBars[i]) then
             local Bar = Library:Create('Frame', {
                 BackgroundColor3 = Library.AccentColor;
                 BorderSizePixel = 0;
@@ -4353,21 +4355,36 @@ function Library:SetWatermarkParts(Parts)
             });
 
             Library:AddToRegistry(Bar, { BackgroundColor3 = 'AccentColor' });
-            table.insert(Library.WatermarkPartInstances, Bar);
+            Library.WatermarkPartBars[i] = Bar;
         end;
 
-        local Label = Library:CreateLabel({
-            Size = UDim2.new(0, 0, 1, 0);
-            AutomaticSize = Enum.AutomaticSize.X;
-            TextSize = 13;
-            Text = Part;
-            TextXAlignment = Enum.TextXAlignment.Left;
-            LayoutOrder = i * 2;
-            ZIndex = 203;
-            Parent = Library.WatermarkContent;
-        });
+        if Library.WatermarkPartLabels[i] then
+            Library.WatermarkPartLabels[i].Text = Part;
+        else
+            local Label = Library:CreateLabel({
+                Size = UDim2.new(0, 0, 1, 0);
+                AutomaticSize = Enum.AutomaticSize.X;
+                TextSize = 13;
+                Text = Part;
+                TextXAlignment = Enum.TextXAlignment.Left;
+                LayoutOrder = i * 2;
+                ZIndex = 203;
+                Parent = Library.WatermarkContent;
+            });
 
-        table.insert(Library.WatermarkPartInstances, Label);
+            Library.WatermarkPartLabels[i] = Label;
+        end;
+    end;
+
+    for i = #Parts + 1, #Library.WatermarkPartLabels do
+        if Library.WatermarkPartLabels[i] then
+            Library.WatermarkPartLabels[i]:Destroy();
+            Library.WatermarkPartLabels[i] = nil;
+        end;
+        if Library.WatermarkPartBars[i] then
+            Library.WatermarkPartBars[i]:Destroy();
+            Library.WatermarkPartBars[i] = nil;
+        end;
     end;
 
     Library:SetWatermarkVisibility(true);
