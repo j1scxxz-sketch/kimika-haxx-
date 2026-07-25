@@ -1643,6 +1643,43 @@ Break = true;
             Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 10, 210), 0, YSize + 23)
         end;
 
+function KeyPicker:Destroy()
+            for _, Connection in next, KeyPicker.Connections do
+                Connection:Disconnect();
+            end;
+
+            KeyPicker.Connections = {};
+
+            if Options[KeyPicker.Idx] == KeyPicker then
+                Options[KeyPicker.Idx] = nil;
+            end;
+
+            if ParentObj.Addons then
+                for i = #ParentObj.Addons, 1, -1 do
+                    if ParentObj.Addons[i] == KeyPicker then
+                        table.remove(ParentObj.Addons, i);
+                    end;
+                end;
+            end;
+
+            PickOuter:Destroy();
+            ModeSelectOuter:Destroy();
+            ContainerLabel:Destroy();
+
+            local YSize, XSize = 0, 0;
+
+            for _, Label in next, Library.KeybindContainer:GetChildren() do
+                if Label:IsA('TextLabel') and Label.Visible then
+                    YSize = YSize + 18;
+                    if (Label.TextBounds.X > XSize) then
+                        XSize = Label.TextBounds.X
+                    end
+                end;
+            end;
+
+            Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 10, 210), 0, YSize + 23)
+        end;
+
         KeyPicker:Update();
 
         Options[Idx] = KeyPicker;
