@@ -3932,7 +3932,6 @@ InputService.InputBegan:Connect(function(Input)
 
         local CogWheel = { Type = 'ConfigWheel' }
 
-        -- Cog Icon Button
         local CogOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
@@ -3959,7 +3958,6 @@ InputService.InputBegan:Connect(function(Input)
             Parent = CogInner;
         })
 
-        -- Config Panel
         local PanelW = Info.Width or 340
         local PanelOuter = Library:Create('Frame', {
             Name = 'ConfigWheelPanel';
@@ -3986,7 +3984,6 @@ InputService.InputBegan:Connect(function(Input)
         Library:Create('UICorner', { CornerRadius = UDim.new(0, 7); Parent = PanelInner })
         Library:AddToRegistry(PanelInner, { BackgroundColor3 = 'BackgroundColor' })
 
-        -- Accent top bar
         local PanelHighlight = Library:Create('Frame', {
             BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
@@ -4005,7 +4002,6 @@ InputService.InputBegan:Connect(function(Input)
         })
         Library:AddToRegistry(PanelHighlight, { BackgroundColor3 = 'AccentColor' })
 
-        -- Title
         Library:CreateLabel({
             Position = UDim2.fromOffset(8, 5);
             Size = UDim2.new(1, -16, 0, 14);
@@ -4016,12 +4012,12 @@ InputService.InputBegan:Connect(function(Input)
             Parent = PanelInner;
         })
 
-        -- Scrolling container for elements
+        -- Scrolling container for elements - MUST HAVE FIXED WIDTH SO ADDONS ALIGN
         local PanelScroll = Library:Create('ScrollingFrame', {
             BackgroundTransparency = 1;
             BorderSizePixel = 0;
             Position = UDim2.fromOffset(4, 22);
-            Size = UDim2.new(1, -8, 1, -26);
+            Size = UDim2.new(0, PanelW - 8, 1, -26); 
             CanvasSize = UDim2.new(0, 0, 0, 0);
             BottomImage = '';
             TopImage = '';
@@ -4040,7 +4036,6 @@ InputService.InputBegan:Connect(function(Input)
             Parent = PanelScroll;
         })
 
-        -- The fake "Groupbox" that elements get added to
         local WheelGroup = {}
         WheelGroup.Container = PanelScroll
         WheelGroup.DependencyBoxes = {}
@@ -4060,20 +4055,54 @@ InputService.InputBegan:Connect(function(Input)
 
         setmetatable(WheelGroup, BaseGroupbox)
 
-        -- Automatically bump ZIndex of ANY element added to the panel so they are clickable & visible
-        local function BumpZ(Obj)
-            if Obj:IsA('GuiObject') then
-                if not Obj:GetAttribute("CogZBumped") then
-                    Obj.ZIndex = Obj.ZIndex + 200
-                    Obj:SetAttribute("CogZBumped", true)
+        local function PatchZIndex(obj)
+            local mt = getmetatable(obj)
+            if not mt then return end
+            local idx = mt.__index
+            if type(idx) == "table" then
+                for MethodName, OriginalFunc in next, idx do
+                    if type(OriginalFunc) == "function" and MethodName ~= "AddDependencyBox" and MethodName ~= "AddBlank" then
+                        idx[MethodName] = function(self, ...)
+                            -- Hijack Library.Create to bump ZIndex of ScreenGui popups (Colorpickers, Dropdowns, etc)
+                            local oldCreate = Library.Create
+                            Library.Create = function(c, p)
+                                if p and p.Parent == Library.ScreenGui and type(c) == 'string' then
+                                    p.ZIndex = (p.ZIndex or 1) + 200
+                                end
+                                return oldCreate(c, p)
+                            end
+                            
+                            local Result = OriginalFunc(self, ...)
+                            
+                            Library.Create = oldCreate
+                            
+                            -- Bump ZIndex of the main element and its descendants
+                            if type(Result) == "table" then
+                                local Outer = Result.Outer or Result.Frame or Result.Container or (Result.DisplayFrame and Result.DisplayFrame.Parent)
+                                if Outer then
+                                    for _, Desc in next, Outer:GetDescendants() do
+                                        if Desc:IsA('GuiObject') then
+                                            Desc.ZIndex = Desc.ZIndex + 200
+                                        end
+                                    end
+                                end
+                            end
+                            return Result
+                        end
+                    end
                 end
             end
         end
 
-        PanelScroll.ChildAdded:Connect(BumpZ)
-        PanelScroll.DescendantAdded:Connect(BumpZ)
+        PatchZIndex(WheelGroup)
 
-        -- Panel positioning logic
+        local OriginalAddDependencyBox = WheelGroup.AddDependencyBox
+        WheelGroup.AddDependencyBox = function(...)
+            local Depbox = OriginalAddDependencyBox(...)
+            PatchZIndex(Depbox)
+            return Depbox
+        end
+
         local function PositionPanel()
             local ap = CogOuter.AbsolutePosition
             local as = CogOuter.AbsoluteSize
