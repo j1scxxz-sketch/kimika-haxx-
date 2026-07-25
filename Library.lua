@@ -3919,12 +3919,12 @@ do
         Parent = ScreenGui;
     });
 
-    Library:Create('UICorner', {
-        CornerRadius = UDim.new(0, 6);
+Library:Create('UICorner', {
+        CornerRadius = UDim.new(0, 8);
         Parent = WatermarkOuter;
     });
 
-    local WatermarkInner = Library:Create('Frame', {
+local WatermarkInner = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
         BorderSizePixel = 0;
         Size = UDim2.new(1, -2, 1, -2);
@@ -3934,12 +3934,23 @@ do
     });
 
     Library:Create('UICorner', {
-        CornerRadius = UDim.new(0, 5);
+        CornerRadius = UDim.new(0, 7);
         Parent = WatermarkInner;
     });
 
     Library:AddToRegistry(WatermarkInner, {
         BackgroundColor3 = 'MainColor';
+    });
+
+    local WatermarkStroke = Library:Create('UIStroke', {
+        Color = Library.AccentColor;
+        Thickness = 1;
+        Transparency = 0.5;
+        Parent = WatermarkOuter;
+    });
+
+    Library:AddToRegistry(WatermarkStroke, {
+        Color = 'AccentColor';
     });
 
     local InnerFrame = Library:Create('Frame', {
@@ -4255,7 +4266,7 @@ function Library:UpdateWatermark(Data)
         table.insert(Parts, Data.DisplayName);
     end;
 
-    Library:SetWatermark(table.concat(Parts, ' | '));
+    Library:SetWatermark(table.concat(Parts, '  •  '));
 end;
 
 function Library:SetWatermark(Text)
