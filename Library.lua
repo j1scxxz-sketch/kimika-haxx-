@@ -522,8 +522,6 @@ end))
 
 local BaseAddons = {};
 
-BaseAddons.__index = BaseAddons; -- Add this to prevent the nil error!
-
 do
     local Funcs = {};
 
@@ -1772,12 +1770,14 @@ Library.CreateKeyPicker = Funcs.AddKeyPicker;
 
         return Funcs[Key](...);
     end;
-    setmetatable(BaseAddons, BaseAddons); -- Add this to ensure the metatable is properly set
+    
+    -- Properly attach the function to the addons AFTER __index is set
+    BaseAddons.__index.AddConfigWheel = function(self, ...)
+        return Funcs.AddConfigWheel(self, ...);
+    end;
 end;
 
 local BaseGroupbox = {};
-
-BaseGroupbox.__index = BaseGroupbox; -- Add this to prevent the nil error!
 
 do
     local Funcs = {};
@@ -4203,9 +4203,10 @@ InputService.InputBegan:Connect(function(Input)
         return CogWheel
     end
 
-    -- Properly attach the function to the groupbox/addons
-    BaseAddons.__index.AddConfigWheel = Funcs.AddConfigWheel
-    BaseGroupbox.__index.AddConfigWheel = Funcs.AddConfigWheel
+    BaseGroupbox.__index = Funcs;
+    BaseGroupbox.__namecall = function(Table, Key, ...)
+        return Funcs[Key](...);
+    end;
 end
 
 -- < Create other UI elements >
