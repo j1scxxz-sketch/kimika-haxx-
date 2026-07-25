@@ -522,6 +522,8 @@ end))
 
 local BaseAddons = {};
 
+BaseAddons.__index = BaseAddons; -- Add this to prevent the nil error!
+
 do
     local Funcs = {};
 
@@ -4199,7 +4201,7 @@ InputService.InputBegan:Connect(function(Input)
 
     -- Properly attach the function to the groupbox/addons
     BaseAddons.AddConfigWheel = Funcs.AddConfigWheel
-    BaseGroupbox.__index.AddConfigWheel = Funcs.AddConfigWheel
+    BaseGroupbox.AddConfigWheel = Funcs.AddConfigWheel
 end
 
 -- < Create other UI elements >
