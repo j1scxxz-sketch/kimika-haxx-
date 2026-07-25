@@ -4144,6 +4144,25 @@ function Funcs:AddConfigWheel(Info)
             PanelOuter.Visible = true
             Library.OpenedFrames[PanelOuter] = true
             IsOpen = true
+
+            -- Fixes click detection by telling the library to ignore clicks outside the panel
+            local AbsPos = PanelOuter.AbsolutePosition
+            local AbsSize = PanelOuter.AbsoluteSize
+            Library.OpenedFrames[PanelOuter] = {
+                AbsolutePosition = AbsPos,
+                AbsoluteSize = AbsSize
+            }
+            
+            -- Keep the stored position/size updated while open
+            task.spawn(function()
+                while IsOpen do
+                    if PanelOuter.Visible then
+                        Library.OpenedFrames[PanelOuter].AbsolutePosition = PanelOuter.AbsolutePosition
+                        Library.OpenedFrames[PanelOuter].AbsoluteSize = PanelOuter.AbsoluteSize
+                    end
+                    RunService.Heartbeat:Wait()
+                end
+            end)
         end
 
         function CogWheel:Close()
@@ -4316,7 +4335,7 @@ do
         local WheelGroup = {}
 
         -- Bumps ZIndex of any new children so they render above the ZIndex 50+ panel frames
-        local function PatchZIndex(Obj)
+         local function PatchZIndex(Obj)
             local mt = getmetatable(Obj)
             if not mt then return end
             local idx = mt.__index
@@ -4331,6 +4350,15 @@ do
                                     for _, Desc in next, Outer:GetDescendants() do
                                         if Desc:IsA('GuiObject') then
                                             Desc.ZIndex = Desc.ZIndex + 60
+                                        end
+                                    end
+                                end
+                                
+                                -- Fixes alignment by stopping the horizontal UIListLayout from shrinking elements
+                                if Result.TextLabel then
+                                    for _, ch in next, Result.TextLabel:GetChildren() do
+                                        if ch:IsA('UIListLayout') then
+                                            ch:Destroy()
                                         end
                                     end
                                 end
