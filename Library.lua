@@ -4163,9 +4163,7 @@ do
         local ParentLabel = self.TextLabel
         if not ParentLabel then return end
 
-        local CogWheel = {
-            Type = 'ConfigWheel',
-        }
+        local CogWheel = { Type = 'ConfigWheel' }
 
         local CogOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
@@ -4198,47 +4196,40 @@ do
             Parent = CogInner;
         })
 
-        Library:AddToRegistry(CogImage, {
-            ImageColor3 = 'AccentColor';
-        })
+        Library:AddToRegistry(CogImage, { ImageColor3 = 'AccentColor' })
 
+        -- Outer black border frame
         local PanelOuter = Library:Create('Frame', {
             Name = 'ConfigWheelPanel';
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderSizePixel = 0;
             Position = UDim2.fromOffset(0, 0);
-            Size = UDim2.fromOffset(260, 20);
+            Size = UDim2.fromOffset(260, 100);
             Visible = false;
-            ZIndex = 15;
+            ZIndex = 50;
             Parent = Library.ScreenGui;
         })
 
-        Library:Create('UICorner', {
-            CornerRadius = UDim.new(0, 8);
-            Parent = PanelOuter;
-        })
+        Library:Create('UICorner', { CornerRadius = UDim.new(0, 8); Parent = PanelOuter })
 
         local PanelInner = Library:Create('Frame', {
             BackgroundColor3 = Library.BackgroundColor;
             BorderSizePixel = 0;
             Size = UDim2.new(1, -2, 1, -2);
             Position = UDim2.new(0, 1, 0, 1);
-            ZIndex = 16;
+            ZIndex = 51;
             Parent = PanelOuter;
         })
 
-        Library:Create('UICorner', {
-            CornerRadius = UDim.new(0, 7);
-            Parent = PanelInner;
-        })
-
+        Library:Create('UICorner', { CornerRadius = UDim.new(0, 7); Parent = PanelInner })
         Library:AddToRegistry(PanelInner, { BackgroundColor3 = 'BackgroundColor' })
 
+        -- Accent bar at top
         local PanelHighlight = Library:Create('Frame', {
             BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
             Size = UDim2.new(1, 0, 0, 3);
-            ZIndex = 17;
+            ZIndex = 52;
             Parent = PanelInner;
         })
         Library:Create('UICorner', { CornerRadius = UDim.new(0, 7); Parent = PanelHighlight })
@@ -4247,87 +4238,53 @@ do
             BorderSizePixel = 0;
             Position = UDim2.new(0, 0, 0.5, 0);
             Size = UDim2.new(1, 0, 0.5, 0);
-            ZIndex = 17;
+            ZIndex = 52;
             Parent = PanelHighlight;
         })
         Library:AddToRegistry(PanelHighlight, { BackgroundColor3 = 'AccentColor' })
 
+        -- Title
         Library:CreateLabel({
-            Position = UDim2.fromOffset(8, 5);
+            Position = UDim2.fromOffset(8, 4);
             Size = UDim2.new(1, -16, 0, 14);
             TextSize = 13;
             Text = Info.Title or 'config';
             TextXAlignment = Enum.TextXAlignment.Left;
-            ZIndex = 17;
+            ZIndex = 52;
             Parent = PanelInner;
         })
 
-        local PanelScroll = Library:Create('ScrollingFrame', {
+        -- Container that elements go into, same as a groupbox Container
+        local ElementContainer = Library:Create('Frame', {
             BackgroundTransparency = 1;
-            BorderSizePixel = 0;
-            Position = UDim2.fromOffset(4, 22);
-            Size = UDim2.new(1, -8, 1, -26);
-            CanvasSize = UDim2.new(0, 0, 0, 0);
-            BottomImage = '';
-            TopImage = '';
-            ScrollBarThickness = 3;
-            ScrollBarImageColor3 = Library.AccentColor;
-            ZIndex = 17;
-            Parent = PanelInner;
-        })
-
-        Library:AddToRegistry(PanelScroll, { ScrollBarImageColor3 = 'AccentColor' })
-
-        local PanelLayout = Library:Create('UIListLayout', {
-            FillDirection = Enum.FillDirection.Vertical;
-            SortOrder = Enum.SortOrder.LayoutOrder;
-            Padding = UDim.new(0, 0);
-            Parent = PanelScroll;
-        })
-
-local WheelContainer = Library:Create('Frame', {
-            BackgroundTransparency = 1;
+            Position = UDim2.fromOffset(3, 20);
             Size = UDim2.new(1, -6, 0, 0);
-            Position = UDim2.new(0, 3, 0, 0);
-            AutomaticSize = Enum.AutomaticSize.Y;
-            ZIndex = 18;
-            Parent = PanelScroll;
+            ZIndex = 52;
+            Parent = PanelInner;
         })
 
-Library:Create('UIListLayout', {
+        local ElementLayout = Library:Create('UIListLayout', {
             FillDirection = Enum.FillDirection.Vertical;
             SortOrder = Enum.SortOrder.LayoutOrder;
-            Padding = UDim.new(0, 2);
-            Parent = WheelContainer;
+            Parent = ElementContainer;
         })
+
+        -- Auto resize panel whenever content changes
+        ElementLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
+            local h = ElementLayout.AbsoluteContentSize.Y
+            ElementContainer.Size = UDim2.new(1, -6, 0, h)
+            PanelInner.Size = UDim2.new(1, -2, 0, h + 22)
+            PanelOuter.Size = UDim2.fromOffset(260, h + 24)
+        end)
 
         local WheelGroup = {}
-        WheelGroup.Container = WheelContainer
-
-        local function ResizePanel()
-            local contentH = PanelLayout.AbsoluteContentSize.Y
-            local capped = math.clamp(contentH, 20, 300)
-            PanelOuter.Size = UDim2.fromOffset(260, capped + 26)
-            PanelScroll.CanvasSize = UDim2.fromOffset(0, contentH)
-        end
-
-        PanelLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(ResizePanel)
-
-
-local WheelLayout = WheelContainer:FindFirstChildOfClass('UIListLayout')
-
-local function UpdatePanelSize()
-            local contentH = WheelLayout.AbsoluteContentSize.Y
-            local capped = math.clamp(contentH, 20, 300)
-            PanelOuter.Size = UDim2.fromOffset(260, capped + 26)
-            PanelScroll.Size = UDim2.new(1, -8, 0, capped)
-            PanelScroll.CanvasSize = UDim2.fromOffset(0, contentH)
-        end
-
-        WheelLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(UpdatePanelSize)
+        WheelGroup.Container = ElementContainer
 
         function WheelGroup:Resize()
-            UpdatePanelSize()
+            local h = ElementLayout.AbsoluteContentSize.Y
+            ElementContainer.Size = UDim2.new(1, -6, 0, h)
+            PanelInner.Size = UDim2.new(1, -2, 0, h + 22)
+            PanelOuter.Size = UDim2.fromOffset(260, h + 24)
         end
 
         setmetatable(WheelGroup, BaseGroupbox)
@@ -4336,26 +4293,17 @@ local function UpdatePanelSize()
             local ap = CogOuter.AbsolutePosition
             local as = CogOuter.AbsoluteSize
             local screenSize = Library.ScreenGui.AbsoluteSize
-            local panelW = PanelOuter.AbsoluteSize.X
-            local panelH = PanelOuter.AbsoluteSize.Y
-
             local x = ap.X + as.X + 4
             local y = ap.Y
-
-            if x + panelW > screenSize.X then
-                x = ap.X - panelW - 4
+            if x + 260 > screenSize.X then x = ap.X - 264 end
+            if y + PanelOuter.AbsoluteSize.Y > screenSize.Y then
+                y = screenSize.Y - PanelOuter.AbsoluteSize.Y - 4
             end
-            if y + panelH > screenSize.Y then
-                y = screenSize.Y - panelH - 4
-            end
-
             PanelOuter.Position = UDim2.fromOffset(x, y)
         end
 
         CogOuter:GetPropertyChangedSignal('AbsolutePosition'):Connect(function()
-            if PanelOuter.Visible then
-                PositionPanel()
-            end
+            if PanelOuter.Visible then PositionPanel() end
         end)
 
         local IsOpen = false
@@ -4368,7 +4316,6 @@ local function UpdatePanelSize()
                 end
             end
             PositionPanel()
-            ResizePanel()
             PanelOuter.Visible = true
             Library.OpenedFrames[PanelOuter] = true
             IsOpen = true
@@ -4381,12 +4328,9 @@ local function UpdatePanelSize()
         end
 
         CogOuter.InputBegan:Connect(function(Input)
-            if Input.UserInputType == Enum.UserInputType.MouseButton1 and not Library:MouseIsOverOpenedFrame() then
-                if IsOpen then
-                    CogWheel:Close()
-                else
-                    CogWheel:Open()
-                end
+            if Input.UserInputType == Enum.UserInputType.MouseButton1
+                and not Library:MouseIsOverOpenedFrame() then
+                if IsOpen then CogWheel:Close() else CogWheel:Open() end
             end
         end)
 
@@ -4403,7 +4347,6 @@ local function UpdatePanelSize()
         end))
 
         CogWheel.Group = WheelGroup
-
         return CogWheel
     end
 
