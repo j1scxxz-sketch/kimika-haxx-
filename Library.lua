@@ -169,29 +169,6 @@ function Library:Create(Class, Properties)
     return _Instance;
 end;
 
-
--- Bump a popup frame (and all of its descendants) so it renders above the cog config
--- panel and any other UI. Also intercepts descendants added later (dropdown items,
--- context-menu options, etc.) so they get bumped too. Needed because the cog panel
--- uses a very high BASE_Z (200) which would otherwise hide every popup that is
--- parented directly to ScreenGui.
-function Library:BumpPopupZ(popup, delta)
-    local function bump(obj)
-        if obj:IsA('GuiObject') then
-            obj.ZIndex = obj.ZIndex + delta
-        end
-    end
-
-    bump(popup)
-    for _, desc in next, popup:GetDescendants() do
-        bump(desc)
-    end
-
-    popup.DescendantAdded:Connect(function(desc)
-        bump(desc)
-    end)
-end
-
 function Library:ApplyTextStroke(Inst)
     Inst.TextStrokeTransparency = 1;
 
@@ -379,7 +356,6 @@ function Library:AddToolTip(InfoStr, HoverInstance)
         IsHovering = false
         Tooltip.Visible = false
     end)
-    Library:BumpPopupZ(Tooltip, 1000)
 end
 
 function Library:OnHighlight(HighlightInstance, Instance, Properties, PropertiesDefault)
@@ -1275,9 +1251,6 @@ Library:AddToRegistry(HueBoxInner, { BackgroundColor3 = 'MainColor'; });
         ColorPicker.DisplayFrame = DisplayFrame
 
         Options[Idx] = ColorPicker;
-        
-        Library:BumpPopupZ(PickerFrameOuter, 1000)
-        Library:BumpPopupZ(ContextMenu.Container, 1000)
 
         return self;
     end;
@@ -1787,8 +1760,6 @@ PickOuter:Destroy();
         KeyPicker:Update();
 
         Options[Idx] = KeyPicker;
-        
-        Library:BumpPopupZ(ModeSelectOuter, 1000)
 
         return self;
     end;
@@ -2575,8 +2546,6 @@ elseif Input.UserInputType == Enum.UserInputType.MouseButton2 and not Library:Mo
         setmetatable(Toggle, BaseAddons);
 
         Toggles[Idx] = Toggle;
-        
-        Library:BumpPopupZ(ToggleContextOuter, 1000)
 
         Library:UpdateDependencyBoxes();
 
@@ -3345,8 +3314,6 @@ Slider:Display();
         Groupbox:Resize();
 
         Options[Idx] = Slider;
-        
-        Library:BumpPopupZ(RandOuter, 1000)
 
         return Slider;
     end;
@@ -3677,8 +3644,8 @@ local ListInner = Library:Create('Frame', {
                 });
 
                 Library:OnHighlight(Button, Button,
-                    { BorderColor3 = 'AccentColor', ZIndex = 1024 },
-                    { BorderColor3 = 'OutlineColor', ZIndex = 1023 }
+                    { BorderColor3 = 'AccentColor', ZIndex = 24 },
+                    { BorderColor3 = 'OutlineColor', ZIndex = 23 }
                 );
 
                 local Selected;
@@ -3876,8 +3843,6 @@ InputService.InputBegan:Connect(function(Input)
         Groupbox:Resize();
 
         Options[Idx] = Dropdown;
-        
-        Library:BumpPopupZ(ListOuter, 1000)
 
         return Dropdown;
     end;
