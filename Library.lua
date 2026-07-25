@@ -3980,11 +3980,11 @@ Library:AddToRegistry(Gradient, {
         end
     });
 
-    local WatermarkShade = Library:Create('Frame', {
+local WatermarkShade = Library:Create('Frame', {
         BackgroundColor3 = Color3.new(0, 0, 0);
         BorderSizePixel = 0;
         Size = UDim2.new(1, 0, 1, 0);
-        ZIndex = 204;
+        ZIndex = 202;
         Parent = InnerFrame;
     });
 
@@ -4042,9 +4042,26 @@ Library:AddToRegistry(Gradient, {
         Parent = WatermarkContent;
     });
 
-    -- .haxx suffix with wave animation (LayoutOrder keeps it last, always)
+-- .haxx suffix with wave animation (LayoutOrder keeps it last, always)
     local WatermarkSuffixLetters = { '.', 'h', 'a', 'x', 'x' };
     local WatermarkSuffixLabels = {};
+
+    local WatermarkSuffixHolder = Library:Create('Frame', {
+        BackgroundTransparency = 1;
+        Size = UDim2.new(0, 0, 1, 0);
+        AutomaticSize = Enum.AutomaticSize.X;
+        LayoutOrder = 1000;
+        ZIndex = 203;
+        Parent = WatermarkContent;
+    });
+
+    Library:Create('UIListLayout', {
+        Padding = UDim.new(0, 0);
+        FillDirection = Enum.FillDirection.Horizontal;
+        VerticalAlignment = Enum.VerticalAlignment.Center;
+        SortOrder = Enum.SortOrder.LayoutOrder;
+        Parent = WatermarkSuffixHolder;
+    });
 
     for i, Letter in next, WatermarkSuffixLetters do
         local LetterLabel = Library:Create('TextLabel', {
@@ -4057,9 +4074,9 @@ Library:AddToRegistry(Gradient, {
             AutomaticSize = Enum.AutomaticSize.X;
             Text = Letter;
             TextXAlignment = Enum.TextXAlignment.Left;
-            LayoutOrder = 1000 + i;
+            LayoutOrder = i;
             ZIndex = 203;
-            Parent = WatermarkContent;
+            Parent = WatermarkSuffixHolder;
         });
 
         Library:ApplyTextStroke(LetterLabel);
