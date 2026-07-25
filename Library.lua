@@ -4285,8 +4285,22 @@ do
             Parent = PanelScroll;
         })
 
+local WheelContainer = Library:Create('Frame', {
+            BackgroundTransparency = 1;
+            Size = UDim2.new(1, -6, 1, 0);
+            Position = UDim2.new(0, 3, 0, 0);
+            ZIndex = 18;
+            Parent = PanelScroll;
+        })
+
+        Library:Create('UIListLayout', {
+            FillDirection = Enum.FillDirection.Vertical;
+            SortOrder = Enum.SortOrder.LayoutOrder;
+            Parent = WheelContainer;
+        })
+
         local WheelGroup = {}
-        WheelGroup.Container = PanelScroll
+        WheelGroup.Container = WheelContainer
 
         local function ResizePanel()
             local contentH = PanelLayout.AbsoluteContentSize.Y
@@ -4297,8 +4311,18 @@ do
 
         PanelLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(ResizePanel)
 
+        WheelContainer:GetPropertyChangedSignal('AbsoluteSize'):Connect(ResizePanel)
+
         function WheelGroup:Resize()
-            ResizePanel()
+            local Size = 0
+            for _, Element in next, WheelGroup.Container:GetChildren() do
+                if not Element:IsA('UIListLayout') and Element.Visible then
+                    Size = Size + Element.Size.Y.Offset
+                end
+            end
+            local capped = math.clamp(Size, 20, 300)
+            PanelOuter.Size = UDim2.fromOffset(260, capped + 26)
+            PanelScroll.CanvasSize = UDim2.fromOffset(0, Size)
         end
 
         setmetatable(WheelGroup, BaseGroupbox)
