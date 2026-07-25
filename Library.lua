@@ -249,11 +249,15 @@ function Library:CreateDragOutline()
     Library:AddToRegistry(Left, { BackgroundColor3 = 'AccentColor' });
     Library:AddToRegistry(Right, { BackgroundColor3 = 'AccentColor' });
 
-    return Outline;
+return Outline;
 end;
+
+Library.DragOutline = Library:CreateDragOutline();
 
 function Library:MakeDraggable(Instance, Cutoff)
     Instance.Active = true;
+
+    local Outline = Library.DragOutline;
 
     Instance.InputBegan:Connect(function(Input)
         if Input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -266,16 +270,30 @@ function Library:MakeDraggable(Instance, Cutoff)
                 return;
             end;
 
+            local AbsSize = Instance.AbsoluteSize;
+            local LastX, LastY = Instance.AbsolutePosition.X, Instance.AbsolutePosition.Y;
+
+            Outline.Size = UDim2.fromOffset(AbsSize.X, AbsSize.Y);
+            Outline.Position = UDim2.fromOffset(LastX, LastY);
+            Outline.Visible = true;
+
             while InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
-                Instance.Position = UDim2.new(
-                    0,
-                    Mouse.X - ObjPos.X + (Instance.Size.X.Offset * Instance.AnchorPoint.X),
-                    0,
-                    Mouse.Y - ObjPos.Y + (Instance.Size.Y.Offset * Instance.AnchorPoint.Y)
-                );
+                LastX = Mouse.X - ObjPos.X;
+                LastY = Mouse.Y - ObjPos.Y;
+
+                Outline.Position = UDim2.fromOffset(LastX, LastY);
 
                 RenderStepped:Wait();
             end;
+
+            Outline.Visible = false;
+
+            Instance.Position = UDim2.new(
+                0,
+                LastX + (Instance.Size.X.Offset * Instance.AnchorPoint.X),
+                0,
+                LastY + (Instance.Size.Y.Offset * Instance.AnchorPoint.Y)
+            );
         end;
     end)
 end;
