@@ -192,7 +192,11 @@ function Library:Create(Class, Properties)
     end;
 
     for Property, Value in next, Properties do
-        _Instance[Property] = Value;
+        if Property == 'Font' and typeof(Value) == 'Font' then
+            _Instance.FontFace = Value;
+        else
+            _Instance[Property] = Value;
+        end;
     end;
 
     return _Instance;
