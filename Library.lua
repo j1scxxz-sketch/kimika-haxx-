@@ -1400,55 +1400,15 @@ local ContainerAccentBar = Library:Create('Frame', {
             BackgroundColor3 = 'AccentColor';
         }, true);
 
-        local TextHolder = Library:Create('Frame', {
-            Name = 'TextHolder';
-            BackgroundTransparency = 1;
+local ContainerLabel = Library:CreateLabel({
             AnchorPoint = Vector2.new(0.5, 0.5);
             AutomaticSize = Enum.AutomaticSize.X;
             Position = UDim2.new(0.5, 4, 0.5, 0);
             Size = UDim2.new(0, 0, 0, 14);
+            TextSize = 13;
+            TextXAlignment = Enum.TextXAlignment.Center;
             ZIndex = 107;
             Parent = ContainerRow;
-        });
-
-        Library:Create('UIListLayout', {
-            Padding = UDim.new(0, 5);
-            FillDirection = Enum.FillDirection.Horizontal;
-            VerticalAlignment = Enum.VerticalAlignment.Center;
-            SortOrder = Enum.SortOrder.LayoutOrder;
-            Parent = TextHolder;
-        });
-
-        local KeyLabel = Library:CreateLabel({
-            AutomaticSize = Enum.AutomaticSize.X;
-            Size = UDim2.new(0, 0, 1, 0);
-            TextSize = 13;
-            TextXAlignment = Enum.TextXAlignment.Left;
-            LayoutOrder = 1;
-            ZIndex = 108;
-            Parent = TextHolder;
-        },  true);
-
-        local ActionLabel = Library:CreateLabel({
-            AutomaticSize = Enum.AutomaticSize.X;
-            Size = UDim2.new(0, 0, 1, 0);
-            TextSize = 13;
-            Text = Info.Text;
-            TextXAlignment = Enum.TextXAlignment.Left;
-            LayoutOrder = 2;
-            ZIndex = 108;
-            Parent = TextHolder;
-        },  true);
-
-        local ModeLabel = Library:CreateLabel({
-            AutomaticSize = Enum.AutomaticSize.X;
-            Size = UDim2.new(0, 0, 1, 0);
-            TextSize = 13;
-            TextTransparency = 0.4;
-            TextXAlignment = Enum.TextXAlignment.Left;
-            LayoutOrder = 3;
-            ZIndex = 108;
-            Parent = TextHolder;
         },  true);
 
         local Modes = Info.Modes or { 'Always', 'Toggle', 'Hold' };
@@ -1525,14 +1485,13 @@ function KeyPicker:Update()
 
             local State = KeyPicker:GetState();
 
-            KeyLabel.Text = '[' .. KeyPicker.Value .. ']';
-            ModeLabel.Text = '(' .. KeyPicker.Mode .. ')';
+ContainerLabel.Text = string.format('[%s] %s (%s)', KeyPicker.Value, Info.Text, KeyPicker.Mode);
             ContainerRow.Visible = true;
 
             local TargetColor = State and Library.AccentColor or Library.FontColor;
             local TargetBorder = State and Library.AccentColorDark or Library.OutlineColor;
 
-            TweenService:Create(KeyLabel, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            TweenService:Create(ContainerLabel, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
                 TextColor3 = TargetColor;
             }):Play();
 
@@ -1544,7 +1503,7 @@ function KeyPicker:Update()
                 BackgroundTransparency = State and 0 or 0.6;
             }):Play();
 
-            Library.RegistryMap[KeyLabel].Properties.TextColor3 = State and 'AccentColor' or 'FontColor';
+            Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and 'AccentColor' or 'FontColor';
 
             local YSize = 0
             local XSize = 0
@@ -1553,9 +1512,9 @@ function KeyPicker:Update()
                 if Row.Name == 'KeybindRow' and Row.Visible then
                     YSize = YSize + 22;
 
-                    local Holder = Row:FindFirstChild('TextHolder');
-                    if Holder and (Holder.AbsoluteSize.X > XSize) then
-                        XSize = Holder.AbsoluteSize.X
+                    local Label = Row:FindFirstChildOfClass('TextLabel');
+                    if Label and (Label.AbsoluteSize.X > XSize) then
+                        XSize = Label.AbsoluteSize.X
                     end
                 end;
             end;
@@ -1748,9 +1707,9 @@ PickOuter:Destroy();
                 if Row.Name == 'KeybindRow' and Row.Visible then
                     YSize = YSize + 22;
 
-                    local Holder = Row:FindFirstChild('TextHolder');
-                    if Holder and (Holder.AbsoluteSize.X > XSize) then
-                        XSize = Holder.AbsoluteSize.X
+                    local Label = Row:FindFirstChildOfClass('TextLabel');
+                    if Label and (Label.AbsoluteSize.X > XSize) then
+                        XSize = Label.AbsoluteSize.X
                     end
                 end;
             end;
@@ -1787,9 +1746,9 @@ PickOuter:Destroy();
                 if Row.Name == 'KeybindRow' and Row.Visible then
                     YSize = YSize + 22;
 
-                    local Holder = Row:FindFirstChild('TextHolder');
-                    if Holder and (Holder.AbsoluteSize.X > XSize) then
-                        XSize = Holder.AbsoluteSize.X
+                    local Label = Row:FindFirstChildOfClass('TextLabel');
+                    if Label and (Label.AbsoluteSize.X > XSize) then
+                        XSize = Label.AbsoluteSize.X
                     end
                 end;
             end;
