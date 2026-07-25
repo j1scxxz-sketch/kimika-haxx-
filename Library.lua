@@ -3959,6 +3959,7 @@ InputService.InputBegan:Connect(function(Input)
         })
 
         local PanelW = Info.Width or 340
+        -- Panel ZIndex is 3, so it sits above the main window (1-2) but below popups (15+)
         local PanelOuter = Library:Create('Frame', {
             Name = 'ConfigWheelPanel';
             BackgroundColor3 = Color3.new(0, 0, 0);
@@ -3966,7 +3967,7 @@ InputService.InputBegan:Connect(function(Input)
             Position = UDim2.fromOffset(0, 0);
             Size = UDim2.fromOffset(PanelW, 20);
             Visible = false;
-            ZIndex = 150;
+            ZIndex = 3; 
             Parent = Library.ScreenGui;
         })
 
@@ -3977,7 +3978,7 @@ InputService.InputBegan:Connect(function(Input)
             BorderSizePixel = 0;
             Size = UDim2.new(1, -2, 1, -2);
             Position = UDim2.new(0, 1, 0, 1);
-            ZIndex = 151;
+            ZIndex = 4;
             Parent = PanelOuter;
         })
 
@@ -3988,7 +3989,7 @@ InputService.InputBegan:Connect(function(Input)
             BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
             Size = UDim2.new(1, 0, 0, 3);
-            ZIndex = 152;
+            ZIndex = 5;
             Parent = PanelInner;
         })
         Library:Create('UICorner', { CornerRadius = UDim.new(0, 7); Parent = PanelHighlight })
@@ -3997,7 +3998,7 @@ InputService.InputBegan:Connect(function(Input)
             BorderSizePixel = 0;
             Position = UDim2.new(0, 0, 0.5, 0);
             Size = UDim2.new(1, 0, 0.5, 0);
-            ZIndex = 152;
+            ZIndex = 5;
             Parent = PanelHighlight;
         })
         Library:AddToRegistry(PanelHighlight, { BackgroundColor3 = 'AccentColor' })
@@ -4008,11 +4009,10 @@ InputService.InputBegan:Connect(function(Input)
             TextSize = 13;
             Text = Info.Title or 'config';
             TextXAlignment = Enum.TextXAlignment.Left;
-            ZIndex = 152;
+            ZIndex = 5;
             Parent = PanelInner;
         })
 
-        -- Scrolling container for elements - MUST HAVE FIXED WIDTH SO ADDONS ALIGN
         local PanelScroll = Library:Create('ScrollingFrame', {
             BackgroundTransparency = 1;
             BorderSizePixel = 0;
@@ -4023,7 +4023,7 @@ InputService.InputBegan:Connect(function(Input)
             TopImage = '';
             ScrollBarThickness = 3;
             ScrollBarImageColor3 = Library.AccentColor;
-            ZIndex = 152;
+            ZIndex = 6;
             Parent = PanelInner;
         })
 
@@ -4055,58 +4055,13 @@ InputService.InputBegan:Connect(function(Input)
 
         setmetatable(WheelGroup, BaseGroupbox)
 
-        local function PatchZIndex(obj)
-            local mt = getmetatable(obj)
-            if not mt then return end
-            local idx = mt.__index
-            if type(idx) == "table" then
-                for MethodName, OriginalFunc in next, idx do
-                    if type(OriginalFunc) == "function" and MethodName ~= "AddDependencyBox" and MethodName ~= "AddBlank" then
-                        idx[MethodName] = function(self, ...)
-                            -- Hijack Library.Create to bump ZIndex of ScreenGui popups (Colorpickers, Dropdowns, etc)
-                            local oldCreate = Library.Create
-                            Library.Create = function(self, ...)
-                                local args = {...}
-                                local Class = args[1]
-                                local Props = args[2]
-                                
-                                if Props and Props.Parent == Library.ScreenGui and type(Class) == 'string' then
-                                    Props.ZIndex = (Props.ZIndex or 1) + 200
-                                end
-                                
-                                return oldCreate(self, ...)
-                            end
-                            
-                            local Result = OriginalFunc(self, ...)
-                            
-                            Library.Create = oldCreate
-                            
-                            -- Bump ZIndex of the main element and its descendants
-                            if type(Result) == "table" then
-                                local Outer = Result.Outer or Result.Frame or Result.Container or (Result.DisplayFrame and Result.DisplayFrame.Parent)
-                                if Outer then
-                                    for _, Desc in next, Outer:GetDescendants() do
-                                        if Desc:IsA('GuiObject') then
-                                            Desc.ZIndex = Desc.ZIndex + 200
-                                        end
-                                    end
-                                end
-                            end
-                            return Result
-                        end
-                    end
-                end
+        -- Automatically bump ZIndex by 10 so elements (5-9) become 15-19.
+        -- This makes them render above the panel background, but below popups (20+)
+        PanelScroll.DescendantAdded:Connect(function(desc)
+            if desc:IsA('GuiObject') then
+                desc.ZIndex = desc.ZIndex + 10
             end
-        end
-
-        PatchZIndex(WheelGroup)
-
-        local OriginalAddDependencyBox = WheelGroup.AddDependencyBox
-        WheelGroup.AddDependencyBox = function(...)
-            local Depbox = OriginalAddDependencyBox(...)
-            PatchZIndex(Depbox)
-            return Depbox
-        end
+        end)
 
         local function PositionPanel()
             local ap = CogOuter.AbsolutePosition
