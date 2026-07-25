@@ -4051,6 +4051,33 @@ function Funcs:AddConfigWheel(Info)
         WheelGroup.Container = PanelScroll
         WheelGroup.DependencyBoxes = {}
 
+        -- Bumps ZIndex of any new children so they render above the ZIndex 50+ panel frames
+        local function PatchZIndex(Obj)
+            local mt = getmetatable(Obj)
+            if not mt then return end
+            local idx = mt.__index
+            if type(idx) == "table" then
+                for MethodName, OriginalFunc in next, idx do
+                    if type(OriginalFunc) == "function" and MethodName ~= "AddDependencyBox" and MethodName ~= "AddBlank" then
+                        idx[MethodName] = function(self, ...)
+                            local Result = OriginalFunc(self, ...)
+                            if type(Result) == "table" then
+                                local Outer = Result.Outer or Result.Frame or Result.Container or (Result.DisplayFrame and Result.DisplayFrame.Parent)
+                                if Outer then
+                                    for _, Desc in next, Outer:GetDescendants() do
+                                        if Desc:IsA('GuiObject') then
+                                            Desc.ZIndex = Desc.ZIndex + 60
+                                        end
+                                    end
+                                end
+                            end
+                            return Result
+                        end
+                    end
+                end
+            end
+        end
+
         -- Resize panel based on content, capped at 300px tall
         local function ResizePanel()
             local contentH = PanelLayout.AbsoluteContentSize.Y
