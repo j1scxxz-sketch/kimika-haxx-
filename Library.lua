@@ -4082,11 +4082,32 @@ function Funcs:AddConfigWheel(Info)
         -- After any child is parented into PanelScroll, push its ZIndex up.
         -- We connect to PanelScroll AND PanelInner so popups that re-parent to ScreenGui
         -- from inside the panel also get caught at creation time via DescendantAdded.
-        PanelScroll.DescendantAdded:Connect(function(desc)
+PanelScroll.DescendantAdded:Connect(function(desc)
             if desc:IsA('GuiObject') and desc.ZIndex < BASE_Z then
                 desc.ZIndex = desc.ZIndex + BASE_Z
             end
         end)
+
+        -- Any popup parented directly to ScreenGui while the cog panel is open
+        -- (color picker, dropdown list, mode select, randomizer) needs its ZIndex
+        -- pushed above BASE_Z so it renders on top of the panel.
+        Library:GiveSignal(Library.ScreenGui.ChildAdded:Connect(function(child)
+            if not IsOpen then return end
+            if child == PanelOuter then return end
+            if not child:IsA('GuiObject') then return end
+
+            -- Give the engine a frame so AbsolutePosition is valid
+            task.defer(function()
+                if child.ZIndex < BASE_Z then
+                    child.ZIndex = child.ZIndex + BASE_Z
+                end
+                for _, desc in next, child:GetDescendants() do
+                    if desc:IsA('GuiObject') and desc.ZIndex < BASE_Z then
+                        desc.ZIndex = desc.ZIndex + BASE_Z
+                    end
+                end
+            end)
+        end))
 
         -- Color-picker / dropdown / mode-select popups are parented to ScreenGui, not
         -- PanelScroll, so they won't get the bump above.  We intercept them by watching
@@ -4117,8 +4138,7 @@ function Funcs:AddConfigWheel(Info)
 
         local IsOpen = false
 
-        function CogWheel:Open()
-            -- Close any other open cog panels
+function CogWheel:Open()
             for _, ch in next, Library.ScreenGui:GetChildren() do
                 if ch.Name == 'ConfigWheelPanel' and ch ~= PanelOuter then
                     ch.Visible = false
@@ -4127,11 +4147,13 @@ function Funcs:AddConfigWheel(Info)
             PositionPanel()
             ResizePanel()
             PanelOuter.Visible = true
+            Library.OpenedFrames[PanelOuter] = true
             IsOpen = true
         end
 
         function CogWheel:Close()
             PanelOuter.Visible = false
+            Library.OpenedFrames[PanelOuter] = nil
             IsOpen = false
         end
 
