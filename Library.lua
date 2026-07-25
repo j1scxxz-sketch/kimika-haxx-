@@ -1413,62 +1413,6 @@ local RemoveLabel = Library:CreateLabel({
             { TextColor3 = 'FontColor' }
         );
 
-if Info.Removable then
-            local RemoveBindLabel = Library:CreateLabel({
-                Active = false;
-                Size = UDim2.new(1, 0, 0, 15);
-                TextSize = 13;
-                Text = 'Remove Bind';
-                ZIndex = 16;
-                Parent = ModeSelectInner;
-            });
-
-            Library:OnHighlight(RemoveBindLabel, RemoveBindLabel,
-                { TextColor3 = 'RiskColor' },
-                { TextColor3 = 'FontColor' }
-            );
-
-            RemoveBindLabel.InputBegan:Connect(function(Input)
-                if Input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    ModeSelectOuter.Visible = false;
-
-                    PickOuter:Destroy();
-                    ContainerLabel:Destroy();
-                    ModeSelectOuter:Destroy();
-
-                    Options[Idx] = nil;
-
-                    if ParentObj.Addons then
-                        for i = #ParentObj.Addons, 1, -1 do
-                            if ParentObj.Addons[i] == KeyPicker then
-                                table.remove(ParentObj.Addons, i);
-                            end;
-                        end;
-                    end;
-
-                    if ParentObj.Type == 'Toggle' then
-                        ParentObj.KeybindAdded = false;
-                    end;
-
-                    local YSize = 0
-                    local XSize = 0
-
-                    for _, Label in next, Library.KeybindContainer:GetChildren() do
-                        if Label:IsA('TextLabel') and Label.Visible then
-                            YSize = YSize + 18;
-                            if (Label.TextBounds.X > XSize) then
-                                XSize = Label.TextBounds.X
-                            end
-                        end;
-                    end;
-
-                    Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 10, 210), 0, YSize + 23)
-
-                    Library:AttemptSave();
-                end;
-            end);
-        end;
-
 function KeyPicker:IsGatedByToggle()
             return ParentObj.Type == 'Toggle' and not ParentObj.Value;
         end;
@@ -2327,7 +2271,7 @@ Library:OnHighlight(ToggleRegion, ToggleStroke,
             { Color = 'Black' }
         );
 
-        local ToggleContextOuter = Library:Create('Frame', {
+ local ToggleContextOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
             Size = UDim2.new(0, 110, 0, 17);
@@ -2350,7 +2294,7 @@ Library:OnHighlight(ToggleRegion, ToggleStroke,
             BorderColor3 = 'OutlineColor';
         });
 
-        local AddKeybindLabel = Library:CreateLabel({
+        local KeybindContextLabel = Library:CreateLabel({
             Active = false;
             Size = UDim2.new(1, -8, 1, 0);
             Position = UDim2.new(0, 4, 0, 0);
@@ -2361,31 +2305,31 @@ Library:OnHighlight(ToggleRegion, ToggleStroke,
             Parent = ToggleContextInner;
         });
 
-        Library:OnHighlight(AddKeybindLabel, AddKeybindLabel,
+        Library:OnHighlight(KeybindContextLabel, KeybindContextLabel,
             { TextColor3 = 'AccentColor' },
             { TextColor3 = 'FontColor' }
         );
 
-        AddKeybindLabel.InputBegan:Connect(function(Input)
-            if Input.UserInputType == Enum.UserInputType.MouseButton1 then
-                ToggleContextOuter.Visible = false;
+        KeybindContextLabel.InputBegan:Connect(function(Input)
+            if Input.UserInputType ~= Enum.UserInputType.MouseButton1 then
+                return;
+            end;
 
-                if Toggle.KeybindAdded then
-                    return;
-                end;
+            ToggleContextOuter.Visible = false;
 
-                Toggle.KeybindAdded = true;
-
-                Library.CreateKeyPicker(Toggle, tostring(Toggle.Idx) .. '_Keybind', {
+            if Toggle.KeybindPicker then
+                Toggle.KeybindPicker:Destroy();
+                Toggle.KeybindPicker = nil;
+            else
+                Toggle.KeybindPicker = Library.CreateKeyPicker(Toggle, tostring(Toggle.Idx) .. '_Keybind', {
                     Text = Toggle.Text;
                     Default = 'None';
                     Mode = 'Toggle';
                     SyncToggleState = true;
-                    Removable = true;
                 });
-
-                Library:AttemptSave();
             end;
+
+            Library:AttemptSave();
         end);
 
         Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
