@@ -3913,7 +3913,7 @@ InputService.InputBegan:Connect(function(Input)
         return Depbox;
     end;
 
-function Funcs:AddConfigWheel(Info)
+    function Funcs:AddConfigWheel(Info)
         Info = Info or {}
 
         local ParentLabel = self.TextLabel
@@ -3959,15 +3959,16 @@ function Funcs:AddConfigWheel(Info)
             ImageColor3 = 'AccentColor';
         })
 
-        -- Panel that opens when cog is clicked
+        -- Panel that opens when cog is clicked (ZIndex 150 ensures it's above dropdowns/colorpickers)
+        local PanelW = Info.Width or 340
         local PanelOuter = Library:Create('Frame', {
             Name = 'ConfigWheelPanel';
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderSizePixel = 0;
             Position = UDim2.fromOffset(0, 0);
-            Size = UDim2.fromOffset(260, 20); -- auto grows
+            Size = UDim2.fromOffset(PanelW, 20); -- auto grows
             Visible = false;
-            ZIndex = 15;
+            ZIndex = 150;
             Parent = Library.ScreenGui;
         })
 
@@ -3981,7 +3982,7 @@ function Funcs:AddConfigWheel(Info)
             BorderSizePixel = 0;
             Size = UDim2.new(1, -2, 1, -2);
             Position = UDim2.new(0, 1, 0, 1);
-            ZIndex = 16;
+            ZIndex = 151;
             Parent = PanelOuter;
         })
 
@@ -3997,7 +3998,7 @@ function Funcs:AddConfigWheel(Info)
             BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
             Size = UDim2.new(1, 0, 0, 3);
-            ZIndex = 17;
+            ZIndex = 152;
             Parent = PanelInner;
         })
         Library:Create('UICorner', { CornerRadius = UDim.new(0, 7); Parent = PanelHighlight })
@@ -4006,7 +4007,7 @@ function Funcs:AddConfigWheel(Info)
             BorderSizePixel = 0;
             Position = UDim2.new(0, 0, 0.5, 0);
             Size = UDim2.new(1, 0, 0.5, 0);
-            ZIndex = 17;
+            ZIndex = 152;
             Parent = PanelHighlight;
         })
         Library:AddToRegistry(PanelHighlight, { BackgroundColor3 = 'AccentColor' })
@@ -4018,7 +4019,7 @@ function Funcs:AddConfigWheel(Info)
             TextSize = 13;
             Text = Info.Title or 'config';
             TextXAlignment = Enum.TextXAlignment.Left;
-            ZIndex = 17;
+            ZIndex = 152;
             Parent = PanelInner;
         })
 
@@ -4033,7 +4034,7 @@ function Funcs:AddConfigWheel(Info)
             TopImage = '';
             ScrollBarThickness = 3;
             ScrollBarImageColor3 = Library.AccentColor;
-            ZIndex = 17;
+            ZIndex = 152;
             Parent = PanelInner;
         })
 
@@ -4048,10 +4049,8 @@ function Funcs:AddConfigWheel(Info)
 
         -- The "groupbox-like" object that elements can be added to
         local WheelGroup = {}
-        WheelGroup.Container = PanelScroll
-        WheelGroup.DependencyBoxes = {}
 
-        -- Bumps ZIndex of any new children so they render above the ZIndex 50+ panel frames
+        -- Bumps ZIndex of any new children so they render above the ZIndex 150+ panel frames
         local function PatchZIndex(Obj)
             local mt = getmetatable(Obj)
             if not mt then return end
@@ -4066,7 +4065,16 @@ function Funcs:AddConfigWheel(Info)
                                 if Outer then
                                     for _, Desc in next, Outer:GetDescendants() do
                                         if Desc:IsA('GuiObject') then
-                                            Desc.ZIndex = Desc.ZIndex + 60
+                                            Desc.ZIndex = Desc.ZIndex + 160
+                                        end
+                                    end
+                                end
+                                
+                                -- Fixes alignment by stopping the horizontal UIListLayout from shrinking elements
+                                if Result.TextLabel then
+                                    for _, ch in next, Result.TextLabel:GetChildren() do
+                                        if ch:IsA('UIListLayout') then
+                                            ch:Destroy()
                                         end
                                     end
                                 end
@@ -4078,11 +4086,14 @@ function Funcs:AddConfigWheel(Info)
             end
         end
 
+        WheelGroup.Container = PanelScroll
+        WheelGroup.DependencyBoxes = {}
+
         -- Resize panel based on content, capped at 300px tall
         local function ResizePanel()
             local contentH = PanelLayout.AbsoluteContentSize.Y
             local capped = math.clamp(contentH, 20, 300)
-            PanelOuter.Size = UDim2.fromOffset(260, capped + 26)
+            PanelOuter.Size = UDim2.fromOffset(PanelW, capped + 26)
             PanelScroll.CanvasSize = UDim2.fromOffset(0, contentH)
         end
 
@@ -4142,27 +4153,9 @@ function Funcs:AddConfigWheel(Info)
             PositionPanel()
             ResizePanel()
             PanelOuter.Visible = true
+            -- CRITICAL FIX: We must pass the Instance, not a table, so MouseIsOverOpenedFrame works correctly!
             Library.OpenedFrames[PanelOuter] = true
             IsOpen = true
-
-            -- Fixes click detection by telling the library to ignore clicks outside the panel
-            local AbsPos = PanelOuter.AbsolutePosition
-            local AbsSize = PanelOuter.AbsoluteSize
-            Library.OpenedFrames[PanelOuter] = {
-                AbsolutePosition = AbsPos,
-                AbsoluteSize = AbsSize
-            }
-            
-            -- Keep the stored position/size updated while open
-            task.spawn(function()
-                while IsOpen do
-                    if PanelOuter.Visible then
-                        Library.OpenedFrames[PanelOuter].AbsolutePosition = PanelOuter.AbsolutePosition
-                        Library.OpenedFrames[PanelOuter].AbsoluteSize = PanelOuter.AbsoluteSize
-                    end
-                    RunService.Heartbeat:Wait()
-                end
-            end)
         end
 
         function CogWheel:Close()
@@ -4201,259 +4194,6 @@ function Funcs:AddConfigWheel(Info)
 
         CogWheel.Group = WheelGroup
 
-        return CogWheel
-    end
-
-    BaseGroupbox.__index = Funcs;
-    BaseGroupbox.__namecall = function(Table, Key, ...)
-        return Funcs[Key](...);
-    end;
-end;
-
-do
-    local function AddConfigWheel(self, Info)
-        Info = Info or {}
-
-        local ParentLabel = self.TextLabel
-        if not ParentLabel then return end
-
-        local CogWheel = { Type = 'ConfigWheel' }
-
-        local CogOuter = Library:Create('Frame', {
-            BackgroundColor3 = Color3.new(0, 0, 0);
-            BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(0, 15, 0, 15);
-            ZIndex = 6;
-            Parent = ParentLabel;
-        })
-
-        local CogInner = Library:Create('Frame', {
-            BackgroundColor3 = Library.BackgroundColor;
-            BorderColor3 = Library.OutlineColor;
-            BorderMode = Enum.BorderMode.Inset;
-            Size = UDim2.new(1, 0, 1, 0);
-            ZIndex = 7;
-            Parent = CogOuter;
-        })
-
-        Library:AddToRegistry(CogInner, {
-            BackgroundColor3 = 'BackgroundColor';
-            BorderColor3 = 'OutlineColor';
-        })
-
-        local CogImage = Library:Create('ImageLabel', {
-            BackgroundTransparency = 1;
-            Image = 'rbxthumb://type=Asset&id=6793572216&w=420&h=420';
-            ImageColor3 = Library.AccentColor;
-            Size = UDim2.new(1, 0, 1, 0);
-            ZIndex = 8;
-            Parent = CogInner;
-        })
-
-        Library:AddToRegistry(CogImage, { ImageColor3 = 'AccentColor' })
-
-        -- Outer black border frame
-        local PanelOuter = Library:Create('Frame', {
-            Name = 'ConfigWheelPanel';
-            BackgroundColor3 = Color3.new(0, 0, 0);
-            BorderSizePixel = 0;
-            Position = UDim2.fromOffset(0, 0);
-            Size = UDim2.fromOffset(260, 100);
-            Visible = false;
-            ZIndex = 50;
-            Parent = Library.ScreenGui;
-        })
-
-        Library:Create('UICorner', { CornerRadius = UDim.new(0, 8); Parent = PanelOuter })
-
-        local PanelInner = Library:Create('Frame', {
-            BackgroundColor3 = Library.BackgroundColor;
-            BorderSizePixel = 0;
-            Size = UDim2.new(1, -2, 1, -2);
-            Position = UDim2.new(0, 1, 0, 1);
-            ZIndex = 51;
-            Parent = PanelOuter;
-        })
-
-        Library:Create('UICorner', { CornerRadius = UDim.new(0, 7); Parent = PanelInner })
-        Library:AddToRegistry(PanelInner, { BackgroundColor3 = 'BackgroundColor' })
-
-        -- Accent bar at top
-        local PanelHighlight = Library:Create('Frame', {
-            BackgroundColor3 = Library.AccentColor;
-            BorderSizePixel = 0;
-            Size = UDim2.new(1, 0, 0, 3);
-            ZIndex = 52;
-            Parent = PanelInner;
-        })
-        Library:Create('UICorner', { CornerRadius = UDim.new(0, 7); Parent = PanelHighlight })
-        Library:Create('Frame', {
-            BackgroundColor3 = Library.AccentColor;
-            BorderSizePixel = 0;
-            Position = UDim2.new(0, 0, 0.5, 0);
-            Size = UDim2.new(1, 0, 0.5, 0);
-            ZIndex = 52;
-            Parent = PanelHighlight;
-        })
-        Library:AddToRegistry(PanelHighlight, { BackgroundColor3 = 'AccentColor' })
-
-        -- Title
-        Library:CreateLabel({
-            Position = UDim2.fromOffset(8, 4);
-            Size = UDim2.new(1, -16, 0, 14);
-            TextSize = 13;
-            Text = Info.Title or 'config';
-            TextXAlignment = Enum.TextXAlignment.Left;
-            ZIndex = 52;
-            Parent = PanelInner;
-        })
-
-        -- Container that elements go into, same as a groupbox Container
-        local ElementContainer = Library:Create('Frame', {
-            BackgroundTransparency = 1;
-            Position = UDim2.fromOffset(3, 20);
-            Size = UDim2.new(1, -6, 0, 0);
-            ZIndex = 52;
-            Parent = PanelInner;
-        })
-
-        local ElementLayout = Library:Create('UIListLayout', {
-            FillDirection = Enum.FillDirection.Vertical;
-            SortOrder = Enum.SortOrder.LayoutOrder;
-            Parent = ElementContainer;
-        })
-
-        -- Auto resize panel whenever content changes
-        ElementLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
-            local h = ElementLayout.AbsoluteContentSize.Y
-            ElementContainer.Size = UDim2.new(1, -6, 0, h)
-            PanelInner.Size = UDim2.new(1, -2, 0, h + 22)
-            PanelOuter.Size = UDim2.fromOffset(260, h + 24)
-        end)
-
-        -- The "groupbox-like" object that elements can be added to
-        local WheelGroup = {}
-
-        -- Bumps ZIndex of any new children so they render above the ZIndex 50+ panel frames
-         local function PatchZIndex(Obj)
-            local mt = getmetatable(Obj)
-            if not mt then return end
-            local idx = mt.__index
-            if type(idx) == "table" then
-                for MethodName, OriginalFunc in next, idx do
-                    if type(OriginalFunc) == "function" and MethodName ~= "AddDependencyBox" and MethodName ~= "AddBlank" then
-                        idx[MethodName] = function(self, ...)
-                            local Result = OriginalFunc(self, ...)
-                            if type(Result) == "table" then
-                                local Outer = Result.Outer or Result.Frame or Result.Container or (Result.DisplayFrame and Result.DisplayFrame.Parent)
-                                if Outer then
-                                    for _, Desc in next, Outer:GetDescendants() do
-                                        if Desc:IsA('GuiObject') then
-                                            Desc.ZIndex = Desc.ZIndex + 60
-                                        end
-                                    end
-                                end
-                                
-                                -- Fixes alignment by stopping the horizontal UIListLayout from shrinking elements
-                                if Result.TextLabel then
-                                    for _, ch in next, Result.TextLabel:GetChildren() do
-                                        if ch:IsA('UIListLayout') then
-                                            ch:Destroy()
-                                        end
-                                    end
-                                end
-                            end
-                            return Result
-                        end
-                    end
-                end
-            end
-        end
-
-        WheelGroup.Container = ElementContainer
-
-        function WheelGroup:Resize()
-            local h = ElementLayout.AbsoluteContentSize.Y
-            ElementContainer.Size = UDim2.new(1, -6, 0, h)
-            PanelInner.Size = UDim2.new(1, -2, 0, h + 22)
-            PanelOuter.Size = UDim2.fromOffset(260, h + 24)
-        end
-
-        setmetatable(WheelGroup, BaseGroupbox)
-
-        local function PositionPanel()
-            local ap = CogOuter.AbsolutePosition
-            local as = CogOuter.AbsoluteSize
-            local screenSize = Library.ScreenGui.AbsoluteSize
-            local x = ap.X + as.X + 4
-            local y = ap.Y
-            if x + 260 > screenSize.X then x = ap.X - 264 end
-            if y + PanelOuter.AbsoluteSize.Y > screenSize.Y then
-                y = screenSize.Y - PanelOuter.AbsoluteSize.Y - 4
-            end
-            PanelOuter.Position = UDim2.fromOffset(x, y)
-        end
-
-        CogOuter:GetPropertyChangedSignal('AbsolutePosition'):Connect(function()
-            if PanelOuter.Visible then PositionPanel() end
-        end)
-
-local IsOpen = false
-        local ZIndexBumped = false
-
-        local function BumpZIndex(Instance, Offset)
-            for _, Desc in next, Instance:GetDescendants() do
-                if Desc:IsA('GuiObject') then
-                    Desc.ZIndex = Desc.ZIndex + Offset
-                end
-            end
-        end
-
-        function CogWheel:Open()
-            for _, ch in next, Library.ScreenGui:GetChildren() do
-                if ch.Name == 'ConfigWheelPanel' and ch ~= PanelOuter then
-                    ch.Visible = false
-                    Library.OpenedFrames[ch] = nil
-                end
-            end
-
-            if not ZIndexBumped then
-                BumpZIndex(ElementContainer, 50)
-                ZIndexBumped = true
-            end
-
-            PositionPanel()
-            PanelOuter.Visible = true
-            Library.OpenedFrames[PanelOuter] = true
-            IsOpen = true
-        end
-
-        function CogWheel:Close()
-            PanelOuter.Visible = false
-            Library.OpenedFrames[PanelOuter] = nil
-            IsOpen = false
-        end
-
-        CogOuter.InputBegan:Connect(function(Input)
-            if Input.UserInputType == Enum.UserInputType.MouseButton1
-                and not Library:MouseIsOverOpenedFrame() then
-                if IsOpen then CogWheel:Close() else CogWheel:Open() end
-            end
-        end)
-
-        Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
-            if Input.UserInputType == Enum.UserInputType.MouseButton1 and IsOpen then
-                local ap, as = PanelOuter.AbsolutePosition, PanelOuter.AbsoluteSize
-                if Mouse.X < ap.X or Mouse.X > ap.X + as.X
-                    or Mouse.Y < ap.Y or Mouse.Y > ap.Y + as.Y then
-                    if not Library:IsMouseOverFrame(CogOuter) then
-                        CogWheel:Close()
-                    end
-                end
-            end
-        end))
-
-        CogWheel.Group = WheelGroup
         return CogWheel
     end
 
