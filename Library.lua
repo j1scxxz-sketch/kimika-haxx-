@@ -8,35 +8,6 @@ local TweenService = game:GetService('TweenService');
 local RenderStepped = RunService.RenderStepped;
 local LocalPlayer = Players.LocalPlayer;
 local Mouse = LocalPlayer:GetMouse();
-local HttpService = game:GetService('HttpService');
-
-local FontFolder = 'font for kimika thing';
-
-if not isfolder(FontFolder) then
-    makefolder(FontFolder);
-end;
-
-if not isfile(FontFolder .. '/Tahoma.ttf') then
-    writefile(FontFolder .. '/Tahoma.ttf', game:HttpGet('https://github.com/LuckyHub1/LuckyHub/raw/main/zekton_rg.ttf'));
-end;
-
-if not isfile(FontFolder .. '/Tahoma.font') then
-    local TahomaFontConfig = {
-        name = 'Tahoma';
-        faces = {
-            {
-                name = 'Regular';
-                weight = 400;
-                style = 'normal';
-                assetId = getcustomasset(FontFolder .. '/Tahoma.ttf');
-            };
-        };
-    };
-
-    writefile(FontFolder .. '/Tahoma.font', HttpService:JSONEncode(TahomaFontConfig));
-end;
-
-local TahomaFont = Font.new(getcustomasset(FontFolder .. '/Tahoma.font'), Enum.FontWeight.Regular);
 
 local ProtectGui = protectgui or (syn and syn.protect_gui) or (function() end);
 
@@ -66,7 +37,7 @@ local Library = {
     RiskColor = Color3.fromRGB(255, 50, 50),
 
     Black = Color3.new(0, 0, 0);
-    Font = TahomaFont,
+    Font = Enum.Font.Code,
 
     OpenedFrames = {};
     DependencyBoxes = {};
@@ -192,11 +163,7 @@ function Library:Create(Class, Properties)
     end;
 
     for Property, Value in next, Properties do
-        if Property == 'Font' and typeof(Value) == 'Font' then
-            _Instance.FontFace = Value;
-        else
-            _Instance[Property] = Value;
-        end;
+        _Instance[Property] = Value;
     end;
 
     return _Instance;
@@ -3336,7 +3303,7 @@ Library:AddToRegistry(Gradient, {
             NumberSequenceKeypoint.new(0, 1);
             NumberSequenceKeypoint.new(1, 0.65);
         });
-        Rotation = 90;
+        Rotation = -90;
         Parent = WatermarkShade;
     });
 
@@ -3431,6 +3398,24 @@ local KeybindLabelWidth = select(1, Library:GetTextBounds('Keybinds', Library.Fo
     Library:AddToRegistry(KeybindInner, {
         BackgroundColor3 = 'BackgroundColor';
     }, true);
+
+    local KeybindBgShade = Library:Create('Frame', {
+        BackgroundColor3 = Color3.new(0, 0, 0);
+        BorderSizePixel = 0;
+        Size = UDim2.new(1, 0, 1, 0);
+        ZIndex = 100;
+        Parent = KeybindInner;
+    });
+
+    Library:Create('UIGradient', {
+        Color = ColorSequence.new(Color3.new(0, 0, 0));
+        Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.85);
+            NumberSequenceKeypoint.new(1, 1);
+        });
+        Rotation = -90;
+        Parent = KeybindBgShade;
+    });
 
     local KeybindHighlightLeft = Library:Create('Frame', {
         BackgroundColor3 = Library.AccentColor;
@@ -3769,6 +3754,24 @@ local Inner = Library:Create('Frame', {
 
     Library:AddToRegistry(Inner, {
         BackgroundColor3 = 'MainColor';
+    });
+
+    local InnerShade = Library:Create('Frame', {
+        BackgroundColor3 = Color3.new(0, 0, 0);
+        BorderSizePixel = 0;
+        Size = UDim2.new(1, 0, 1, 0);
+        ZIndex = 1;
+        Parent = Inner;
+    });
+
+    Library:Create('UIGradient', {
+        Color = ColorSequence.new(Color3.new(0, 0, 0));
+        Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.88);
+            NumberSequenceKeypoint.new(1, 1);
+        });
+        Rotation = -90;
+        Parent = InnerShade;
     });
 
  local HasSubtitle = type(Config.Subtitle) == 'string' and #Config.Subtitle > 0;
