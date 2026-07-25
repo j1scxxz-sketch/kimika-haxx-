@@ -1769,11 +1769,15 @@ Library.CreateKeyPicker = Funcs.AddKeyPicker;
 
     BaseAddons.__index = Funcs;
     BaseAddons.__namecall = function(Table, Key, ...)
+
         return Funcs[Key](...);
     end;
+    setmetatable(BaseAddons, BaseAddons); -- Add this to ensure the metatable is properly set
 end;
 
 local BaseGroupbox = {};
+
+BaseGroupbox.__index = BaseGroupbox; -- Add this to prevent the nil error!
 
 do
     local Funcs = {};
@@ -4200,8 +4204,8 @@ InputService.InputBegan:Connect(function(Input)
     end
 
     -- Properly attach the function to the groupbox/addons
-    BaseAddons.AddConfigWheel = Funcs.AddConfigWheel
-    BaseGroupbox.AddConfigWheel = Funcs.AddConfigWheel
+    BaseAddons.__index.AddConfigWheel = Funcs.AddConfigWheel
+    BaseGroupbox.__index.AddConfigWheel = Funcs.AddConfigWheel
 end
 
 -- < Create other UI elements >
