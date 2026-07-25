@@ -4082,37 +4082,11 @@ function Funcs:AddConfigWheel(Info)
         -- After any child is parented into PanelScroll, push its ZIndex up.
         -- We connect to PanelScroll AND PanelInner so popups that re-parent to ScreenGui
         -- from inside the panel also get caught at creation time via DescendantAdded.
-PanelScroll.DescendantAdded:Connect(function(desc)
+        PanelScroll.DescendantAdded:Connect(function(desc)
             if desc:IsA('GuiObject') and desc.ZIndex < BASE_Z then
                 desc.ZIndex = desc.ZIndex + BASE_Z
             end
         end)
-
--- Boost any popup that ScreenGui receives while the cog panel is open.
-        -- Use BASE_Z * 2 so popups always beat the panel (BASE_Z + its children).
-        local POPUP_Z = BASE_Z * 2  -- 400
-
-        Library:GiveSignal(Library.ScreenGui.ChildAdded:Connect(function(child)
-            if not IsOpen then return end
-            if child == PanelOuter then return end
-            if not child:IsA('GuiObject') then return end
-
-            task.defer(function()
-                if not child.Parent then return end  -- already destroyed
-                child.ZIndex = POPUP_Z
-                for _, desc in next, child:GetDescendants() do
-                    if desc:IsA('GuiObject') then
-                        desc.ZIndex = desc.ZIndex - BASE_Z + POPUP_Z
-                    end
-                end
-                -- Also watch for descendants added after defer (e.g. dropdown buttons built lazily)
-                child.DescendantAdded:Connect(function(desc)
-                    if desc:IsA('GuiObject') and desc.ZIndex < POPUP_Z then
-                        desc.ZIndex = desc.ZIndex + POPUP_Z
-                    end
-                end)
-            end)
-        end))
 
         -- Color-picker / dropdown / mode-select popups are parented to ScreenGui, not
         -- PanelScroll, so they won't get the bump above.  We intercept them by watching
@@ -4143,7 +4117,8 @@ PanelScroll.DescendantAdded:Connect(function(desc)
 
         local IsOpen = false
 
-function CogWheel:Open()
+        function CogWheel:Open()
+            -- Close any other open cog panels
             for _, ch in next, Library.ScreenGui:GetChildren() do
                 if ch.Name == 'ConfigWheelPanel' and ch ~= PanelOuter then
                     ch.Visible = false
