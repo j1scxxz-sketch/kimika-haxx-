@@ -3921,11 +3921,9 @@ InputService.InputBegan:Connect(function(Input)
         local ParentLabel = self.TextLabel
         if not ParentLabel then return end
 
-        local CogWheel = {
-            Type = 'ConfigWheel',
-        }
+        local CogWheel = { Type = 'ConfigWheel' }
 
-        -- Cog icon button next to the toggle label
+        -- Cog Icon Button
         local CogOuter = Library:Create('Frame', {
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderColor3 = Color3.new(0, 0, 0);
@@ -3943,11 +3941,6 @@ InputService.InputBegan:Connect(function(Input)
             Parent = CogOuter;
         })
 
-        Library:AddToRegistry(CogInner, {
-            BackgroundColor3 = 'BackgroundColor';
-            BorderColor3 = 'OutlineColor';
-        })
-
         local CogImage = Library:Create('ImageLabel', {
             BackgroundTransparency = 1;
             Image = 'rbxthumb://type=Asset&id=6793572216&w=420&h=420';
@@ -3957,27 +3950,20 @@ InputService.InputBegan:Connect(function(Input)
             Parent = CogInner;
         })
 
-        Library:AddToRegistry(CogImage, {
-            ImageColor3 = 'AccentColor';
-        })
-
-        -- Panel that opens when cog is clicked (ZIndex 150 ensures it's above dropdowns/colorpickers)
+        -- Config Panel
         local PanelW = Info.Width or 340
         local PanelOuter = Library:Create('Frame', {
             Name = 'ConfigWheelPanel';
             BackgroundColor3 = Color3.new(0, 0, 0);
             BorderSizePixel = 0;
             Position = UDim2.fromOffset(0, 0);
-            Size = UDim2.fromOffset(PanelW, 20); -- auto grows
+            Size = UDim2.fromOffset(PanelW, 20);
             Visible = false;
-            ZIndex = 150;
+            ZIndex = 150; -- High ZIndex so it sits above everything else
             Parent = Library.ScreenGui;
         })
 
-        Library:Create('UICorner', {
-            CornerRadius = UDim.new(0, 8);
-            Parent = PanelOuter;
-        })
+        Library:Create('UICorner', { CornerRadius = UDim.new(0, 8); Parent = PanelOuter })
 
         local PanelInner = Library:Create('Frame', {
             BackgroundColor3 = Library.BackgroundColor;
@@ -3988,11 +3974,7 @@ InputService.InputBegan:Connect(function(Input)
             Parent = PanelOuter;
         })
 
-        Library:Create('UICorner', {
-            CornerRadius = UDim.new(0, 7);
-            Parent = PanelInner;
-        })
-
+        Library:Create('UICorner', { CornerRadius = UDim.new(0, 7); Parent = PanelInner })
         Library:AddToRegistry(PanelInner, { BackgroundColor3 = 'BackgroundColor' })
 
         -- Accent top bar
@@ -4014,8 +3996,8 @@ InputService.InputBegan:Connect(function(Input)
         })
         Library:AddToRegistry(PanelHighlight, { BackgroundColor3 = 'AccentColor' })
 
-        -- Title label in panel
-        local PanelTitle = Library:CreateLabel({
+        -- Title
+        Library:CreateLabel({
             Position = UDim2.fromOffset(8, 5);
             Size = UDim2.new(1, -16, 0, 14);
             TextSize = 13;
@@ -4049,40 +4031,11 @@ InputService.InputBegan:Connect(function(Input)
             Parent = PanelScroll;
         })
 
-        -- The "groupbox-like" object that elements can be added to
+        -- The fake "Groupbox" that elements get added to
         local WheelGroup = {}
-
-        -- Bumps ZIndex of any new children so they render above the ZIndex 150+ panel frames
-        local function PatchZIndex(Obj)
-            local mt = getmetatable(Obj)
-            if not mt then return end
-            local idx = mt.__index
-            if type(idx) == "table" then
-                for MethodName, OriginalFunc in next, idx do
-                    if type(OriginalFunc) == "function" and MethodName ~= "AddDependencyBox" and MethodName ~= "AddBlank" then
-                        idx[MethodName] = function(self, ...)
-                            local Result = OriginalFunc(self, ...)
-                            if type(Result) == "table" then
-                                local Outer = Result.Outer or Result.Frame or Result.Container or (Result.DisplayFrame and Result.DisplayFrame.Parent)
-                                if Outer then
-                                    for _, Desc in next, Outer:GetDescendants() do
-                                        if Desc:IsA('GuiObject') then
-                                            Desc.ZIndex = Desc.ZIndex + 160
-                                        end
-                                    end
-                                end
-                            end
-                            return Result
-                        end
-                    end
-                end
-            end
-        end
-
         WheelGroup.Container = PanelScroll
         WheelGroup.DependencyBoxes = {}
 
-        -- Resize panel based on content, capped at 300px tall
         local function ResizePanel()
             local contentH = PanelLayout.AbsoluteContentSize.Y
             local capped = math.clamp(contentH, 20, 300)
@@ -4097,16 +4050,61 @@ InputService.InputBegan:Connect(function(Input)
         end
 
         setmetatable(WheelGroup, BaseGroupbox)
-        PatchZIndex(WheelGroup)
 
+        -- Intercept element creation to bump ZIndex so they appear above the panel
+        local mt = getmetatable(WheelGroup)
+        local idx = mt.__index
+        if type(idx) == "table" then
+            for MethodName, OriginalFunc in next, idx do
+                if type(OriginalFunc) == "function" and MethodName ~= "AddDependencyBox" and MethodName ~= "AddBlank" then
+                    idx[MethodName] = function(self, ...)
+                        local Result = OriginalFunc(self, ...)
+                        if type(Result) == "table" then
+                            local Outer = Result.Outer or Result.Frame or Result.Container or (Result.DisplayFrame and Result.DisplayFrame.Parent)
+                            if Outer then
+                                for _, Desc in next, Outer:GetDescendants() do
+                                    if Desc:IsA('GuiObject') then
+                                        Desc.ZIndex = Desc.ZIndex + 200
+                                    end
+                                end
+                            end
+                        end
+                        return Result
+                    end
+                end
+            end
+        end
+
+        -- Hook into DependencyBox so its elements also get the ZIndex bump
         local OriginalAddDependencyBox = WheelGroup.AddDependencyBox
         WheelGroup.AddDependencyBox = function(...)
             local Depbox = OriginalAddDependencyBox(...)
-            PatchZIndex(Depbox)
+            local dep_mt = getmetatable(Depbox)
+            local dep_idx = dep_mt.__index
+            if type(dep_idx) == "table" then
+                for MethodName, OriginalFunc in next, dep_idx do
+                    if type(OriginalFunc) == "function" and MethodName ~= "AddBlank" then
+                        dep_idx[MethodName] = function(self, ...)
+                            local Result = OriginalFunc(self, ...)
+                            if type(Result) == "table" then
+                                local Outer = Result.Outer or Result.Frame or Result.Container or (Result.DisplayFrame and Result.DisplayFrame.Parent)
+                                if Outer then
+                                    for _, Desc in next, Outer:GetDescendants() do
+                                        if Desc:IsA('GuiObject') then
+                                            Desc.ZIndex = Desc.ZIndex + 200
+                                        end
+                                    end
+                                end
+                            end
+                            return Result
+                        end
+                    end
+                end
+            end
             return Depbox
         end
 
-        -- Position panel near the cog icon
+        -- Panel positioning logic
         local function PositionPanel()
             local ap = CogOuter.AbsolutePosition
             local as = CogOuter.AbsoluteSize
@@ -4117,26 +4115,21 @@ InputService.InputBegan:Connect(function(Input)
             local x = ap.X + as.X + 4
             local y = ap.Y
 
-            -- Clamp to screen
-            if x + panelW > screenSize.X then
-                x = ap.X - panelW - 4
-            end
-            if y + panelH > screenSize.Y then
-                y = screenSize.Y - panelH - 4
-            end
+            if x + panelW > screenSize.X then x = ap.X - panelW - 4 end
+            if y + panelH > screenSize.Y then y = screenSize.Y - panelH - 4 end
+            if y < 0 then y = 0 end
 
             PanelOuter.Position = UDim2.fromOffset(x, y)
         end
 
         CogOuter:GetPropertyChangedSignal('AbsolutePosition'):Connect(function()
-            if PanelOuter.Visible then
-                PositionPanel()
-            end
+            if PanelOuter.Visible then PositionPanel() end
         end)
 
         local IsOpen = false
 
         function CogWheel:Open()
+            -- Close any other open panels
             for _, ch in next, Library.ScreenGui:GetChildren() do
                 if ch.Name == 'ConfigWheelPanel' and ch ~= PanelOuter then
                     ch.Visible = false
@@ -4155,25 +4148,21 @@ InputService.InputBegan:Connect(function(Input)
 
         CogOuter.InputBegan:Connect(function(Input)
             if Input.UserInputType == Enum.UserInputType.MouseButton1 and not Library:MouseIsOverOpenedFrame() then
-                if IsOpen then
-                    CogWheel:Close()
-                else
-                    CogWheel:Open()
-                end
+                if IsOpen then CogWheel:Close() else CogWheel:Open() end
             end
         end)
 
-        -- Hover highlight
+        -- Hover highlight for the cog icon
         Library:OnHighlight(CogOuter, CogImage,
             { ImageColor3 = function() return Library:GetBrighterColor(Library.AccentColor) end },
             { ImageColor3 = 'AccentColor' }
         )
 
+        -- Click outside to close
         Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
             if Input.UserInputType == Enum.UserInputType.MouseButton1 and IsOpen then
                 local ap, as = PanelOuter.AbsolutePosition, PanelOuter.AbsoluteSize
-                if Mouse.X < ap.X or Mouse.X > ap.X + as.X
-                    or Mouse.Y < ap.Y or Mouse.Y > ap.Y + as.Y then
+                if Mouse.X < ap.X or Mouse.X > ap.X + as.X or Mouse.Y < ap.Y or Mouse.Y > ap.Y + as.Y then
                     if not Library:IsMouseOverFrame(CogOuter) then
                         CogWheel:Close()
                     end
@@ -4182,17 +4171,15 @@ InputService.InputBegan:Connect(function(Input)
         end))
 
         CogWheel.Group = WheelGroup
-
         return CogWheel
     end
 
     BaseGroupbox.__index = Funcs;
     BaseGroupbox.__namecall = function(Table, Key, ...)
-
         return Funcs[Key](...);
     end;
 
-    -- Attach AddConfigWheel to BaseAddons directly without a wrapper
+    -- Properly attach the function to addons so Toggles can use it
     BaseAddons.__index.AddConfigWheel = Funcs.AddConfigWheel
 end
 
