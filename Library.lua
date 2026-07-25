@@ -4745,7 +4745,7 @@ local TabButtonWidth = Library:GetTextBounds(Name, Library.Font, 13);
             BackgroundColor3 = 'AccentColor';
         });
 
-local TabButtonLabel = Library:CreateLabel({
+        local TabButtonLabel = Library:CreateLabel({
             Size = UDim2.new(1, 0, 1, 0);
             Text = Name;
             TextSize = 13;
@@ -4755,23 +4755,7 @@ local TabButtonLabel = Library:CreateLabel({
             Parent = TabButton;
         });
 
-        local TabLabelScale = Library:Create('UIScale', {
-            Scale = 1;
-            Parent = TabButtonLabel;
-        });
-
-        local TabGlowStroke = Library:Create('UIStroke', {
-            Color = Library.AccentColor;
-            Thickness = 2;
-            Transparency = 1;
-            Parent = TabButtonLabel;
-        });
-
-        Library:AddToRegistry(TabGlowStroke, {
-            Color = 'AccentColor';
-        });
-
-        local TabIsActive = false;
+local TabIsActive = false;
 
 local TabFrame = Library:Create('Frame', {
             Name = 'TabFrame',
@@ -4836,22 +4820,13 @@ function Tab:ShowTab()
                 Tab:HideTab();
             end;
 
-TabIsActive = true;
+            TabIsActive = true;
 
             TabButtonLabel.TextColor3 = Library.AccentColor;
             Library.RegistryMap[TabButtonLabel].Properties.TextColor3 = 'AccentColor';
 
             TweenService:Create(TabBackground, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
                 BackgroundTransparency = 0.85;
-            }):Play();
-
-            TabLabelScale.Scale = 0.85;
-            TweenService:Create(TabLabelScale, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-                Scale = 1;
-            }):Play();
-
-            TweenService:Create(TabGlowStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Transparency = 0.4;
             }):Play();
 
             TabFrame.Visible = true;
@@ -4881,12 +4856,8 @@ function Tab:HideTab()
             TabButtonLabel.TextColor3 = Library.FontColor;
             Library.RegistryMap[TabButtonLabel].Properties.TextColor3 = 'FontColor';
 
-TweenService:Create(TabBackground, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            TweenService:Create(TabBackground, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
                 BackgroundTransparency = 1;
-            }):Play();
-
-            TweenService:Create(TabGlowStroke, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Transparency = 1;
             }):Play();
 
             TabFrame.Visible = false;
