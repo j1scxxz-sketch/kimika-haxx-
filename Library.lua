@@ -4198,7 +4198,7 @@ InputService.InputBegan:Connect(function(Input)
     end
 
     -- Properly attach the function to the groupbox/addons
-    BaseAddons.__index.AddConfigWheel = Funcs.AddConfigWheel
+    BaseAddons.AddConfigWheel = Funcs.AddConfigWheel
     BaseGroupbox.__index.AddConfigWheel = Funcs.AddConfigWheel
 end
 
