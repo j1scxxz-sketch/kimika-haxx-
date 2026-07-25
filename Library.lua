@@ -4837,12 +4837,8 @@ function Tab:ShowTab()
 
             TabIsActive = true;
 
-            TabButtonLabel.TextColor3 = Library.AccentColor;
+TabButtonLabel.TextColor3 = Library.AccentColor;
             Library.RegistryMap[TabButtonLabel].Properties.TextColor3 = 'AccentColor';
-
-            TabButtonStroke.Color = Library.AccentColor;
-            Library.RegistryMap[TabButtonStroke].Properties.Color = 'AccentColor';
-            TabButtonStroke.Thickness = 1.5;
 
             TabFrame.Visible = true;
 
@@ -4868,12 +4864,8 @@ function Tab:ShowTab()
 function Tab:HideTab()
             TabIsActive = false;
 
-            TabButtonLabel.TextColor3 = Library.FontColor;
+TabButtonLabel.TextColor3 = Library.FontColor;
             Library.RegistryMap[TabButtonLabel].Properties.TextColor3 = 'FontColor';
-
-            TabButtonStroke.Color = Library.OutlineColor;
-            Library.RegistryMap[TabButtonStroke].Properties.Color = 'OutlineColor';
-            TabButtonStroke.Thickness = 1;
 
             TabFrame.Visible = false;
         end;
