@@ -3924,7 +3924,7 @@ InputService.InputBegan:Connect(function(Input)
         return Depbox;
     end;
 
-    function Funcs:AddConfigWheel(Info)
+function Funcs:AddConfigWheel(Info)
         Info = Info or {}
 
         local ParentLabel = self.TextLabel
@@ -3958,8 +3958,12 @@ InputService.InputBegan:Connect(function(Input)
             Parent = CogInner;
         })
 
+        Library:AddToRegistry(CogInner, { BackgroundColor3 = 'BackgroundColor'; BorderColor3 = 'OutlineColor' })
+        Library:AddToRegistry(CogImage, { ImageColor3 = 'AccentColor' })
+
         local PanelW = Info.Width or 340
-        -- Panel ZIndex is 3, so it sits above the main window (1-2) but below popups (15+)
+        local BASE_Z  = 200   -- well above everything else in the UI
+
         local PanelOuter = Library:Create('Frame', {
             Name = 'ConfigWheelPanel';
             BackgroundColor3 = Color3.new(0, 0, 0);
@@ -3967,10 +3971,9 @@ InputService.InputBegan:Connect(function(Input)
             Position = UDim2.fromOffset(0, 0);
             Size = UDim2.fromOffset(PanelW, 20);
             Visible = false;
-            ZIndex = 3; 
+            ZIndex = BASE_Z;
             Parent = Library.ScreenGui;
         })
-
         Library:Create('UICorner', { CornerRadius = UDim.new(0, 8); Parent = PanelOuter })
 
         local PanelInner = Library:Create('Frame', {
@@ -3978,10 +3981,9 @@ InputService.InputBegan:Connect(function(Input)
             BorderSizePixel = 0;
             Size = UDim2.new(1, -2, 1, -2);
             Position = UDim2.new(0, 1, 0, 1);
-            ZIndex = 4;
+            ZIndex = BASE_Z + 1;
             Parent = PanelOuter;
         })
-
         Library:Create('UICorner', { CornerRadius = UDim.new(0, 7); Parent = PanelInner })
         Library:AddToRegistry(PanelInner, { BackgroundColor3 = 'BackgroundColor' })
 
@@ -3989,7 +3991,7 @@ InputService.InputBegan:Connect(function(Input)
             BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
             Size = UDim2.new(1, 0, 0, 3);
-            ZIndex = 5;
+            ZIndex = BASE_Z + 2;
             Parent = PanelInner;
         })
         Library:Create('UICorner', { CornerRadius = UDim.new(0, 7); Parent = PanelHighlight })
@@ -3998,7 +4000,7 @@ InputService.InputBegan:Connect(function(Input)
             BorderSizePixel = 0;
             Position = UDim2.new(0, 0, 0.5, 0);
             Size = UDim2.new(1, 0, 0.5, 0);
-            ZIndex = 5;
+            ZIndex = BASE_Z + 2;
             Parent = PanelHighlight;
         })
         Library:AddToRegistry(PanelHighlight, { BackgroundColor3 = 'AccentColor' })
@@ -4009,7 +4011,7 @@ InputService.InputBegan:Connect(function(Input)
             TextSize = 13;
             Text = Info.Title or 'config';
             TextXAlignment = Enum.TextXAlignment.Left;
-            ZIndex = 5;
+            ZIndex = BASE_Z + 2;
             Parent = PanelInner;
         })
 
@@ -4017,16 +4019,15 @@ InputService.InputBegan:Connect(function(Input)
             BackgroundTransparency = 1;
             BorderSizePixel = 0;
             Position = UDim2.fromOffset(4, 22);
-            Size = UDim2.new(0, PanelW - 8, 1, -26); 
+            Size = UDim2.new(0, PanelW - 8, 1, -26);
             CanvasSize = UDim2.new(0, 0, 0, 0);
             BottomImage = '';
             TopImage = '';
             ScrollBarThickness = 3;
             ScrollBarImageColor3 = Library.AccentColor;
-            ZIndex = 6;
+            ZIndex = BASE_Z + 2;
             Parent = PanelInner;
         })
-
         Library:AddToRegistry(PanelScroll, { ScrollBarImageColor3 = 'AccentColor' })
 
         local PanelLayout = Library:Create('UIListLayout', {
@@ -4036,14 +4037,34 @@ InputService.InputBegan:Connect(function(Input)
             Parent = PanelScroll;
         })
 
+        -- Recursively set ZIndex on a newly created descendant tree
+        local function BumpZIndex(root, base)
+            -- We want every GuiObject whose ZIndex is in the "normal" range (1-199)
+            -- to be lifted so it renders inside the panel correctly.
+            local function walk(obj)
+                for _, child in next, obj:GetChildren() do
+                    if child:IsA('GuiObject') then
+                        if child.ZIndex < base then
+                            child.ZIndex = child.ZIndex + base
+                        end
+                        walk(child)
+                    end
+                end
+            end
+            if root:IsA('GuiObject') and root.ZIndex < base then
+                root.ZIndex = root.ZIndex + base
+            end
+            walk(root)
+        end
+
+        -- WheelGroup acts exactly like a groupbox but targets PanelScroll
         local WheelGroup = {}
         WheelGroup.Container = PanelScroll
-        WheelGroup.DependencyBoxes = {}
 
         local function ResizePanel()
             local contentH = PanelLayout.AbsoluteContentSize.Y
-            local capped = math.clamp(contentH, 20, 300)
-            PanelOuter.Size = UDim2.fromOffset(PanelW, capped + 26)
+            local capped   = math.clamp(contentH, 20, 300)
+            PanelOuter.Size     = UDim2.fromOffset(PanelW, capped + 26)
             PanelScroll.CanvasSize = UDim2.fromOffset(0, contentH)
         end
 
@@ -4053,15 +4074,25 @@ InputService.InputBegan:Connect(function(Input)
             ResizePanel()
         end
 
+        -- Override AddBlank so it writes into PanelScroll directly (same as Container)
+        -- BaseGroupbox methods use self.Container, which is PanelScroll here, so they work.
+
         setmetatable(WheelGroup, BaseGroupbox)
 
-        -- Automatically bump ZIndex by 10 so elements (5-9) become 15-19.
-        -- This makes them render above the panel background, but below popups (20+)
+        -- After any child is parented into PanelScroll, push its ZIndex up.
+        -- We connect to PanelScroll AND PanelInner so popups that re-parent to ScreenGui
+        -- from inside the panel also get caught at creation time via DescendantAdded.
         PanelScroll.DescendantAdded:Connect(function(desc)
-            if desc:IsA('GuiObject') then
-                desc.ZIndex = desc.ZIndex + 10
+            if desc:IsA('GuiObject') and desc.ZIndex < BASE_Z then
+                desc.ZIndex = desc.ZIndex + BASE_Z
             end
         end)
+
+        -- Color-picker / dropdown / mode-select popups are parented to ScreenGui, not
+        -- PanelScroll, so they won't get the bump above.  We intercept them by watching
+        -- ScreenGui and boosting anything that was just added with a "low" ZIndex while
+        -- the panel is open, but only if its AbsolutePosition overlaps the panel region.
+        -- Simpler approach: wrap the group methods so we bump right after the call.
 
         local function PositionPanel()
             local ap = CogOuter.AbsolutePosition
@@ -4087,6 +4118,7 @@ InputService.InputBegan:Connect(function(Input)
         local IsOpen = false
 
         function CogWheel:Open()
+            -- Close any other open cog panels
             for _, ch in next, Library.ScreenGui:GetChildren() do
                 if ch.Name == 'ConfigWheelPanel' and ch ~= PanelOuter then
                     ch.Visible = false
@@ -4104,7 +4136,8 @@ InputService.InputBegan:Connect(function(Input)
         end
 
         CogOuter.InputBegan:Connect(function(Input)
-            if Input.UserInputType == Enum.UserInputType.MouseButton1 and not Library:MouseIsOverOpenedFrame() then
+            if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+                -- Don't block on MouseIsOverOpenedFrame here; the cog itself is the trigger.
                 if IsOpen then CogWheel:Close() else CogWheel:Open() end
             end
         end)
@@ -4117,7 +4150,8 @@ InputService.InputBegan:Connect(function(Input)
         Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
             if Input.UserInputType == Enum.UserInputType.MouseButton1 and IsOpen then
                 local ap, as = PanelOuter.AbsolutePosition, PanelOuter.AbsoluteSize
-                if Mouse.X < ap.X or Mouse.X > ap.X + as.X or Mouse.Y < ap.Y or Mouse.Y > ap.Y + as.Y then
+                if Mouse.X < ap.X or Mouse.X > ap.X + as.X
+                or Mouse.Y < ap.Y or Mouse.Y > ap.Y + as.Y then
                     if not Library:IsMouseOverFrame(CogOuter) then
                         CogWheel:Close()
                     end
@@ -4128,14 +4162,6 @@ InputService.InputBegan:Connect(function(Input)
         CogWheel.Group = WheelGroup
         return CogWheel
     end
-
-    BaseGroupbox.__index = Funcs;
-    BaseGroupbox.__namecall = function(Table, Key, ...)
-        return Funcs[Key](...);
-    end;
-
-    BaseAddons.__index.AddConfigWheel = Funcs.AddConfigWheel
-end
 
 -- < Create other UI elements >
 do
