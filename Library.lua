@@ -4306,7 +4306,16 @@ do
             if PanelOuter.Visible then PositionPanel() end
         end)
 
-        local IsOpen = false
+local IsOpen = false
+        local ZIndexBumped = false
+
+        local function BumpZIndex(Instance, Offset)
+            for _, Desc in next, Instance:GetDescendants() do
+                if Desc:IsA('GuiObject') then
+                    Desc.ZIndex = Desc.ZIndex + Offset
+                end
+            end
+        end
 
         function CogWheel:Open()
             for _, ch in next, Library.ScreenGui:GetChildren() do
@@ -4315,6 +4324,12 @@ do
                     Library.OpenedFrames[ch] = nil
                 end
             end
+
+            if not ZIndexBumped then
+                BumpZIndex(ElementContainer, 50)
+                ZIndexBumped = true
+            end
+
             PositionPanel()
             PanelOuter.Visible = true
             Library.OpenedFrames[PanelOuter] = true
