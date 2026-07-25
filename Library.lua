@@ -4013,17 +4013,36 @@ Library:AddToRegistry(Gradient, {
         ImageColor3 = 'AccentColor';
     });
 
-    -- Title text (dynamic, set via SetWatermark)
-    local WatermarkLabel = Library:CreateLabel({
+-- Content holder: auto-sizes and vertically centers everything (stats, bars, suffix)
+    local WatermarkContent = Library:Create('Frame', {
+        BackgroundTransparency = 1;
         Position = UDim2.new(0, 26, 0, 0);
         Size = UDim2.new(0, 0, 1, 0);
-        TextSize = 13;
-        TextXAlignment = Enum.TextXAlignment.Left;
+        AutomaticSize = Enum.AutomaticSize.X;
         ZIndex = 203;
         Parent = InnerFrame;
     });
 
-    -- .haxx suffix with wave animation (positioned AFTER the name text)
+    local WatermarkContentLayout = Library:Create('UIListLayout', {
+        Padding = UDim.new(0, 6);
+        FillDirection = Enum.FillDirection.Horizontal;
+        VerticalAlignment = Enum.VerticalAlignment.Center;
+        SortOrder = Enum.SortOrder.LayoutOrder;
+        Parent = WatermarkContent;
+    });
+
+    -- Plain-text fallback label (used by SetWatermark for custom strings)
+    local WatermarkLabel = Library:CreateLabel({
+        Size = UDim2.new(0, 0, 1, 0);
+        AutomaticSize = Enum.AutomaticSize.X;
+        TextSize = 13;
+        TextXAlignment = Enum.TextXAlignment.Left;
+        LayoutOrder = 1;
+        ZIndex = 203;
+        Parent = WatermarkContent;
+    });
+
+    -- .haxx suffix with wave animation (LayoutOrder keeps it last, always)
     local WatermarkSuffixLetters = { '.', 'h', 'a', 'x', 'x' };
     local WatermarkSuffixLabels = {};
 
@@ -4035,10 +4054,12 @@ Library:AddToRegistry(Gradient, {
             TextSize = 13;
             TextStrokeTransparency = 0;
             Size = UDim2.new(0, 0, 1, 0);
+            AutomaticSize = Enum.AutomaticSize.X;
             Text = Letter;
             TextXAlignment = Enum.TextXAlignment.Left;
+            LayoutOrder = 1000 + i;
             ZIndex = 203;
-            Parent = InnerFrame;
+            Parent = WatermarkContent;
         });
 
         Library:ApplyTextStroke(LetterLabel);
@@ -4046,6 +4067,12 @@ Library:AddToRegistry(Gradient, {
     end;
 
     Library.WatermarkSuffixLabels = WatermarkSuffixLabels;
+    Library.WatermarkContent = WatermarkContent;
+
+    WatermarkContentLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
+        local TotalWidth = 26 + WatermarkContentLayout.AbsoluteContentSize.X + 10;
+        Library.Watermark.Size = UDim2.new(0, TotalWidth, 0, 24);
+    end);
 
     Library.Watermark = WatermarkOuter;
     Library.WatermarkText = WatermarkLabel;
@@ -4266,31 +4293,67 @@ function Library:UpdateWatermark(Data)
         table.insert(Parts, Data.DisplayName);
     end;
 
-    Library:SetWatermark(table.concat(Parts, '  •  '));
+Library:SetWatermarkParts(Parts);
 end;
 
 function Library:SetWatermark(Text)
-    local X, Y = Library:GetTextBounds(Text, Library.Font, 13);
-    local SuffixTotalWidth = 0;
-
-    -- Position suffix letters AFTER the name text
-    -- logo (26px) + name width + small gap
-    local SuffixX = 26 + X + 2;
-    for i, Letter in next, { '.', 'h', 'a', 'x', 'x' } do
-        local LetterWidth = select(1, Library:GetTextBounds(Letter, Library.Font, 13));
-        local Label = Library.WatermarkSuffixLabels[i];
-        Label.Position = UDim2.new(0, SuffixX, 0, 0);
-        Label.Size = UDim2.new(0, LetterWidth, 1, 0);
-        SuffixX = SuffixX + LetterWidth;
-        SuffixTotalWidth = SuffixTotalWidth + LetterWidth;
+    if Library.WatermarkPartInstances then
+        for _, Inst in next, Library.WatermarkPartInstances do
+            Inst:Destroy();
+        end;
+        Library.WatermarkPartInstances = {};
     end;
 
-    -- Resize watermark to fit logo + text + suffix + padding
-    local TotalWidth = 26 + X + 2 + SuffixTotalWidth + 10;
-    Library.Watermark.Size = UDim2.new(0, TotalWidth, 0, 24);
-    Library:SetWatermarkVisibility(true)
-
+    Library.WatermarkText.Visible = true;
     Library.WatermarkText.Text = Text;
+    Library:SetWatermarkVisibility(true);
+end;
+
+function Library:SetWatermarkParts(Parts)
+    if Library.WatermarkPartInstances then
+        for _, Inst in next, Library.WatermarkPartInstances do
+            Inst:Destroy();
+        end;
+    end;
+    Library.WatermarkPartInstances = {};
+
+    Library.WatermarkText.Visible = false;
+
+    for i, Part in next, Parts do
+        if i > 1 then
+            local Bar = Library:Create('Frame', {
+                BackgroundColor3 = Library.AccentColor;
+                BorderSizePixel = 0;
+                Size = UDim2.new(0, 2, 0, 12);
+                LayoutOrder = (i * 2) - 1;
+                ZIndex = 203;
+                Parent = Library.WatermarkContent;
+            });
+
+            Library:Create('UICorner', {
+                CornerRadius = UDim.new(1, 0);
+                Parent = Bar;
+            });
+
+            Library:AddToRegistry(Bar, { BackgroundColor3 = 'AccentColor' });
+            table.insert(Library.WatermarkPartInstances, Bar);
+        end;
+
+        local Label = Library:CreateLabel({
+            Size = UDim2.new(0, 0, 1, 0);
+            AutomaticSize = Enum.AutomaticSize.X;
+            TextSize = 13;
+            Text = Part;
+            TextXAlignment = Enum.TextXAlignment.Left;
+            LayoutOrder = i * 2;
+            ZIndex = 203;
+            Parent = Library.WatermarkContent;
+        });
+
+        table.insert(Library.WatermarkPartInstances, Label);
+    end;
+
+    Library:SetWatermarkVisibility(true);
 end;
 
 function Library:Notify(Text, Time)
