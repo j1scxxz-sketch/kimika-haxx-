@@ -1706,6 +1706,8 @@ Break = true;
         return self;
     end;
 
+    Library.CreateKeyPicker = Funcs.AddKeyPicker;
+
     BaseAddons.__index = Funcs;
     BaseAddons.__namecall = function(Table, Key, ...)
         return Funcs[Key](...);
@@ -2374,7 +2376,7 @@ Library:OnHighlight(ToggleRegion, ToggleStroke,
 
                 Toggle.KeybindAdded = true;
 
-                Toggle:AddKeyPicker(tostring(Toggle.Idx) .. '_Keybind', {
+                Library.CreateKeyPicker(Toggle, tostring(Toggle.Idx) .. '_Keybind', {
                     Text = Toggle.Text;
                     Default = 'None';
                     Mode = 'Toggle';
