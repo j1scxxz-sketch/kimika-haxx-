@@ -4068,6 +4068,13 @@ function Funcs:AddConfigWheel(Info)
         setmetatable(WheelGroup, BaseGroupbox)
         PatchZIndex(WheelGroup)
 
+        local OriginalAddDependencyBox = WheelGroup.AddDependencyBox
+        WheelGroup.AddDependencyBox = function(...)
+            local Depbox = OriginalAddDependencyBox(...)
+            PatchZIndex(Depbox)
+            return Depbox
+        end
+
         -- Position panel near the cog icon
         local function PositionPanel()
             local ap = CogOuter.AbsolutePosition
@@ -4282,7 +4289,6 @@ do
         local WheelGroup = {}
 
         -- Bumps ZIndex of any new children so they render above the ZIndex 50+ panel frames
-        local OriginalAddBlank = Funcs.AddBlank
         local function PatchZIndex(Obj)
             local mt = getmetatable(Obj)
             if not mt then return end
