@@ -4311,18 +4311,21 @@ local WheelContainer = Library:Create('Frame', {
 
         PanelLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(ResizePanel)
 
-        WheelContainer:GetPropertyChangedSignal('AbsoluteSize'):Connect(ResizePanel)
+
+local WheelLayout = WheelContainer:FindFirstChildOfClass('UIListLayout')
+
+        local function UpdatePanelSize()
+            local contentH = WheelLayout.AbsoluteContentSize.Y
+            local capped = math.clamp(contentH, 20, 300)
+            WheelContainer.Size = UDim2.new(1, -6, 0, contentH)
+            PanelOuter.Size = UDim2.fromOffset(260, capped + 26)
+            PanelScroll.CanvasSize = UDim2.fromOffset(0, contentH)
+        end
+
+        WheelLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(UpdatePanelSize)
 
         function WheelGroup:Resize()
-            local Size = 0
-            for _, Element in next, WheelGroup.Container:GetChildren() do
-                if not Element:IsA('UIListLayout') and Element.Visible then
-                    Size = Size + Element.Size.Y.Offset
-                end
-            end
-            local capped = math.clamp(Size, 20, 300)
-            PanelOuter.Size = UDim2.fromOffset(260, capped + 26)
-            PanelScroll.CanvasSize = UDim2.fromOffset(0, Size)
+            UpdatePanelSize()
         end
 
         setmetatable(WheelGroup, BaseGroupbox)
