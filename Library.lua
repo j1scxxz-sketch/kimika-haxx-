@@ -1311,7 +1311,7 @@ function KeyPicker:UpdateDisplay()
 local ModeSelectOuter = Library:Create('Frame', {
             BorderColor3 = Color3.new(0, 0, 0);
             Position = UDim2.fromOffset(ToggleLabel.AbsolutePosition.X + ToggleLabel.AbsoluteSize.X + 4, ToggleLabel.AbsolutePosition.Y + 1);
-            Size = UDim2.new(0, 90, 0, 45 + 15 + 2);
+            Size = UDim2.new(0, 90, 0, 45 + 15 + (Info.Removable and 15 or 0) + 2);
             Visible = false;
             ZIndex = 14;
             Parent = ScreenGui;
@@ -1413,22 +1413,61 @@ local RemoveLabel = Library:CreateLabel({
             { TextColor3 = 'FontColor' }
         );
 
-        RemoveLabel.InputBegan:Connect(function(Input)
-            if Input.UserInputType == Enum.UserInputType.MouseButton1 then
-                DisplayLabel.Text = 'None';
-                KeyPicker.Value = 'None';
-                KeyPicker.Toggled = false;
-                KeyPicker:UpdateDisplay();
-                KeyPicker:Update();
+if Info.Removable then
+            local RemoveBindLabel = Library:CreateLabel({
+                Active = false;
+                Size = UDim2.new(1, 0, 0, 15);
+                TextSize = 13;
+                Text = 'Remove Bind';
+                ZIndex = 16;
+                Parent = ModeSelectInner;
+            });
 
-                Library:SafeCallback(KeyPicker.ChangedCallback, nil)
-                Library:SafeCallback(KeyPicker.Changed, nil)
+            Library:OnHighlight(RemoveBindLabel, RemoveBindLabel,
+                { TextColor3 = 'RiskColor' },
+                { TextColor3 = 'FontColor' }
+            );
 
-                ModeSelectOuter.Visible = false;
+            RemoveBindLabel.InputBegan:Connect(function(Input)
+                if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    ModeSelectOuter.Visible = false;
 
-                Library:AttemptSave();
-            end;
-        end);
+                    PickOuter:Destroy();
+                    ContainerLabel:Destroy();
+                    ModeSelectOuter:Destroy();
+
+                    Options[Idx] = nil;
+
+                    if ParentObj.Addons then
+                        for i = #ParentObj.Addons, 1, -1 do
+                            if ParentObj.Addons[i] == KeyPicker then
+                                table.remove(ParentObj.Addons, i);
+                            end;
+                        end;
+                    end;
+
+                    if ParentObj.Type == 'Toggle' then
+                        ParentObj.KeybindAdded = false;
+                    end;
+
+                    local YSize = 0
+                    local XSize = 0
+
+                    for _, Label in next, Library.KeybindContainer:GetChildren() do
+                        if Label:IsA('TextLabel') and Label.Visible then
+                            YSize = YSize + 18;
+                            if (Label.TextBounds.X > XSize) then
+                                XSize = Label.TextBounds.X
+                            end
+                        end;
+                    end;
+
+                    Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 10, 210), 0, YSize + 23)
+
+                    Library:AttemptSave();
+                end;
+            end);
+        end;
 
 function KeyPicker:IsGatedByToggle()
             return ParentObj.Type == 'Toggle' and not ParentObj.Value;
@@ -2130,9 +2169,11 @@ local TextBoxOuter = Library:Create('Frame', {
     function Funcs:AddToggle(Idx, Info)
         assert(Info.Text, 'AddInput: Missing `Text` string.')
 
-        local Toggle = {
+local Toggle = {
             Value = Info.Default or false;
             Type = 'Toggle';
+            Idx = Idx;
+            Text = Info.Text;
 
             Callback = Info.Callback or function(Value) end;
             Addons = {},
@@ -2239,6 +2280,75 @@ Library:OnHighlight(ToggleRegion, ToggleStroke,
             { Color = 'Black' }
         );
 
+        local ToggleContextOuter = Library:Create('Frame', {
+            BackgroundColor3 = Color3.new(0, 0, 0);
+            BorderColor3 = Color3.new(0, 0, 0);
+            Size = UDim2.new(0, 110, 0, 17);
+            Visible = false;
+            ZIndex = 50;
+            Parent = ScreenGui;
+        });
+
+        local ToggleContextInner = Library:Create('Frame', {
+            BackgroundColor3 = Library.BackgroundColor;
+            BorderColor3 = Library.OutlineColor;
+            BorderMode = Enum.BorderMode.Inset;
+            Size = UDim2.new(1, 0, 1, 0);
+            ZIndex = 51;
+            Parent = ToggleContextOuter;
+        });
+
+        Library:AddToRegistry(ToggleContextInner, {
+            BackgroundColor3 = 'BackgroundColor';
+            BorderColor3 = 'OutlineColor';
+        });
+
+        local AddKeybindLabel = Library:CreateLabel({
+            Active = false;
+            Size = UDim2.new(1, -8, 1, 0);
+            Position = UDim2.new(0, 4, 0, 0);
+            TextSize = 13;
+            Text = 'Add Keybind';
+            TextXAlignment = Enum.TextXAlignment.Left;
+            ZIndex = 52;
+            Parent = ToggleContextInner;
+        });
+
+        Library:OnHighlight(AddKeybindLabel, AddKeybindLabel,
+            { TextColor3 = 'AccentColor' },
+            { TextColor3 = 'FontColor' }
+        );
+
+        AddKeybindLabel.InputBegan:Connect(function(Input)
+            if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+                ToggleContextOuter.Visible = false;
+
+                if Toggle.KeybindAdded then
+                    return;
+                end;
+
+                Toggle.KeybindAdded = true;
+
+                Toggle:AddKeyPicker(tostring(Toggle.Idx) .. '_Keybind', {
+                    Text = Toggle.Text;
+                    Default = 'None';
+                    Mode = 'Toggle';
+                    SyncToggleState = true;
+                    Removable = true;
+                });
+
+                Library:AttemptSave();
+            end;
+        end);
+
+        Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
+            if Input.UserInputType == Enum.UserInputType.MouseButton1 and ToggleContextOuter.Visible then
+                if not Library:IsMouseOverFrame(ToggleContextOuter) then
+                    ToggleContextOuter.Visible = false;
+                end;
+            end;
+        end));
+
         function Toggle:UpdateColors()
             Toggle:Display();
         end;
@@ -2291,10 +2401,13 @@ local ToggleInitialized = false;
             Library:UpdateDependencyBoxes();
         end;
 
-        ToggleRegion.InputBegan:Connect(function(Input)
+ToggleRegion.InputBegan:Connect(function(Input)
             if Input.UserInputType == Enum.UserInputType.MouseButton1 and not Library:MouseIsOverOpenedFrame() then
                 Toggle:SetValue(not Toggle.Value) -- Why was it not like this from the start?
                 Library:AttemptSave();
+            elseif Input.UserInputType == Enum.UserInputType.MouseButton2 and not Library:MouseIsOverOpenedFrame() then
+                ToggleContextOuter.Position = UDim2.fromOffset(Mouse.X, Mouse.Y);
+                ToggleContextOuter.Visible = true;
             end;
         end);
 
