@@ -4287,15 +4287,17 @@ do
 
 local WheelContainer = Library:Create('Frame', {
             BackgroundTransparency = 1;
-            Size = UDim2.new(1, -6, 1, 0);
+            Size = UDim2.new(1, -6, 0, 0);
             Position = UDim2.new(0, 3, 0, 0);
+            AutomaticSize = Enum.AutomaticSize.Y;
             ZIndex = 18;
             Parent = PanelScroll;
         })
 
-        Library:Create('UIListLayout', {
+Library:Create('UIListLayout', {
             FillDirection = Enum.FillDirection.Vertical;
             SortOrder = Enum.SortOrder.LayoutOrder;
+            Padding = UDim.new(0, 2);
             Parent = WheelContainer;
         })
 
@@ -4314,11 +4316,11 @@ local WheelContainer = Library:Create('Frame', {
 
 local WheelLayout = WheelContainer:FindFirstChildOfClass('UIListLayout')
 
-        local function UpdatePanelSize()
+local function UpdatePanelSize()
             local contentH = WheelLayout.AbsoluteContentSize.Y
             local capped = math.clamp(contentH, 20, 300)
-            WheelContainer.Size = UDim2.new(1, -6, 0, contentH)
             PanelOuter.Size = UDim2.fromOffset(260, capped + 26)
+            PanelScroll.Size = UDim2.new(1, -8, 0, capped)
             PanelScroll.CanvasSize = UDim2.fromOffset(0, contentH)
         end
 
