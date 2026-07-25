@@ -1361,13 +1361,54 @@ local ModeSelectOuter = Library:Create('Frame', {
             Parent = ModeSelectInner;
         });
 
-        local ContainerLabel = Library:CreateLabel({
-            TextXAlignment = Enum.TextXAlignment.Left;
-            Size = UDim2.new(1, 0, 0, 18);
-            TextSize = 13;
+local ContainerRow = Library:Create('Frame', {
+            Name = 'KeybindRow';
+            BackgroundColor3 = Library.MainColor;
+            BorderColor3 = Library.OutlineColor;
+            BorderMode = Enum.BorderMode.Inset;
+            Size = UDim2.new(1, 0, 0, 20);
             Visible = false;
-            ZIndex = 110;
+            ZIndex = 105;
             Parent = Library.KeybindContainer;
+        });
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(0, 4);
+            Parent = ContainerRow;
+        });
+
+        Library:AddToRegistry(ContainerRow, {
+            BackgroundColor3 = 'MainColor';
+        }, true);
+
+        local ContainerAccentBar = Library:Create('Frame', {
+            BackgroundColor3 = Library.AccentColor;
+            BorderSizePixel = 0;
+            BackgroundTransparency = 0.6;
+            Position = UDim2.new(0, 2, 0, 2);
+            Size = UDim2.new(0, 3, 1, -4);
+            ZIndex = 106;
+            Parent = ContainerRow;
+        });
+
+        Library:Create('UICorner', {
+            CornerRadius = UDim.new(1, 0);
+            Parent = ContainerAccentBar;
+        });
+
+        Library:AddToRegistry(ContainerAccentBar, {
+            BackgroundColor3 = 'AccentColor';
+        }, true);
+
+        local ContainerLabel = Library:CreateLabel({
+            RichText = true;
+            TextXAlignment = Enum.TextXAlignment.Left;
+            Position = UDim2.new(0, 11, 0, 0);
+            Size = UDim2.new(1, -13, 1, 0);
+            TextSize = 13;
+            Visible = true;
+            ZIndex = 107;
+            Parent = ContainerRow;
         },  true);
 
         local Modes = Info.Modes or { 'Always', 'Toggle', 'Hold' };
@@ -1444,13 +1485,22 @@ function KeyPicker:Update()
 
             local State = KeyPicker:GetState();
 
-            ContainerLabel.Text = string.format('[%s] %s (%s)', KeyPicker.Value, Info.Text, KeyPicker.Mode);
-            ContainerLabel.Visible = true;
+            ContainerLabel.Text = string.format('<b>%s</b>  %s  <font color="#8f8f8f">(%s)</font>', KeyPicker.Value, Info.Text, KeyPicker.Mode);
+            ContainerRow.Visible = true;
 
             local TargetColor = State and Library.AccentColor or Library.FontColor;
+            local TargetBorder = State and Library.AccentColorDark or Library.OutlineColor;
 
             TweenService:Create(ContainerLabel, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
                 TextColor3 = TargetColor;
+            }):Play();
+
+            TweenService:Create(ContainerRow, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                BorderColor3 = TargetBorder;
+            }):Play();
+
+            TweenService:Create(ContainerAccentBar, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                BackgroundTransparency = State and 0 or 0.6;
             }):Play();
 
             Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and 'AccentColor' or 'FontColor';
@@ -1458,16 +1508,18 @@ function KeyPicker:Update()
             local YSize = 0
             local XSize = 0
 
-            for _, Label in next, Library.KeybindContainer:GetChildren() do
-                if Label:IsA('TextLabel') and Label.Visible then
-                    YSize = YSize + 18;
-                    if (Label.TextBounds.X > XSize) then
+            for _, Row in next, Library.KeybindContainer:GetChildren() do
+                if Row.Name == 'KeybindRow' and Row.Visible then
+                    YSize = YSize + 22;
+
+                    local Label = Row:FindFirstChildOfClass('TextLabel');
+                    if Label and (Label.TextBounds.X > XSize) then
                         XSize = Label.TextBounds.X
                     end
                 end;
             end;
 
-            Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 10, 210), 0, YSize + 23)
+            Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 24, 210), 0, YSize + 23)
         end;
 
         function KeyPicker:GetState()
@@ -1645,22 +1697,24 @@ Break = true;
                 end;
             end;
 
-            PickOuter:Destroy();
+PickOuter:Destroy();
             ModeSelectOuter:Destroy();
-            ContainerLabel:Destroy();
+            ContainerRow:Destroy();
 
             local YSize, XSize = 0, 0;
 
-            for _, Label in next, Library.KeybindContainer:GetChildren() do
-                if Label:IsA('TextLabel') and Label.Visible then
-                    YSize = YSize + 18;
-                    if (Label.TextBounds.X > XSize) then
+            for _, Row in next, Library.KeybindContainer:GetChildren() do
+                if Row.Name == 'KeybindRow' and Row.Visible then
+                    YSize = YSize + 22;
+
+                    local Label = Row:FindFirstChildOfClass('TextLabel');
+                    if Label and (Label.TextBounds.X > XSize) then
                         XSize = Label.TextBounds.X
                     end
                 end;
             end;
 
-            Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 10, 210), 0, YSize + 23)
+            Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 24, 210), 0, YSize + 23)
         end;
 
 function KeyPicker:Destroy()
@@ -1682,22 +1736,24 @@ function KeyPicker:Destroy()
                 end;
             end;
 
-            PickOuter:Destroy();
+PickOuter:Destroy();
             ModeSelectOuter:Destroy();
-            ContainerLabel:Destroy();
+            ContainerRow:Destroy();
 
             local YSize, XSize = 0, 0;
 
-            for _, Label in next, Library.KeybindContainer:GetChildren() do
-                if Label:IsA('TextLabel') and Label.Visible then
-                    YSize = YSize + 18;
-                    if (Label.TextBounds.X > XSize) then
+            for _, Row in next, Library.KeybindContainer:GetChildren() do
+                if Row.Name == 'KeybindRow' and Row.Visible then
+                    YSize = YSize + 22;
+
+                    local Label = Row:FindFirstChildOfClass('TextLabel');
+                    if Label and (Label.TextBounds.X > XSize) then
                         XSize = Label.TextBounds.X
                     end
                 end;
             end;
 
-            Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 10, 210), 0, YSize + 23)
+            Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 24, 210), 0, YSize + 23)
         end;
 
         KeyPicker:Update();
