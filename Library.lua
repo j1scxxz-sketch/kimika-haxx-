@@ -2023,6 +2023,15 @@ self.Outer.Size = UDim2.new(0.5, -2, 0, 16)
             SubButton.Outer.Size = UDim2.new(1, -2, 0, 16)
             SubButton.Outer.Parent = self.Outer
 
+            -- Ensure sub button gets the ZIndex bump if it's inside a ConfigWheel panel
+            if self.Outer.ZIndex >= 150 then
+                for _, Desc in next, SubButton.Outer:GetDescendants() do
+                    if Desc:IsA('GuiObject') then
+                        Desc.ZIndex = Desc.ZIndex + 200
+                    end
+                end
+            end
+            
             function SubButton:AddTooltip(tooltip)
                 if type(tooltip) == 'string' then
                     Library:AddToolTip(tooltip, self.Outer)
